@@ -1,4 +1,3 @@
-import { Container } from "react-bootstrap";
 import Login from "./pages/Login";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Register from "./pages/Register";
@@ -7,7 +6,7 @@ import Chat from "./pages/Chat";
 
 function App() {
   return (
-    <Container>
+    <div className="w-100 h-100 m-0" >
       <NavBar />
       <Routes>
         <Route path="/" element={<Chat />} />
@@ -15,7 +14,7 @@ function App() {
         <Route path="/Login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </Container>
+    </div>
   );
 }
 

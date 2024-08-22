@@ -7,12 +7,12 @@ function NavBar() {
   return (
     <Navbar
       bg="light"
-      className="mb-2 rounded-pill px-2"
-      style={{ height: "3.25rem" }}
+      className="mb-2 rounded-pill px-2 m-auto"
+      style={{ maxWidth: "1296px", height: "3.25rem" }}
     >
       <Container>
-        <h3>
-          <NavLink to="/" className="link-dark text-decoration-none font-bold">
+        <h3 className="mb-0">
+          <NavLink to="/" className="link-dark text-decoration-none fw-bold">
             <FontAwesomeIcon icon={faComments} className=" me-2" />
             Chat
           </NavLink>
@@ -22,13 +22,13 @@ function NavBar() {
             <>
               <NavLink
                 to="/login"
-                className="link-dark text-decoration-none font-bold"
+                className="link-dark text-decoration-none fw-bold"
               >
                 Login
               </NavLink>
               <NavLink
                 to="/register"
-                className="link-dark text-decoration-none font-bold"
+                className="link-dark text-decoration-none fw-bold"
               >
                 Register
               </NavLink>
