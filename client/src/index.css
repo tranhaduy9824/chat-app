@@ -23,3 +23,7 @@
   --primary-dark: #a5c3ff;
   --text-dark: black;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
