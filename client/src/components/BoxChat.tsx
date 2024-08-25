@@ -5,6 +5,7 @@ import {
   faEllipsisH,
   faStickyNote,
   faPaperPlane,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
@@ -42,6 +43,12 @@ function BoxChat() {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [replyingTo, setReplyingTo] = useState<null | {
+    id: number;
+    sender: string;
+    text: string;
+    timestamp: string;
+  }>(null);
 
   const handleSendMessage = () => {
     if (message.trim() || attachedFile) {
@@ -138,7 +145,7 @@ function BoxChat() {
             </span>
           </div>
         </div>
-        <div className="flex-grow-1 overflow-y-auto mt-3">
+        <div className="flex-grow-1 overflow-y-auto my-3">
           <div className="d-flex flex-column gap-2">
             {messages.map((msg, index) => {
               const showAvatar = messages[index + 1]?.sender !== msg.sender;
@@ -156,14 +163,39 @@ function BoxChat() {
                       {msg.timestamp}
                     </div>
                   )}
-                  <Message msg={msg} showAvatar={showAvatar} />
+                  <Message
+                    msg={msg}
+                    showAvatar={showAvatar}
+                    setReplyingTo={setReplyingTo}
+                  />
                 </div>
               );
             })}
             <div ref={messagesEndRef} />
           </div>
         </div>
-        <div className="d-flex align-items-center mt-3">
+        {replyingTo && (
+          <div
+            className="d-flex align-items-center justify-content-between"
+            style={{ padding: "10px 0 5px", borderTop: "1px solid #7e889c" }}
+          >
+            <div>
+              <div className="fw-bold">
+                Đang trả lời{" "}
+                {replyingTo.sender === "Duy" ? "Duy" : "Chính mình"}
+              </div>
+              <div className="small">{replyingTo.text}</div>
+            </div>
+            <span
+              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+              style={{ width: "2rem", height: "2rem" }}
+              onClick={() => setReplyingTo(null)}
+            >
+              <FontAwesomeIcon icon={faTimes} />
+            </span>
+          </div>
+        )}
+        <div className="d-flex align-items-center">
           <div className="d-flex align-items-center gap-2">
             <label
               htmlFor="file-upload"

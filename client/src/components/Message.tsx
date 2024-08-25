@@ -14,7 +14,7 @@ interface MessageProps {
   showAvatar: boolean;
 }
 
-function Message({ msg, showAvatar }: MessageProps) {
+function Message({ msg, showAvatar, setReplyingTo }: MessageProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
@@ -117,6 +117,7 @@ function Message({ msg, showAvatar }: MessageProps) {
             <span
               className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
               style={{ width: "2rem", height: "2rem" }}
+              onClick={() => setReplyingTo(msg)}
             >
               <FontAwesomeIcon icon={faReply} />
             </span>
@@ -159,6 +160,7 @@ function Message({ msg, showAvatar }: MessageProps) {
             <span
               className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
               style={{ width: "2rem", height: "2rem" }}
+              onClick={() => setReplyingTo(msg)}
             >
               <FontAwesomeIcon icon={faReply} />
             </span>
