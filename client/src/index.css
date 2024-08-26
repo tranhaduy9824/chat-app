@@ -84,3 +84,13 @@
 .control-message aside > ul > li:last-child {
   display: none;
 }
+.pin-icon {
+  opacity: 0;
+  transform: translate(-400%, -200%);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.pin-icon.selected {
+  opacity: 1;
+  transform: translate(-40%, -40%);
+}

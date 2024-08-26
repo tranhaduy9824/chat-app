@@ -6,6 +6,7 @@ import {
   faStickyNote,
   faPaperPlane,
   faTimes,
+  faCamera,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
@@ -44,6 +45,12 @@ function BoxChat() {
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [replyingTo, setReplyingTo] = useState<null | {
+    id: number;
+    sender: string;
+    text: string;
+    timestamp: string;
+  }>(null);
+  const [edit, setEdit] = useState<null | {
     id: number;
     sender: string;
     text: string;
@@ -101,7 +108,7 @@ function BoxChat() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [replyingTo]);
 
   return (
     <div
@@ -148,13 +155,13 @@ function BoxChat() {
         <div className="flex-grow-1 overflow-y-auto my-3">
           <div className="d-flex flex-column gap-2">
             {messages.map((msg, index) => {
-              const showAvatar = messages[index + 1]?.sender !== msg.sender;
               const showTimestamp =
                 index === 0 ||
                 timeDiffInMinutes(
                   messages[index - 1].timestamp,
                   msg.timestamp
                 ) >= 10;
+              const showAvatar = messages[index + 1]?.sender !== msg.sender;
 
               return (
                 <div key={msg.id}>
@@ -167,6 +174,7 @@ function BoxChat() {
                     msg={msg}
                     showAvatar={showAvatar}
                     setReplyingTo={setReplyingTo}
+                    setEdit={setEdit}
                   />
                 </div>
               );
@@ -174,29 +182,40 @@ function BoxChat() {
             <div ref={messagesEndRef} />
           </div>
         </div>
-        {replyingTo && (
+        {(replyingTo || edit) && (
           <div
             className="d-flex align-items-center justify-content-between"
             style={{ padding: "10px 0 5px", borderTop: "1px solid #7e889c" }}
           >
-            <div>
-              <div className="fw-bold">
-                Đang trả lời{" "}
-                {replyingTo.sender === "Duy" ? "Duy" : "Chính mình"}
+            <>
+              <div>
+                <div className="fw-bold">
+                  {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
+                  {!edit && (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
+                </div>
+                <div className="small">{replyingTo?.text}</div>
               </div>
-              <div className="small">{replyingTo.text}</div>
-            </div>
-            <span
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2rem", height: "2rem" }}
-              onClick={() => setReplyingTo(null)}
-            >
-              <FontAwesomeIcon icon={faTimes} />
-            </span>
+              <span
+                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: "2rem", height: "2rem" }}
+                onClick={() => {
+                  setReplyingTo(null);
+                  setEdit(null);
+                }}
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </span>
+            </>
           </div>
         )}
         <div className="d-flex align-items-center">
           <div className="d-flex align-items-center gap-2">
+            <span
+              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+              style={{ width: "2.1rem", height: "2.1rem" }}
+            >
+              <FontAwesomeIcon icon={faCamera} style={{ fontSize: "20px" }} />
+            </span>
             <label
               htmlFor="file-upload"
               className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
@@ -225,7 +244,7 @@ function BoxChat() {
               type="text"
               className="form-control rounded-pill me-2"
               placeholder="Enter message..."
-              value={message}
+              value={edit?.text || message}
               onChange={(e) => setMessage(e.target.value)}
               onFocus={() => setShowEmojiPicker(false)}
             />
