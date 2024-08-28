@@ -7,11 +7,14 @@ import {
   faPaperPlane,
   faTimes,
   faCamera,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
 import Message from "./Message";
 import Picker, { EmojiClickData } from "emoji-picker-react";
+import Tippy from "@tippyjs/react";
+import 'tippy.js/dist/tippy.css';
 
 const messages: {
   id: number;
@@ -38,7 +41,7 @@ const messages: {
   { id: 12, sender: "Bạn", text: "Tôi khỏe, cảm ơn!", timestamp: "10:51" },
 ];
 
-function BoxChat() {
+function BoxChat({ showInfoChat, setShowInfoChat }) {
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -63,6 +66,8 @@ function BoxChat() {
       setMessage("");
       setAttachedFile(null);
     }
+    setReplyingTo(null);
+    setEdit(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +113,7 @@ function BoxChat() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [replyingTo]);
+  }, [replyingTo, edit]);
 
   return (
     <div
@@ -128,6 +133,10 @@ function BoxChat() {
               className="rounded-circle mr-3"
               width={50}
               height={50}
+              style={{
+                boxShadow:
+                  "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
+              }}
             />
             <div>
               <p className="fw-bold m-0">Duy</p>
@@ -135,21 +144,28 @@ function BoxChat() {
             </div>
           </div>
           <div className="d-flex align-items-center gap-3">
-            <span
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem" }}
-            >
-              <FontAwesomeIcon icon={faVideo} style={{ fontSize: "20px" }} />
-            </span>
-            <span
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem" }}
-            >
-              <FontAwesomeIcon
-                icon={faEllipsisH}
-                style={{ fontSize: "20px" }}
-              />
-            </span>
+            <Tippy content="Bắt đầu gọi video" placement="bottom">
+              <span
+                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: "2.1rem", height: "2.1rem" }}
+              >
+                <FontAwesomeIcon icon={faVideo} style={{ fontSize: "20px" }} />
+              </span>
+            </Tippy>
+            <Tippy content="Thông tin về cuộc trò truyện" placement="bottom">
+              <span
+                className={`icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                  showInfoChat && "selected"
+                }`}
+                style={{ width: "2.1rem", height: "2.1rem" }}
+                onClick={() => setShowInfoChat(!showInfoChat)}
+              >
+                <FontAwesomeIcon
+                  icon={faEllipsisH}
+                  style={{ fontSize: "20px" }}
+                />
+              </span>
+            </Tippy>
           </div>
         </div>
         <div className="flex-grow-1 overflow-y-auto my-3">
@@ -191,7 +207,8 @@ function BoxChat() {
               <div>
                 <div className="fw-bold">
                   {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
-                  {!edit && (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
+                  {!edit &&
+                    (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
                 </div>
                 <div className="small">{replyingTo?.text}</div>
               </div>
@@ -210,34 +227,40 @@ function BoxChat() {
         )}
         <div className="d-flex align-items-center">
           <div className="d-flex align-items-center gap-2">
-            <span
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem" }}
-            >
-              <FontAwesomeIcon icon={faCamera} style={{ fontSize: "20px" }} />
-            </span>
-            <label
-              htmlFor="file-upload"
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
-            >
-              <FontAwesomeIcon icon={faImages} style={{ fontSize: "20px" }} />
-            </label>
+            <Tippy content="Chụp ảnh">
+              <span
+                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: "2.1rem", height: "2.1rem" }}
+              >
+                <FontAwesomeIcon icon={faCamera} style={{ fontSize: "20px" }} />
+              </span>
+            </Tippy>
+            <Tippy content="Đính kèm file">
+              <label
+                htmlFor="file-upload"
+                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
+              >
+                <FontAwesomeIcon icon={faImages} style={{ fontSize: "20px" }} />
+              </label>
+            </Tippy>
             <input
               id="file-upload"
               type="file"
               style={{ display: "none" }}
               onChange={handleFileChange}
             />
-            <span
-              className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem" }}
-            >
-              <FontAwesomeIcon
-                icon={faStickyNote}
-                style={{ fontSize: "20px" }}
-              />
-            </span>
+            <Tippy content="Chọn file gif">
+              <span
+                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                style={{ width: "2.1rem", height: "2.1rem" }}
+              >
+                <FontAwesomeIcon
+                  icon={faStickyNote}
+                  style={{ fontSize: "20px" }}
+                />
+              </span>
+            </Tippy>
           </div>
           <div className="position-relative flex-grow-1 mx-3">
             <input
@@ -248,13 +271,17 @@ function BoxChat() {
               onChange={(e) => setMessage(e.target.value)}
               onFocus={() => setShowEmojiPicker(false)}
             />
-            <span
-              className="position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <FontAwesomeIcon icon={faSmile} style={{ fontSize: "20px" }} />
-            </span>
+            <Tippy content="Chọn biểu tượng cảm xúc">
+              <span
+                className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                  showEmojiPicker && "selected"
+                }`}
+                style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              >
+                <FontAwesomeIcon icon={faSmile} style={{ fontSize: "20px" }} />
+              </span>
+            </Tippy>
             {showEmojiPicker && (
               <div
                 className="position-absolute bottom-100 end-0 mb-2"
@@ -270,7 +297,11 @@ function BoxChat() {
             style={{ height: "100%", width: "auto", aspectRatio: "1/1" }}
             onClick={handleSendMessage}
           >
-            <FontAwesomeIcon icon={faPaperPlane} />
+            {!edit ? (
+              <FontAwesomeIcon icon={faPaperPlane} />
+            ) : (
+              <FontAwesomeIcon icon={faCheck} />
+            )}
           </button>
         </div>
       </div>

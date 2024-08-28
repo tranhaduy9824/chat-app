@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap");
 
 * {
   margin: 0;
@@ -12,8 +12,8 @@
   font-family: "Mali", sans-serif !important;
   background-image: linear-gradient(
     45deg,
-    rgb(94, 94, 255),
-    var(--primary-light)
+    #a68bff,
+    #dce2f0
   ) !important;
   padding: 10px;
 }
@@ -21,7 +21,7 @@
 :root {
   --border-radius: 20px;
 
-  --primary-light: #a5c3ff;
+  --primary-light: #c2d6ff;
   --text-light: white;
 
   --primary-dark: #a5c3ff;
@@ -93,4 +93,33 @@
 .pin-icon.selected {
   opacity: 1;
   transform: translate(-40%, -40%);
+}
+
+.item-info-chat > div > div,
+.icon-info-chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.2rem;
+  border-radius: 100%;
+}
+
+.item-info-chat > div {
+  width: 100%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.icon-info-chat:hover,
+.item-info-chat > div:hover {
+  opacity: 0.8;
+}
+
+.item-info-chat > div > div {
+  margin-right: 8px;
 }
