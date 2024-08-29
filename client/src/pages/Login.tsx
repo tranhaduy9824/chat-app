@@ -1,11 +1,15 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Button, Form, FormGroup, Container, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebookF, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import gsap from "gsap";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
+  const { loginUser, loginError, loginInfo, updateLoginInfo, isLoginLoading } =
+    useContext(AuthContext);
+
   const rotate = () => {
     gsap.to(".card", {
       duration: 0.8,
@@ -44,6 +48,9 @@ function Login() {
                 id="email"
                 placeholder="Enter email"
                 className="form-control"
+                onChange={(e) =>
+                  updateLoginInfo({ ...loginInfo, email: e.target.value })
+                }
               />
             </FormGroup>
             <FormGroup>
@@ -54,6 +61,9 @@ function Login() {
                 id="password"
                 placeholder="Enter password"
                 className="form-control"
+                onChange={(e) =>
+                  updateLoginInfo({ ...loginInfo, password: e.target.value })
+                }
               />
             </FormGroup>
             <div className="d-grid gap-2 mb-4 mt-4">
@@ -66,6 +76,7 @@ function Login() {
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}
+                onClick={loginUser}
               >
                 Login
               </Button>

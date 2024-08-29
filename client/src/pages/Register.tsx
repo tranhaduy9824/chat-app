@@ -1,9 +1,20 @@
-import { useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Form, FormGroup, Container, Col } from "react-bootstrap";
 import gsap from "gsap";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Register() {
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const {
+    registerInfo,
+    updateRegisterInfo,
+    registerUser,
+    registerError,
+    isRegisterLoading,
+  } = useContext(AuthContext);
+
   const rotate = () => {
     gsap.to(".card", {
       duration: 0.8,
@@ -42,6 +53,12 @@ function Register() {
                 id="fullname"
                 placeholder="Enter fullname"
                 className="form-control"
+                onChange={(e) =>
+                  updateRegisterInfo({
+                    ...registerInfo,
+                    fullname: e.target.value,
+                  })
+                }
               />
             </FormGroup>
             <FormGroup className="mb-2">
@@ -52,6 +69,9 @@ function Register() {
                 id="email"
                 placeholder="Enter email"
                 className="form-control"
+                onChange={(e) =>
+                  updateRegisterInfo({ ...registerInfo, email: e.target.value })
+                }
               />
             </FormGroup>
             <FormGroup className="mb-2">
@@ -62,12 +82,18 @@ function Register() {
                 id="password"
                 placeholder="Enter password"
                 className="form-control"
+                onChange={(e) =>
+                  updateRegisterInfo({
+                    ...registerInfo,
+                    password: e.target.value,
+                  })
+                }
               />
             </FormGroup>
             <FormGroup className="mb-2">
               <label htmlFor="confirm-password">Password</label>
               <input
-                type="confirm-password"
+                type="password"
                 name="confirm-password"
                 id="confirm-password"
                 placeholder="Enter confirm password"
@@ -84,6 +110,7 @@ function Register() {
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}
+                onClick={registerUser}
               >
                 Register
               </Button>
