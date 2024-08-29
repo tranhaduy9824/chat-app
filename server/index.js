@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const userRoute = require('./routes/userRoute');
+const chatRoute = require('./routes/chatRoute');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +13,7 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(cors());
 app.use('/api/users', userRoute);
+app.use('/api/chats', chatRoute);
 
 const port = process.env.PORT || 5000;
 const uri = process.env.ATLAS_URI;
