@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Login() {
-  const { loginUser, loginError, loginInfo, updateLoginInfo, isLoginLoading } =
-    useContext(AuthContext);
+  const { loginUser, loginInfo, updateLoginInfo, isLoginLoading } =
+    useContext(AuthContext)!;
 
   const rotate = () => {
     gsap.to(".card", {
@@ -76,9 +76,9 @@ function Login() {
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}
-                onClick={loginUser}
+                onClick={isLoginLoading ? undefined : loginUser}
               >
-                Login
+                {isLoginLoading ? "Loading..." : "Login"}
               </Button>
             </div>
             <div className="mb-3">

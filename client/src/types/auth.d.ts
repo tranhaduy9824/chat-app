@@ -20,12 +20,10 @@ export interface AuthContextType {
   registerInfo: RegisterInfo;
   updateRegisterInfo: (info: RegisterInfo) => void;
   registerUser: (e: React.FormEvent) => Promise<void>;
-  registerError: string | null;
   isRegisterLoading: boolean;
   logoutUser: () => void;
   loginUser: (e: React.FormEvent) => Promise<void>;
   loginInfo: LoginInfo;
   updateLoginInfo: (info: LoginInfo) => void;
-  loginError: string | null;
   isLoginLoading: boolean;
 }

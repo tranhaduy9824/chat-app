@@ -3,17 +3,14 @@ import { Button, Form, FormGroup, Container, Col } from "react-bootstrap";
 import gsap from "gsap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { useNotification } from "../context/NotificationContext";
 
 function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const {
-    registerInfo,
-    updateRegisterInfo,
-    registerUser,
-    registerError,
-    isRegisterLoading,
-  } = useContext(AuthContext);
+  const { registerInfo, updateRegisterInfo, registerUser, isRegisterLoading } =
+    useContext(AuthContext)!;
+  const { addNotification } = useNotification();
 
   const rotate = () => {
     gsap.to(".card", {
@@ -91,13 +88,15 @@ function Register() {
               />
             </FormGroup>
             <FormGroup className="mb-2">
-              <label htmlFor="confirm-password">Password</label>
+              <label htmlFor="confirm-password">Confirm password</label>
               <input
                 type="password"
                 name="confirm-password"
                 id="confirm-password"
-                placeholder="Enter confirm password"
+                placeholder="Confirm password"
                 className="form-control"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </FormGroup>
             <div className="d-grid gap-2 mb-3 mt-4">
@@ -110,9 +109,20 @@ function Register() {
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}
-                onClick={registerUser}
+                onClick={
+                  isRegisterLoading
+                    ? undefined
+                    : (e) => {
+                        if (registerInfo.password !== confirmPassword) {
+                          e.preventDefault();
+                          addNotification("Password does not match", "error");
+                        } else {
+                          registerUser(e);
+                        }
+                      }
+                }
               >
-                Register
+                {isRegisterLoading ? "Loading..." : "Register"}
               </Button>
             </div>
             <div className="d-flex justify-content-center align-items-center">

@@ -14,7 +14,7 @@ import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
 import Message from "./Message";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import Tippy from "@tippyjs/react";
-import 'tippy.js/dist/tippy.css';
+import "tippy.js/dist/tippy.css";
 
 const messages: {
   id: number;
@@ -168,7 +168,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
             </Tippy>
           </div>
         </div>
-        <div className="flex-grow-1 overflow-y-auto my-3">
+        <div className="flex-grow-1 overflow-x-hidden overflow-y-auto my-3">
           <div className="d-flex flex-column gap-2">
             {messages.map((msg, index) => {
               const showTimestamp =

@@ -7,26 +7,31 @@ import {
 } from "react";
 import { baseUrl, postRequest } from "../utils/services";
 import { AuthContextType, User, RegisterInfo, LoginInfo } from "../types/auth";
+import { useLoading } from "./LoadingContext";
+import { useNavigate } from "react-router-dom";
+import { useNotification } from "./NotificationContext";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [registerError, setRegisterError] = useState<string | null>(null);
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const [registerInfo, setRegisterInfo] = useState<RegisterInfo>({
     fullname: "",
     email: "",
     password: "",
   });
-  const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [loginInfo, setLoginInfo] = useState<LoginInfo>({
     email: "",
     password: "",
   });
+
+  const { setProgress } = useLoading();
+  const { addNotification } = useNotification();
 
   const updateRegisterInfo = useCallback((info: RegisterInfo) => {
     setRegisterInfo(info);
@@ -49,22 +54,28 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       e.preventDefault();
 
       setIsRegisterLoading(true);
-      setRegisterError(null);
+
       const response = await postRequest(
         `${baseUrl}/users/register`,
-        registerInfo
+        registerInfo,
+        setProgress
       );
 
       setIsRegisterLoading(false);
 
-      if (response.error) {
-        return setRegisterError(response.error);
+      if (!response.error) {
+        addNotification("Register success", "success");
+        setRegisterInfo({
+          fullname: "",
+          email: "",
+          password: "",
+        });
+        navigate("/login");
+      } else {
+        addNotification(response.message, "error");
       }
-
-      localStorage.setItem("User", JSON.stringify(response));
-      setUser(response);
     },
-    [registerInfo]
+    [registerInfo, setProgress, navigate, addNotification]
   );
 
   const loginUser = useCallback(
@@ -72,23 +83,30 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       e.preventDefault();
 
       setIsLoginLoading(true);
-      setLoginError(null);
 
       const response = await postRequest(
         `${baseUrl}/users/login`,
-        loginInfo
+        loginInfo,
+        setProgress
       );
 
       setIsLoginLoading(false);
 
-      if (response.error) {
-        return setLoginError(response.error);
+      if (!response.error) {
+        addNotification("Login success", "success");
+        setLoginInfo({
+          email: "",
+          password: "",
+        }); 
+        navigate("/");
+      } else {
+        addNotification(response.message, "error");
       }
 
       localStorage.setItem("User", JSON.stringify(response));
       setUser(response);
     },
-    [loginInfo]
+    [loginInfo, setProgress, navigate, addNotification]
   );
 
   const logoutUser = useCallback(() => {
@@ -103,12 +121,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         registerInfo,
         updateRegisterInfo,
         registerUser,
-        registerError,
         isRegisterLoading,
         logoutUser,
         loginUser,
         loginInfo,
-        loginError,
         isLoginLoading,
         updateLoginInfo,
       }}
