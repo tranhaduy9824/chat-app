@@ -1,10 +1,6 @@
 // src/contexts/LoadingContext.tsx
 import React, { createContext, useContext, useState } from "react";
-
-interface LoadingContextProps {
-  progress: number;
-  setProgress: (value: number) => void;
-}
+import { LoadingContextProps } from "../types/loading";
 
 export const LoadingContext = createContext<LoadingContextProps | undefined>(
   undefined

@@ -11,6 +11,9 @@ const messageRoute = require("./routes/messageRoute");
 const app = express();
 const server = http.createServer(app);
 
+app.use("/assets", express.static("assets"));
+app.use("/uploads", express.static("uploads"));
+
 app.use(express.json());
 app.use(cors());
 app.use("/api/users", userRoute);

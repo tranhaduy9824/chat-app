@@ -6,20 +6,11 @@ import {
   ReactNode,
   useCallback,
 } from "react";
-
-type NotificationType = "success" | "error" | "info";
-
-interface Notification {
-  id: number;
-  message: string;
-  type: NotificationType;
-}
-
-interface NotificationContextType {
-  notifications: Notification[];
-  addNotification: (message: string, type: NotificationType) => void;
-  removeNotification: (id: number) => void;
-}
+import {
+  Notification,
+  NotificationContextType,
+  NotificationType,
+} from "../types/notification";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined

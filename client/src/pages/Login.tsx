@@ -76,7 +76,13 @@ function Login() {
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}
-                onClick={isLoginLoading ? undefined : loginUser}
+                onClick={
+                  isLoginLoading
+                    ? (e) => {
+                        e.preventDefault();
+                      }
+                    : loginUser
+                }
               >
                 {isLoginLoading ? "Loading..." : "Login"}
               </Button>

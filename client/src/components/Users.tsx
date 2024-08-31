@@ -1,40 +1,14 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useContext } from "react";
+import { ChatContext } from "../context/ChatContext";
+import Avatar from "./Avatar";
+import { AuthContext } from "../context/AuthContext";
+import UserChat from "./UserChat";
 
 function Users() {
-  const [selectedUserId, setSelectedUserId] = useState(null);
-
-  const users = [
-    {
-      id: 1,
-      name: "Duy",
-      image:
-        "https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD",
-      status: true,
-    },
-    {
-      id: 2,
-      name: "Linh",
-      image:
-        "https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD",
-      status: true,
-    },
-    {
-      id: 3,
-      name: "Hoa",
-      image:
-        "https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD",
-      status: false,
-    },
-    {
-      id: 4,
-      name: "Minh",
-      image:
-        "https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD",
-      status: false,
-    },
-  ];
+  const { user } = useContext(AuthContext)!;
+  const { allUsers, userChats, createChat, currentChat, updateCurrentChat } = useContext(ChatContext)!;
 
   return (
     <div
@@ -66,102 +40,56 @@ function Users() {
         </div>
       </div>
       <div className="list-friend mx-3 d-flex align-items-center gap-3 overflow-x-auto mb-3">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="d-flex flex-column align-items-center position-relative"
-          >
-            <img
-              src={user.image}
-              alt={user.name}
-              className="rounded-circle mr-3"
-              width={50}
-              height={50}
-            />
-            <p className="fw-bold m-0">{user.name}</p>
-            {user.status && (
-              <div
-                className="position-absolute end-0 rounded-circle"
-                style={{
-                  width: "15px",
-                  height: "15px",
-                  top: "35px",
-                  backgroundColor: "#31a24c",
-                }}
-              ></div>
-            )}
-          </div>
-        ))}
+        {allUsers
+          .filter((u) => u._id !== user?._id)
+          .map((u) => (
+            <div
+              key={u._id} 
+              className="d-flex flex-column align-items-center position-relative"
+              onClick={() => {
+                if (user) {
+                  createChat(user._id, u._id);
+                }
+              }}
+            >
+              <Avatar user={u} />
+              <p className="fw-bold m-0">{u.fullname.split(" ").pop()}</p>
+              {u.status && (
+                <div
+                  className="position-absolute end-0 rounded-circle"
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                    top: "35px",
+                    backgroundColor: "#31a24c",
+                  }}
+                ></div>
+              )}
+            </div>
+          ))}
       </div>
       <div
         className="d-flex flex-column overflow-y-auto"
         style={{ height: "400px" }}
       >
-        {users.map((user, index) => {
-          const isSelected = user.id === selectedUserId;
-          const previousUserSelected =
-            index > 0 && users[index - 1].id === selectedUserId;
-          const nextUserSelected =
-            index < users.length - 1 && users[index + 1].id === selectedUserId;
+        {userChats?.map((chat, index) => {
+          const isSelected = chat._id === currentChat?._id;
+          const previousChat =
+            index > 0 && userChats[index - 1]._id === currentChat?._id;
+          const nextChat =
+            index < userChats.length - 1 &&
+            userChats[index + 1]._id === currentChat?._id;
 
           return (
-            <div key={user.id} style={{ backgroundColor: "#e9ecf5" }}>
-              <div
-                className={`item-user-chat d-flex align-items-center gap-2 bg-white position-relative py-2 px-3 ${
-                  isSelected ? "selected" : ""
-                }`}
-                onClick={() => setSelectedUserId(user.id)}
-                style={{
-                  borderRadius: previousUserSelected
-                    ? "0 50px 0 0"
-                    : nextUserSelected
-                    ? "0 0 50px 0"
-                    : "0",
-                }}
-              >
-                <div>
-                  <img
-                    src={user.image}
-                    alt={user.name}
-                    className="rounded-circle mr-3"
-                    width={50}
-                    height={50}
-                  />
-                  {user.status && (
-                    <div
-                      className="position-absolute rounded-circle"
-                      style={{
-                        width: "15px",
-                        height: "15px",
-                        top: "43px",
-                        left: "51px",
-                        backgroundColor: "#31a24c",
-                      }}
-                    ></div>
-                  )}
-                </div>
-                <div className="flex-grow-1 pe-5">
-                  <span className="fw-bold">{user.name}</span>
-                  <div>
-                    <span className="fa-sm">Xin chào nha </span>
-                    <span className="message-footer fa-sm">- 8 giờ trước</span>
-                  </div>
-                </div>
-                {user.status && (
-                  <div
-                    className="position-absolute rounded-circle"
-                    style={{
-                      width: "15px",
-                      height: "15px",
-                      top: "50%",
-                      right: "36px",
-                      transform: "translateY(-50%)",
-                      backgroundColor: "#2e89ff",
-                    }}
-                  ></div>
-                )}
-              </div>
-            </div>
+            <UserChat
+              key={index}
+              chat={chat}
+              user={user}
+              isSelected={isSelected}
+              updateCurrentChat={updateCurrentChat}
+              previousChat={previousChat}
+              nextChat={nextChat}
+            />
           );
         })}
       </div>

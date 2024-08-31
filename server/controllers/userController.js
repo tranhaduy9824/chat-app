@@ -2,6 +2,7 @@ const userModel = require("../models/userModel");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const createToken = (_id) => {
   const jwtKey = process.env.JWT_SECRET_KEY;
@@ -27,7 +28,9 @@ const registerUser = async (req, res) => {
     if (!validator.isStrongPassword(password))
       return res.status(400).json("Password must be a strong password...");
 
-    user = new userModel({ fullname, email, password });
+    const avatarPath = path.join("assets", "avatar_default.png");
+
+    user = new userModel({ fullname, email, password, avatar: avatarPath });
 
     const salt = await bcryptjs.genSalt(10);
     user.password = await bcryptjs.hash(user.password, salt);
@@ -53,11 +56,20 @@ const loginUser = async (req, res) => {
 
     const isValidPassword = await bcryptjs.compare(password, user.password);
 
-    if (!isValidPassword) return res.status(400).json("Invalid email or password");
+    if (!isValidPassword)
+      return res.status(400).json("Invalid email or password");
 
     const token = createToken(user._id);
 
-    return res.status(200).json({ _id: user._id, fullname: user.fullname, email, token });
+    return res
+      .status(200)
+      .json({
+        _id: user._id,
+        fullname: user.fullname,
+        email,
+        avatar: user.avatar,
+        token,
+      });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -68,7 +80,7 @@ const findUser = async (req, res) => {
   const userId = req.params.userId;
 
   try {
-    const user = await userModel.findById(userId)
+    const user = await userModel.findById(userId);
 
     return res.status(200).json(user);
   } catch (error) {
@@ -78,14 +90,65 @@ const findUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-    try {
-      const users = await userModel.find()
-  
-      return res.status(200).json(users);
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json(error);
-    }
-  };
+  try {
+    const users = await userModel.find();
 
-module.exports = { registerUser, loginUser, findUser, getUsers };
+    return res.status(200).json(users);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
+const updateAvatar = async (req, res) => {
+  const userId = req.body.id;
+  const avatar = req.file.path;
+
+  try {
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      { avatar },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json("User not found");
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
+const updateUser = async (req, res) => {
+  const userId = req.body.id;
+  const { fullname, email, password } = req.body;
+
+  try {
+    const updateFields = { fullname, email };
+
+    if (password) {
+      if (!validator.isStrongPassword(password)) {
+        return res.status(400).json("Password must be a strong password...");
+      }
+
+      const salt = await bcryptjs.genSalt(10);
+      updateFields.password = await bcryptjs.hash(password, salt);
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      updateFields,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) return res.status(404).json("User not found");
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, findUser, getUsers, updateAvatar, updateUser };

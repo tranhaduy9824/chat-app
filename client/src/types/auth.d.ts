@@ -1,7 +1,8 @@
 export interface User {
-  id: string;
+  _id: string;
   fullname: string;
   email: string;
+  avatar: string;
 }
 
 export interface RegisterInfo {

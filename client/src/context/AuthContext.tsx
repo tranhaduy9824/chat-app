@@ -97,14 +97,14 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setLoginInfo({
           email: "",
           password: "",
-        }); 
+        });
         navigate("/");
+
+        localStorage.setItem("User", JSON.stringify(response));
+        setUser(response);
       } else {
         addNotification(response.message, "error");
       }
-
-      localStorage.setItem("User", JSON.stringify(response));
-      setUser(response);
     },
     [loginInfo, setProgress, navigate, addNotification]
   );

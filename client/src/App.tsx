@@ -3,31 +3,29 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Register from "./pages/Register";
 import NavBar from "./components/NavBar";
 import Chat from "./pages/Chat";
-import { AuthContextProvider } from "./context/AuthContext";
-import { LoadingProvider } from "./context/LoadingContext";
+import { AuthContext } from "./context/AuthContext";
 import LoadingBar from "./components/LoadingBar";
 import NotificationList from "./components/NotificationList";
-import { NotificationProvider } from "./context/NotificationContext";
+import { useContext } from "react";
+import { ChatContextProvider } from "./context/ChatContext";
 
 function App() {
+  const { user } = useContext(AuthContext)!;
+
   return (
-    <LoadingProvider>
-      <NotificationProvider>
-        <AuthContextProvider>
-          <LoadingBar />
-          <NotificationList />
-          <div className="w-100 h-100 m-0">
-            <NavBar />
-            <Routes>
-              <Route path="/" element={<Chat />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/Login" element={<Login />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </div>
-        </AuthContextProvider>
-      </NotificationProvider>
-    </LoadingProvider>
+    <ChatContextProvider user={user}>
+      <LoadingBar />
+      <NotificationList />
+      <div className="w-100 h-100 m-0">
+        <NavBar />
+        <Routes>
+          <Route path="/" element={user ? <Chat /> : <Login />} />
+          <Route path="/register" element={user ? <Chat /> : <Register />} />
+          <Route path="/Login" element={user ? <Chat /> : <Login />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </ChatContextProvider>
   );
 }
 
