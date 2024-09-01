@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Chat {
   secondId: any;
   firstId: any;
@@ -16,5 +17,5 @@ interface ChatContextProps {
 
 interface ChatContextProviderProps {
   children: React.ReactNode;
-  user: User;
+  user: User | null;
 }

@@ -1,43 +1,36 @@
 import { faSmile } from "@fortawesome/free-regular-svg-icons";
 import { faEllipsisV, faReply } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import { PinIcon } from "./Icons";
+import Avatar from "./Avatar";
+import { AuthContext } from "../context/AuthContext";
+import moment from "moment";
 
 interface MessageProps {
-  msg: {
-    id: number;
-    sender: string;
-    text: string;
-    timestamp: string;
-  };
+  msg: Message;
+  recipientUser: User | null;
   showAvatar: boolean;
-  setReplyingTo: React.Dispatch<
-    React.SetStateAction<null | {
-      id: number;
-      sender: string;
-      text: string;
-      timestamp: string;
-    }>
-  >;
-  setEdit: React.Dispatch<
-    React.SetStateAction<null | {
-      id: number;
-      sender: string;
-      text: string;
-      timestamp: string;
-    }>
-  >;
+  setReplyingTo: React.Dispatch<React.SetStateAction<null | Message>>;
+  setEdit: React.Dispatch<React.SetStateAction<null | Message>>;
 }
 
-function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
+function Message({
+  msg,
+  recipientUser,
+  showAvatar,
+  setReplyingTo,
+  setEdit,
+}: MessageProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [showMore, setShowMore] = useState<boolean>(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [pin, setPin] = useState<boolean>(false);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const moreRef = useRef<HTMLDivElement | null>(null);
+
+  const { user } = useContext(AuthContext)!;
 
   const handleEmojiClick = (event: EmojiClickData) => {
     setSelectedEmoji(event.emoji);
@@ -63,11 +56,11 @@ function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
   }, []);
 
   return (
-    <div key={msg.id}>
+    <div key={msg._id}>
       {pin && (
         <span
           className={`d-block w-100 small ${
-            msg.sender === "Duy" ? "ms-5" : "text-end pe-5"
+            msg.senderId === "Duy" ? "ms-5" : "text-end pe-5"
           }`}
           style={{ minWidth: "max-content" }}
         >
@@ -76,20 +69,22 @@ function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
       )}
       <div
         className={`position-relative item-message d-flex align-items-start ${
-          msg.sender === "Duy" ? "justify-content-start" : "justify-content-end"
+          msg.senderId === recipientUser?._id
+            ? "justify-content-start"
+            : "justify-content-end"
         }`}
       >
-        {msg.sender === "Duy" ? (
+        {msg.senderId === recipientUser?._id ? (
           <>
             <div
               className="d-flex align-items-center me-2 m-auto ms-0"
               style={{ width: "35px", height: "35px" }}
             >
               {showAvatar && (
-                <img
-                  src="https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD"
-                  alt="Duy"
-                  className="rounded-circle"
+                <Avatar
+                  user={
+                    msg.senderId === recipientUser?._id ? recipientUser : null
+                  }
                   width={35}
                   height={35}
                 />
@@ -106,7 +101,7 @@ function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
             >
               <p className="m-0">{msg.text}</p>
               <span className="position-absolute z-2 top-0 start-100 time-message ms-2 small">
-                {msg.timestamp}
+                {moment(msg.createdAt).calendar()}
               </span>
               {selectedEmoji && (
                 <span
@@ -284,7 +279,7 @@ function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
             >
               <p className="m-0">{msg.text}</p>
               <span className="position-absolute z-2 top-0 end-100 time-message me-2 small">
-                {msg.timestamp}
+                {moment(msg.createdAt).calendar()}
               </span>
               {selectedEmoji && (
                 <span
@@ -313,10 +308,8 @@ function Message({ msg, showAvatar, setReplyingTo, setEdit }: MessageProps) {
               style={{ width: "35px", height: "35px" }}
             >
               {showAvatar && (
-                <img
-                  src="https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD"
-                  alt="Duy"
-                  className="rounded-circle"
+                <Avatar
+                  user={msg.senderId !== recipientUser?._id ? user : null}
                   width={35}
                   height={35}
                 />

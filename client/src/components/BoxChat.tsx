@@ -9,37 +9,18 @@ import {
   faCamera,
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
 import Message from "./Message";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-
-const messages: {
-  id: number;
-  sender: string;
-  text: string;
-  timestamp: string;
-}[] = [
-  { id: 1, sender: "Duy", text: "Chào bạn!", timestamp: "10:00" },
-  { id: 2, sender: "Bạn", text: "Chào Duy!", timestamp: "10:01" },
-  { id: 3, sender: "Duy", text: "Bạn có khỏe không?", timestamp: "10:02" },
-  { id: 4, sender: "Bạn", text: "Tôi khỏe, cảm ơn!", timestamp: "10:12" },
-  {
-    id: 5,
-    sender: "Duy",
-    text: "Bạn có dự định gì không?",
-    timestamp: "10:22",
-  },
-  { id: 6, sender: "Bạn", text: "Chào Duy!", timestamp: "10:23" },
-  { id: 7, sender: "Duy", text: "Bạn có khỏe không?", timestamp: "10:24" },
-  { id: 8, sender: "Duy", text: "Bạn có khỏe không?", timestamp: "10:38" },
-  { id: 9, sender: "Bạn", text: "Tôi khỏe, cảm ơn!", timestamp: "10:39" },
-  { id: 10, sender: "Bạn", text: "Chào Duy!", timestamp: "10:40" },
-  { id: 11, sender: "Duy", text: "Bạn có khỏe không?", timestamp: "10:50" },
-  { id: 12, sender: "Bạn", text: "Tôi khỏe, cảm ơn!", timestamp: "10:51" },
-];
+import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser";
+import { ChatContext } from "../context/ChatContext";
+import { AuthContext } from "../context/AuthContext";
+import Avatar from "./Avatar";
+import { MessageContext } from "../context/MessageContext";
+import moment from "moment";
 
 function BoxChat({ showInfoChat, setShowInfoChat }) {
   const [message, setMessage] = useState<string>("");
@@ -60,9 +41,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
     timestamp: string;
   }>(null);
 
+  const { user } = useContext(AuthContext)!;
+  const { currentChat } = useContext(ChatContext)!;
+  const { messages, sendTextMessage } = useContext(MessageContext)!;
+  const { recipientUser } = useFetchRecipientUser(currentChat, user);
+
   const handleSendMessage = () => {
     if (message.trim() || attachedFile) {
-      console.log("Tin nhắn đã gửi:", message, attachedFile);
+      sendTextMessage(message, user, currentChat?._id);
       setMessage("");
       setAttachedFile(null);
     }
@@ -87,10 +73,9 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
     }
   };
 
-  const timeDiffInMinutes = (time1: string, time2: string): number => {
-    const [hours1, minutes1] = time1.split(":").map(Number);
-    const [hours2, minutes2] = time2.split(":").map(Number);
-    return (hours2 - hours1) * 60 + (minutes2 - minutes1);
+  const timeDiffInMinutes = (date1: Date, date2: Date): number => {
+    const diffInMs = date2.getTime() - date1.getTime();
+    return Math.floor(diffInMs / (1000 * 60));
   };
 
   useEffect(() => {
@@ -127,19 +112,15 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
       <div className="flex-grow-1 ps-3 d-flex flex-column">
         <div className="d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-2">
-            <img
-              src="https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD"
-              alt="Duy"
-              className="rounded-circle mr-3"
-              width={50}
-              height={50}
+            <Avatar
+              user={recipientUser}
               style={{
                 boxShadow:
                   "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
               }}
             />
             <div>
-              <p className="fw-bold m-0">Duy</p>
+              <p className="fw-bold m-0">{recipientUser?.fullname}</p>
               <span className="message-footer fa-sm">Online</span>
             </div>
           </div>
@@ -170,24 +151,32 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
         </div>
         <div className="flex-grow-1 overflow-x-hidden overflow-y-auto my-3">
           <div className="d-flex flex-column gap-2">
-            {messages.map((msg, index) => {
+            {messages?.map((msg, index) => {
               const showTimestamp =
                 index === 0 ||
+                (messages[index - 1]?.createdAt &&
+                  msg?.createdAt &&
+                  timeDiffInMinutes(
+                    new Date(messages[index - 1].createdAt),
+                    new Date(msg.createdAt)
+                  ) >= 10);
+              const showAvatar =
+                messages[index + 1]?.senderId !== msg.senderId ||
                 timeDiffInMinutes(
-                  messages[index - 1].timestamp,
-                  msg.timestamp
+                  new Date(msg.createdAt),
+                  new Date(messages[index + 1].createdAt)
                 ) >= 10;
-              const showAvatar = messages[index + 1]?.sender !== msg.sender;
 
               return (
                 <div key={msg.id}>
                   {showTimestamp && (
                     <div className="text-center text-muted small my-2 fw-bold">
-                      {msg.timestamp}
+                      {moment(msg.createdAt).calendar()}
                     </div>
                   )}
                   <Message
                     msg={msg}
+                    recipientUser={recipientUser}
                     showAvatar={showAvatar}
                     setReplyingTo={setReplyingTo}
                     setEdit={setEdit}

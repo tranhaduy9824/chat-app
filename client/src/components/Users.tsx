@@ -82,7 +82,7 @@ function Users() {
 
           return (
             <UserChat
-              key={index}
+              key={chat._id}
               chat={chat}
               user={user}
               isSelected={isSelected}

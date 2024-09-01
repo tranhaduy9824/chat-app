@@ -22,7 +22,7 @@ const UserChat: React.FC<UserChatProps> = ({
   const { recipientUser } = useFetchRecipientUser(chat, user);
 
   return (
-    <div key={chat._id} style={{ backgroundColor: "#e9ecf5" }}>
+    <div style={{ backgroundColor: "#e9ecf5" }}>
       <div
         className={`item-user-chat d-flex align-items-center gap-2 bg-white position-relative py-2 px-3 ${
           isSelected ? "selected" : ""

@@ -68,7 +68,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
     getUserChats();
   }, [user]);
 
-  const updateCurrentChat = useCallback((chat: Chat) => {
+  const updateCurrentChat = useCallback((chat: Chat | null) => {
     setCurrentChat(chat);
   }, []);
 
@@ -78,19 +78,18 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         const newMembersString = [firstId, secondId].sort().join(",");
 
         const existingChat = userChats?.find(
-            (chat) => chat.members.sort().join(",") === newMembersString
-          );
+          (chat) => chat.members.sort().join(",") === newMembersString
+        );
 
         if (existingChat) {
-            updateCurrentChat(existingChat);
+          updateCurrentChat(existingChat);
           return;
         }
 
-        const response = await postRequest(
-          `${baseUrl}/chats`,
-          { firstId, secondId },
-          setProgress
-        );
+        const response = await postRequest(`${baseUrl}/chats`, {
+          firstId,
+          secondId,
+        });
 
         if (response.error) {
           console.log("Error creating chat", response);
@@ -104,8 +103,12 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         console.log("Error creating chat", error);
       }
     },
-    [userChats, setProgress, updateCurrentChat]
+    [userChats, updateCurrentChat]
   );
+
+  useEffect(() => {
+    updateCurrentChat(null);
+  }, [user]);
 
   return (
     <ChatContext.Provider
