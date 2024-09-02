@@ -22,6 +22,7 @@ import { AuthContext } from "../context/AuthContext";
 import Avatar from "./Avatar";
 import { MessageContext } from "../context/MessageContext";
 import moment from "moment";
+import backgroundImage from "../assets/background-chat.png";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [message, setMessage] = useState<string>("");
@@ -100,203 +101,230 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       }}
     >
       <Users />
-      <div className="flex-grow-1 ps-3 d-flex flex-column">
-        <div className="d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center gap-2">
-            <Avatar
-              user={recipientUser}
-              style={{
-                boxShadow:
-                  "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
-              }}
-            />
-            <div>
-              <p className="fw-bold m-0">{recipientUser?.fullname}</p>
-              <span className="message-footer fa-sm">
-                {onlineUsers?.some(
-                  (user) => user?.userId === recipientUser?._id
-                )
-                  ? "Online"
-                  : "Offline"}
-              </span>
+      {!currentChat ? (
+        <div className="flex-grow-1 ps-3 d-flex flex-column align-items-center justify-content-center">
+          <h3>Welcome to ChatApp</h3>
+          <img src={backgroundImage} alt="Background image" className="w-50 rounded-5 mt-2" />
+        </div>
+      ) : (
+        <div className="flex-grow-1 ps-3 d-flex flex-column">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-2">
+              <Avatar
+                user={recipientUser}
+                style={{
+                  boxShadow:
+                    "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
+                }}
+              />
+              <div>
+                <p className="fw-bold m-0">{recipientUser?.fullname}</p>
+                <span className="message-footer fa-sm">
+                  {onlineUsers?.some(
+                    (user) => user?.userId === recipientUser?._id
+                  )
+                    ? "Online"
+                    : "Offline"}
+                </span>
+              </div>
+            </div>
+            <div className="d-flex align-items-center gap-3">
+              <Tippy content="Bắt đầu gọi video" placement="bottom">
+                <span
+                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                  style={{ width: "2.1rem", height: "2.1rem" }}
+                >
+                  <FontAwesomeIcon
+                    icon={faVideo}
+                    style={{ fontSize: "20px" }}
+                  />
+                </span>
+              </Tippy>
+              <Tippy content="Thông tin về cuộc trò truyện" placement="bottom">
+                <span
+                  className={`icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                    showInfoChat && "selected"
+                  }`}
+                  style={{ width: "2.1rem", height: "2.1rem" }}
+                  onClick={() => setShowInfoChat(!showInfoChat)}
+                >
+                  <FontAwesomeIcon
+                    icon={faEllipsisH}
+                    style={{ fontSize: "20px" }}
+                  />
+                </span>
+              </Tippy>
             </div>
           </div>
-          <div className="d-flex align-items-center gap-3">
-            <Tippy content="Bắt đầu gọi video" placement="bottom">
-              <span
-                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: "2.1rem", height: "2.1rem" }}
-              >
-                <FontAwesomeIcon icon={faVideo} style={{ fontSize: "20px" }} />
-              </span>
-            </Tippy>
-            <Tippy content="Thông tin về cuộc trò truyện" placement="bottom">
-              <span
-                className={`icon-hover d-flex align-items-center justify-content-center rounded-circle ${
-                  showInfoChat && "selected"
-                }`}
-                style={{ width: "2.1rem", height: "2.1rem" }}
-                onClick={() => setShowInfoChat(!showInfoChat)}
-              >
-                <FontAwesomeIcon
-                  icon={faEllipsisH}
-                  style={{ fontSize: "20px" }}
-                />
-              </span>
-            </Tippy>
-          </div>
-        </div>
-        <div className="flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
-          <div className="d-flex flex-column gap-2">
-            {messages?.map((msg, index) => {
-              const showTimestamp =
-                index === 0 ||
-                (messages[index - 1]?.createdAt &&
-                  msg?.createdAt &&
+          <div className="flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
+            <div className="d-flex flex-column gap-2">
+              {messages?.map((msg, index) => {
+                const showTimestamp =
+                  index === 0 ||
+                  (messages[index - 1]?.createdAt &&
+                    msg?.createdAt &&
+                    timeDiffInMinutes(
+                      new Date(messages[index - 1].createdAt),
+                      new Date(msg.createdAt)
+                    ) >= 10);
+                const showAvatar =
+                  messages[index + 1]?.senderId !== msg.senderId ||
                   timeDiffInMinutes(
-                    new Date(messages[index - 1].createdAt),
-                    new Date(msg.createdAt)
-                  ) >= 10);
-              const showAvatar =
-                messages[index + 1]?.senderId !== msg.senderId ||
-                timeDiffInMinutes(
-                  new Date(msg.createdAt),
-                  new Date(messages[index + 1].createdAt)
-                ) >= 10;
+                    new Date(msg.createdAt),
+                    new Date(messages[index + 1].createdAt)
+                  ) >= 10;
 
-              return (
-                <div key={msg.id}>
-                  {showTimestamp && (
-                    <div className="text-center text-muted small my-2 fw-bold">
-                      {moment(msg.createdAt).calendar()}
-                    </div>
-                  )}
-                  <Message
-                    msg={msg}
-                    recipientUser={recipientUser}
-                    showAvatar={showAvatar}
-                    setReplyingTo={setReplyingTo}
-                    setEdit={setEdit}
+                return (
+                  <div key={msg.id}>
+                    {showTimestamp && (
+                      <div className="text-center text-muted small my-2 fw-bold">
+                        {moment(msg.createdAt).calendar()}
+                      </div>
+                    )}
+                    <Message
+                      msg={msg}
+                      recipientUser={recipientUser}
+                      showAvatar={showAvatar}
+                      setReplyingTo={setReplyingTo}
+                      setEdit={setEdit}
+                    />
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+          {(replyingTo || edit) && (
+            <div
+              className="d-flex align-items-center justify-content-between"
+              style={{ padding: "10px 0 5px", borderTop: "1px solid #7e889c" }}
+            >
+              <>
+                <div>
+                  <div className="fw-bold">
+                    {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
+                    {!edit &&
+                      (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
+                  </div>
+                  <div className="small">{replyingTo?.text}</div>
+                </div>
+                <span
+                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                  style={{ width: "2rem", height: "2rem" }}
+                  onClick={() => {
+                    setReplyingTo(null);
+                    setEdit(null);
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </span>
+              </>
+            </div>
+          )}
+          <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center gap-2">
+              <Tippy content="Chụp ảnh">
+                <span
+                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                  style={{ width: "2.1rem", height: "2.1rem" }}
+                >
+                  <FontAwesomeIcon
+                    icon={faCamera}
+                    style={{ fontSize: "20px" }}
                   />
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-        {(replyingTo || edit) && (
-          <div
-            className="d-flex align-items-center justify-content-between"
-            style={{ padding: "10px 0 5px", borderTop: "1px solid #7e889c" }}
-          >
-            <>
-              <div>
-                <div className="fw-bold">
-                  {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
-                  {!edit &&
-                    (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
-                </div>
-                <div className="small">{replyingTo?.text}</div>
-              </div>
-              <span
-                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: "2rem", height: "2rem" }}
-                onClick={() => {
-                  setReplyingTo(null);
-                  setEdit(null);
+                </span>
+              </Tippy>
+              <Tippy content="Đính kèm file">
+                <label
+                  htmlFor="file-upload"
+                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                  style={{
+                    width: "2.1rem",
+                    height: "2.1rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faImages}
+                    style={{ fontSize: "20px" }}
+                  />
+                </label>
+              </Tippy>
+              <input
+                id="file-upload"
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
+              <Tippy content="Chọn file gif">
+                <span
+                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                  style={{ width: "2.1rem", height: "2.1rem" }}
+                >
+                  <FontAwesomeIcon
+                    icon={faStickyNote}
+                    style={{ fontSize: "20px" }}
+                  />
+                </span>
+              </Tippy>
+            </div>
+            <div className="position-relative flex-grow-1 mx-3">
+              <input
+                type="text"
+                className="form-control rounded-pill me-2"
+                style={{ paddingRight: "38px" }}
+                placeholder="Enter message..."
+                value={edit?.text || message}
+                onChange={(e) => setMessage(e.target.value)}
+                onFocus={() => setShowEmojiPicker(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSendMessage();
+                  }
                 }}
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </span>
-            </>
+              />
+              <Tippy content="Chọn biểu tượng cảm xúc">
+                <span
+                  className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                    showEmojiPicker && "selected"
+                  }`}
+                  style={{
+                    width: "2.1rem",
+                    height: "2.1rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  <FontAwesomeIcon
+                    icon={faSmile}
+                    style={{ fontSize: "20px" }}
+                  />
+                </span>
+              </Tippy>
+              {showEmojiPicker && (
+                <div
+                  className="position-absolute bottom-100 end-0 mb-2"
+                  style={{ zIndex: 1000 }}
+                  ref={emojiPickerRef}
+                >
+                  <Picker onEmojiClick={handleEmojiClick} />
+                </div>
+              )}
+            </div>
+            <button
+              className="btn btn-primary rounded-pill"
+              style={{ height: "100%", width: "auto", aspectRatio: "1/1" }}
+              onClick={handleSendMessage}
+            >
+              {!edit ? (
+                <FontAwesomeIcon icon={faPaperPlane} />
+              ) : (
+                <FontAwesomeIcon icon={faCheck} />
+              )}
+            </button>
           </div>
-        )}
-        <div className="d-flex align-items-center">
-          <div className="d-flex align-items-center gap-2">
-            <Tippy content="Chụp ảnh">
-              <span
-                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: "2.1rem", height: "2.1rem" }}
-              >
-                <FontAwesomeIcon icon={faCamera} style={{ fontSize: "20px" }} />
-              </span>
-            </Tippy>
-            <Tippy content="Đính kèm file">
-              <label
-                htmlFor="file-upload"
-                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
-              >
-                <FontAwesomeIcon icon={faImages} style={{ fontSize: "20px" }} />
-              </label>
-            </Tippy>
-            <input
-              id="file-upload"
-              type="file"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-            <Tippy content="Chọn file gif">
-              <span
-                className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                style={{ width: "2.1rem", height: "2.1rem" }}
-              >
-                <FontAwesomeIcon
-                  icon={faStickyNote}
-                  style={{ fontSize: "20px" }}
-                />
-              </span>
-            </Tippy>
-          </div>
-          <div className="position-relative flex-grow-1 mx-3">
-            <input
-              type="text"
-              className="form-control rounded-pill me-2"
-              style={{ paddingRight: "38px" }}
-              placeholder="Enter message..."
-              value={edit?.text || message}
-              onChange={(e) => setMessage(e.target.value)}
-              onFocus={() => setShowEmojiPicker(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSendMessage();
-                }
-              }}
-            />
-            <Tippy content="Chọn biểu tượng cảm xúc">
-              <span
-                className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
-                  showEmojiPicker && "selected"
-                }`}
-                style={{ width: "2.1rem", height: "2.1rem", cursor: "pointer" }}
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              >
-                <FontAwesomeIcon icon={faSmile} style={{ fontSize: "20px" }} />
-              </span>
-            </Tippy>
-            {showEmojiPicker && (
-              <div
-                className="position-absolute bottom-100 end-0 mb-2"
-                style={{ zIndex: 1000 }}
-                ref={emojiPickerRef}
-              >
-                <Picker onEmojiClick={handleEmojiClick} />
-              </div>
-            )}
-          </div>
-          <button
-            className="btn btn-primary rounded-pill"
-            style={{ height: "100%", width: "auto", aspectRatio: "1/1" }}
-            onClick={handleSendMessage}
-          >
-            {!edit ? (
-              <FontAwesomeIcon icon={faPaperPlane} />
-            ) : (
-              <FontAwesomeIcon icon={faCheck} />
-            )}
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
