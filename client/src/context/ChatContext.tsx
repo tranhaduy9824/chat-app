@@ -4,6 +4,7 @@ import { baseUrl, getRequest, postRequest } from "../utils/services";
 import { User } from "../types/auth";
 import { useLoading } from "./LoadingContext";
 import { useNotification } from "./NotificationContext";
+import { io, Socket } from "socket.io-client";
 
 export const ChatContext = createContext<ChatContextProps | undefined>(
   undefined
@@ -17,9 +18,32 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
   const [potentialChats, setPotentialChats] = useState<User[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const { setProgress } = useLoading();
   const { addNotification } = useNotification();
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:3000");
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (socket === null) return;
+    socket.emit("addNewUser", user?._id);
+    socket.on("getOnlineUsers", (res) => {
+      setOnlineUsers(res);
+    });
+
+    return () => {
+      socket.off("getOnlineUsers");
+    };
+  }, [socket, user]);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -119,6 +143,8 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         currentChat,
         updateCurrentChat,
         allUsers,
+        onlineUsers,
+        socket
       }}
     >
       {children}

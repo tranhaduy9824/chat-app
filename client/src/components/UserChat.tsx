@@ -1,6 +1,10 @@
+import { useContext } from "react";
 import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser.js";
 import { User } from "../types/auth.js";
 import Avatar from "./Avatar.js";
+import { ChatContext } from "../context/ChatContext.js";
+import { useFetchLatestMessage } from "../hooks/useFetchLatestMessage.js";
+import moment from "moment";
 
 interface UserChatProps {
   chat: Chat;
@@ -20,6 +24,21 @@ const UserChat: React.FC<UserChatProps> = ({
   nextChat,
 }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
+  const { onlineUsers } = useContext(ChatContext)!;
+
+  const { latestMessage } = useFetchLatestMessage(chat);
+
+  const truncateText = (text: string) => {
+    const lengthShortText =
+      latestMessage?.senderId === recipientUser?._id ? 20 : 16;
+    let shortText = text.substring(0, lengthShortText);
+
+    if (text.length > lengthShortText) {
+      shortText = shortText + "...";
+    }
+
+    return shortText;
+  };
 
   return (
     <div style={{ backgroundColor: "#e9ecf5" }}>
@@ -38,24 +57,35 @@ const UserChat: React.FC<UserChatProps> = ({
       >
         <div>
           <Avatar user={recipientUser} />
-          {recipientUser?.status && (
-            <div
-              className="position-absolute rounded-circle"
-              style={{
-                width: "15px",
-                height: "15px",
-                top: "43px",
-                left: "51px",
-                backgroundColor: "#31a24c",
-              }}
-            ></div>
-          )}
+          <div
+            className={`position-absolute rounded-circle ${
+              !onlineUsers?.some(
+                (user) => user?.userId === recipientUser?._id
+              ) && "d-none"
+            }`}
+            style={{
+              width: "15px",
+              height: "15px",
+              top: "43px",
+              left: "51px",
+              backgroundColor: "#31a24c",
+            }}
+          ></div>
         </div>
         <div className="flex-grow-1 pe-5">
           <span className="fw-bold">{recipientUser?.fullname}</span>
           <div>
-            <span className="fa-sm">Xin chào nha </span>
-            <span className="message-footer fa-sm">- 8 giờ trước</span>
+            {latestMessage?.text && (
+              <>
+                <span className="fa-sm">
+                  {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
+                  {truncateText(latestMessage?.text)}{" "}
+                </span>
+                <span className="message-footer fa-sm">
+                  - {moment(latestMessage?.createdAt).fromNow()}
+                </span>
+              </>
+            )}
           </div>
         </div>
         {recipientUser?.status && (

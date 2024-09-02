@@ -8,14 +8,15 @@ import UserChat from "./UserChat";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
-  const { allUsers, userChats, createChat, currentChat, updateCurrentChat } = useContext(ChatContext)!;
+  const { allUsers, userChats, createChat, currentChat, updateCurrentChat, onlineUsers } = useContext(ChatContext)!;
 
   return (
     <div
       className="bg-white py-3 shadow-sm"
       style={{
         borderRadius: "var(--border-radius)",
-        width: "450px",
+        minWidth: "450px",
+        maxWidth: "450px",
       }}
     >
       <div className="w-100 px-3 mb-3 position-relative">
@@ -54,9 +55,8 @@ function Users() {
             >
               <Avatar user={u} />
               <p className="fw-bold m-0">{u.fullname.split(" ").pop()}</p>
-              {u.status && (
                 <div
-                  className="position-absolute end-0 rounded-circle"
+                  className={`position-absolute end-0 rounded-circle ${!onlineUsers?.some((user) => user?.userId === u?._id) && "d-none"}`}
                   style={{
                     width: "15px",
                     height: "15px",
@@ -64,7 +64,6 @@ function Users() {
                     backgroundColor: "#31a24c",
                   }}
                 ></div>
-              )}
             </div>
           ))}
       </div>

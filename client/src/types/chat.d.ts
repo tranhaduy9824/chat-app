@@ -13,6 +13,8 @@ interface ChatContextProps {
   currentChat: Chat | null;
   updateCurrentChat: (chat: Chat) => void;
   allUsers: User[];
+  onlineUsers: User[];
+  socket: Socket;
 }
 
 interface ChatContextProviderProps {

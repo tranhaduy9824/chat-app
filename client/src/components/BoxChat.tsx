@@ -28,21 +28,11 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const [replyingTo, setReplyingTo] = useState<null | {
-    id: number;
-    sender: string;
-    text: string;
-    timestamp: string;
-  }>(null);
-  const [edit, setEdit] = useState<null | {
-    id: number;
-    sender: string;
-    text: string;
-    timestamp: string;
-  }>(null);
+  const [replyingTo, setReplyingTo] = useState<null | Message>(null);
+  const [edit, setEdit] = useState<null | Message>(null);
 
   const { user } = useContext(AuthContext)!;
-  const { currentChat } = useContext(ChatContext)!;
+  const { currentChat, onlineUsers } = useContext(ChatContext)!;
   const { messages, sendTextMessage } = useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
@@ -98,7 +88,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [replyingTo, edit]);
+  }, [replyingTo, edit, messages]);
 
   return (
     <div
@@ -121,7 +111,13 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
             />
             <div>
               <p className="fw-bold m-0">{recipientUser?.fullname}</p>
-              <span className="message-footer fa-sm">Online</span>
+              <span className="message-footer fa-sm">
+                {onlineUsers?.some(
+                  (user) => user?.userId === recipientUser?._id
+                )
+                  ? "Online"
+                  : "Offline"}
+              </span>
             </div>
           </div>
           <div className="d-flex align-items-center gap-3">
@@ -255,10 +251,16 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
             <input
               type="text"
               className="form-control rounded-pill me-2"
+              style={{ paddingRight: "38px" }}
               placeholder="Enter message..."
               value={edit?.text || message}
               onChange={(e) => setMessage(e.target.value)}
               onFocus={() => setShowEmojiPicker(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSendMessage();
+                }
+              }}
             />
             <Tippy content="Chọn biểu tượng cảm xúc">
               <span

@@ -7,6 +7,7 @@ import { PinIcon } from "./Icons";
 import Avatar from "./Avatar";
 import { AuthContext } from "../context/AuthContext";
 import moment from "moment";
+import { User } from "../types/auth";
 
 interface MessageProps {
   msg: Message;
