@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Users from "./Users";
 import {
@@ -22,7 +23,7 @@ import Avatar from "./Avatar";
 import { MessageContext } from "../context/MessageContext";
 import moment from "moment";
 
-function BoxChat({ showInfoChat, setShowInfoChat }) {
+function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -38,7 +39,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
 
   const handleSendMessage = () => {
     if (message.trim() || attachedFile) {
-      sendTextMessage(message, user, currentChat?._id);
+      sendTextMessage(message, user, currentChat?._id || "");
       setMessage("");
       setAttachedFile(null);
     }
@@ -145,7 +146,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }) {
             </Tippy>
           </div>
         </div>
-        <div className="flex-grow-1 overflow-x-hidden overflow-y-auto my-3">
+        <div className="flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
           <div className="d-flex flex-column gap-2">
             {messages?.map((msg, index) => {
               const showTimestamp =

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Message {
   _id: string;
   chatId: string;
@@ -15,6 +16,9 @@ interface MessageContextProps {
   ) => Promise<void>;
   newMessage: Message[] | null;
   notifications: Message[] | null;
+  markAllNotificationsAsRead: any;
+  martNotificationAsRead: any;
+  markThisUserNotificationsAsRead: any;
 }
 
 interface MessageContextProviderProps {

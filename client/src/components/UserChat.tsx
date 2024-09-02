@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext } from "react";
 import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser.js";
 import { User } from "../types/auth.js";
@@ -5,6 +6,8 @@ import Avatar from "./Avatar.js";
 import { ChatContext } from "../context/ChatContext.js";
 import { useFetchLatestMessage } from "../hooks/useFetchLatestMessage.js";
 import moment from "moment";
+import { unReadNotificationsFunc } from "../utils/unReadNotificationsFunc.js";
+import { MessageContext } from "../context/MessageContext.js";
 
 interface UserChatProps {
   chat: Chat;
@@ -25,8 +28,15 @@ const UserChat: React.FC<UserChatProps> = ({
 }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const { onlineUsers } = useContext(ChatContext)!;
+  const { notifications, markThisUserNotificationsAsRead } =
+    useContext(MessageContext)!;
 
   const { latestMessage } = useFetchLatestMessage(chat);
+
+  const unReadNotifications = unReadNotificationsFunc(notifications);
+  const thisUserNotification = unReadNotifications?.filter(
+    (n: any) => n.senderId === recipientUser?._id
+  );
 
   const truncateText = (text: string) => {
     const lengthShortText =
@@ -41,7 +51,14 @@ const UserChat: React.FC<UserChatProps> = ({
   };
 
   return (
-    <div style={{ backgroundColor: "#e9ecf5" }}>
+    <div
+      style={{ backgroundColor: "#e9ecf5", cursor: "pointer" }}
+      onClick={() => {
+        if (thisUserNotification?.length !== 0) {
+          markThisUserNotificationsAsRead(thisUserNotification, notifications);
+        }
+      }}
+    >
       <div
         className={`item-user-chat d-flex align-items-center gap-2 bg-white position-relative py-2 px-3 ${
           isSelected ? "selected" : ""
@@ -88,7 +105,7 @@ const UserChat: React.FC<UserChatProps> = ({
             )}
           </div>
         </div>
-        {recipientUser?.status && (
+        {thisUserNotification?.length > 0 && (
           <div
             className="position-absolute rounded-circle"
             style={{

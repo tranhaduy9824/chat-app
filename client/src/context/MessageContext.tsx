@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   createContext,
@@ -23,7 +24,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [newMessage, setNewMessage] = useState<Message[] | null>(null);
   const [notifications, setNotifications] = useState<Message[] | null>(null);
 
-  const { currentChat, socket } = useContext(ChatContext)!;
+  const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
 
   const { addNotification } = useNotification();
@@ -97,6 +98,58 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     []
   );
 
+  const markAllNotificationsAsRead = useCallback((notifications: Message[]) => {
+    const mNotifications = notifications.map((n) => ({ ...n, isRead: true }));
+
+    setNotifications(mNotifications);
+  }, []);
+
+  const martNotificationAsRead = useCallback(
+    (n: any, userChats: User[], user: User, notifications: Message[]) => {
+      const desiredChat = userChats.find((chat) => {
+        const chatMembers = [user._id, n.senderId];
+        const isDesiredChat = chat?.members.every((member: any) => {
+          return chatMembers.includes(member);
+        });
+
+        return isDesiredChat;
+      });
+
+      const mNotification = notifications.map((el) => {
+        if (n.senderId === el.senderId) {
+          return { ...n, isRead: true };
+        } else {
+          return el;
+        }
+      });
+
+      updateCurrentChat(desiredChat);
+      setNotifications(mNotification);
+    },
+    []
+  );
+
+  const markThisUserNotificationsAsRead = useCallback(
+    (thisUserNotifications: any, notifications: Message[]) => {
+      const mNotifications = notifications.map((el) => {
+        let notification;
+
+        thisUserNotifications.forEach((n) => {
+          if (n.senderId === el.senderId) {
+            notification = { ...n, isRead: true };
+          } else {
+            notification = el;
+          }
+        });
+
+        return notification;
+      });
+
+      setNotifications(mNotifications);
+    },
+    []
+  );
+
   return (
     <MessageContext.Provider
       value={{
@@ -104,6 +157,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         sendTextMessage,
         newMessage,
         notifications,
+        markAllNotificationsAsRead,
+        martNotificationAsRead,
+        markThisUserNotificationsAsRead,
       }}
     >
       {children}
