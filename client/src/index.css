@@ -192,3 +192,23 @@
     transform: translateX(0);
   }
 }
+
+.tippy-box {
+  box-shadow: var(--primary-light) 0px 8px 24px,
+    var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px;
+  background-color: white;
+  color: black;
+  padding: 0;
+}
+
+.tippy-content {
+  padding: 0;
+}
+
+.tippy-arrow {
+  color: white;
+}
+
+.avatar-upload:hover > div {
+  display: block !important;
+}

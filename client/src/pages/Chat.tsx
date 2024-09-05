@@ -1,6 +1,6 @@
 import { useState } from "react";
-import BoxChat from "../components/BoxChat";
-import InfoChat from "../components/InfoChat";
+import BoxChat from "../components/Chat/BoxChat";
+import InfoChat from "../components/Chat/InfoChat";
 
 function Chat() {
   const [showInfoChat, setShowInfoChat] = useState<boolean>(false)

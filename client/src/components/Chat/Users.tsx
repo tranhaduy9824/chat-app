@@ -2,12 +2,12 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext } from "react";
-import { ChatContext } from "../context/ChatContext";
-import Avatar from "./Avatar";
-import { AuthContext } from "../context/AuthContext";
+import { ChatContext } from "../../context/ChatContext";
+import Avatar from "../Avatar";
+import { AuthContext } from "../../context/AuthContext";
 import UserChat from "./UserChat";
-import { MessageContext } from "../context/MessageContext";
-import { unReadNotificationsFunc } from "../utils/unReadNotificationsFunc";
+import { MessageContext } from "../../context/MessageContext";
+import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
 
 function Users() {
   const { user } = useContext(AuthContext)!;

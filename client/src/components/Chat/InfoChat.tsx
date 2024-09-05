@@ -10,7 +10,7 @@ import {
   faThumbTack,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FontIcon } from "./Icons";
+import { FontIcon } from "../Icons";
 import Tippy from "@tippyjs/react";
 import 'tippy.js/dist/tippy.css';
 

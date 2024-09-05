@@ -3,11 +3,11 @@ import { faEllipsisV, faReply } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useRef, useState } from "react";
 import Picker, { EmojiClickData } from "emoji-picker-react";
-import { PinIcon } from "./Icons";
-import Avatar from "./Avatar";
-import { AuthContext } from "../context/AuthContext";
+import { PinIcon } from "../Icons";
+import Avatar from "../Avatar";
+import { AuthContext } from "../../context/AuthContext";
 import moment from "moment";
-import { User } from "../types/auth";
+import { User } from "../../types/auth";
 
 interface MessageProps {
   msg: Message;

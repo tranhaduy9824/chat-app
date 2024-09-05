@@ -16,13 +16,13 @@ import Message from "./Message";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser";
-import { ChatContext } from "../context/ChatContext";
-import { AuthContext } from "../context/AuthContext";
-import Avatar from "./Avatar";
-import { MessageContext } from "../context/MessageContext";
+import { useFetchRecipientUser } from "../../hooks/useFetchRecipientUser";
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
+import Avatar from "../Avatar";
+import { MessageContext } from "../../context/MessageContext";
 import moment from "moment";
-import backgroundImage from "../assets/background-chat.png";
+import backgroundImage from "../../assets/background-chat.png";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [message, setMessage] = useState<string>("");
@@ -104,7 +104,11 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       {!currentChat ? (
         <div className="flex-grow-1 ps-3 d-flex flex-column align-items-center justify-content-center">
           <h3>Welcome to ChatApp</h3>
-          <img src={backgroundImage} alt="Background image" className="w-50 rounded-5 mt-2" />
+          <img
+            src={backgroundImage}
+            alt="Background image"
+            className="w-50 rounded-5 mt-2"
+          />
         </div>
       ) : (
         <div className="flex-grow-1 ps-3 d-flex flex-column">

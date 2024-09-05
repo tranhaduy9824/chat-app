@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext } from "react";
-import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser.js";
-import { User } from "../types/auth.js";
-import Avatar from "./Avatar.js";
-import { ChatContext } from "../context/ChatContext.js";
-import { useFetchLatestMessage } from "../hooks/useFetchLatestMessage.js";
+import { useFetchRecipientUser } from "../../hooks/useFetchRecipientUser.js";
+import { User } from "../../types/auth.js";
+import Avatar from "../Avatar.js";
+import { ChatContext } from "../../context/ChatContext.js";
+import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage.js";
 import moment from "moment";
-import { unReadNotificationsFunc } from "../utils/unReadNotificationsFunc.js";
-import { MessageContext } from "../context/MessageContext.js";
+import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
+import { MessageContext } from "../../context/MessageContext.js";
 
 interface UserChatProps {
   chat: Chat;
