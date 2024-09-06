@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface User {
-  members: any;
   _id: string;
   fullname: string;
   email: string;
   avatar: string;
+  token: string,
 }
 
 export interface RegisterInfo {
@@ -29,4 +28,6 @@ export interface AuthContextType {
   loginInfo: LoginInfo;
   updateLoginInfo: (info: LoginInfo) => void;
   isLoginLoading: boolean;
+  updateAvatar: (file: File) => Promise<void>;
+  updateUser: (e: React.FormEvent) => Promise<void>;
 }

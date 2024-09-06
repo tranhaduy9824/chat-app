@@ -61,15 +61,13 @@ const loginUser = async (req, res) => {
 
     const token = createToken(user._id);
 
-    return res
-      .status(200)
-      .json({
-        _id: user._id,
-        fullname: user.fullname,
-        email,
-        avatar: user.avatar,
-        token,
-      });
+    return res.status(200).json({
+      _id: user._id,
+      fullname: user.fullname,
+      email,
+      avatar: user.avatar,
+      token,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -101,7 +99,7 @@ const getUsers = async (req, res) => {
 };
 
 const updateAvatar = async (req, res) => {
-  const userId = req.body.id;
+  const userId = req.userData._id;
   const avatar = req.file.path;
 
   try {
@@ -113,7 +111,12 @@ const updateAvatar = async (req, res) => {
 
     if (!user) return res.status(404).json("User not found");
 
-    return res.status(200).json(user);
+    return res.status(200).json({
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      avatar: user.avatar,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -121,13 +124,32 @@ const updateAvatar = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const userId = req.body.id;
-  const { fullname, email, password } = req.body;
+  const userId = req.userData._id;
+  const { fullname, email, currentPassword, password } = req.body;
 
   try {
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== userId.toString()) {
+      return res.status(400).json("Email is already taken by another user");
+    }
+
     const updateFields = { fullname, email };
 
     if (password) {
+      const user = await userModel.findById(userId);
+
+      if (!user) {
+        return res.status(404).json("User not found");
+      }
+
+      const isValidPassword = await bcryptjs.compare(
+        currentPassword,
+        user.password
+      );
+      if (!isValidPassword) {
+        return res.status(400).json("Current password is incorrect");
+      }
+
       if (!validator.isStrongPassword(password)) {
         return res.status(400).json("Password must be a strong password...");
       }
@@ -142,13 +164,25 @@ const updateUser = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (!updatedUser) return res.status(404).json("User not found");
+    if (!updatedUser) {
+      return res.status(404).json("User not found");
+    }
 
-    return res.status(200).json(updatedUser);
+    return res.status(200).json({
+      fullname: updatedUser.fullname,
+      email: updatedUser.email,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
   }
 };
 
-module.exports = { registerUser, loginUser, findUser, getUsers, updateAvatar, updateUser };
+module.exports = {
+  registerUser,
+  loginUser,
+  findUser,
+  getUsers,
+  updateAvatar,
+  updateUser,
+};

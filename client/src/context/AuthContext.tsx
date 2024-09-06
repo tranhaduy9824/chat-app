@@ -5,7 +5,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { baseUrl, postRequest } from "../utils/services";
+import { baseUrl, patchRequest, postRequest } from "../utils/services";
 import { AuthContextType, User, RegisterInfo, LoginInfo } from "../types/auth";
 import { useLoading } from "./LoadingContext";
 import { useNavigate } from "react-router-dom";
@@ -114,6 +114,69 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   }, []);
 
+  const updateAvatar = useCallback(
+    async (file: File) => {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await patchRequest(
+        `${baseUrl}/users/avatar`,
+        formData,
+        setProgress,
+        true,
+        true
+      );
+
+      if (!response.error) {
+        localStorage.setItem(
+          "User",
+          JSON.stringify({ ...user, avatar: response.avatar })
+        );
+        setUser({ ...user, avatar: response.avatar });
+        addNotification("Update avatar success", "success");
+      } else {
+        addNotification(response.message, "error");
+      }
+    },
+    [addNotification, setProgress, user]
+  );
+
+  const updateUser = useCallback(
+    async (data: object, handleChangePWSuccess?: () => void) => {
+      const response = await patchRequest(
+        `${baseUrl}/users/`,
+        data,
+        setProgress,
+        true
+      );
+
+      if (!response.error) {
+        localStorage.setItem(
+          "User",
+          JSON.stringify({
+            ...user,
+            fullname: response.fullname,
+            email: response.email,
+          })
+        );
+        setUser({
+          ...user,
+          fullname: response.fullname,
+          email: response.email,
+        });
+        if (handleChangePWSuccess) {
+          handleChangePWSuccess();
+          addNotification("Update password success", "success");
+        } else {
+          addNotification("Update info success", "success");
+        }
+      } else {
+        addNotification(response.message, "error");
+      }
+    },
+    [addNotification, setProgress, user]
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -127,6 +190,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         loginInfo,
         isLoginLoading,
         updateLoginInfo,
+        updateAvatar,
+        updateUser,
       }}
     >
       {children}

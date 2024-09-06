@@ -8,6 +8,7 @@ const {
   updateAvatar,
   updateUser,
 } = require("../controllers/userController");
+const checkAuth = require("../middleware/check-auth");
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/find/:userId", findUser);
 router.get("/", getUsers);
-router.patch("/avatar", upload.single("avatar"), updateAvatar);
-router.patch("/", updateUser);
+router.patch("/avatar", checkAuth, upload.single("avatar"), updateAvatar);
+router.patch("/", checkAuth, updateUser);
 
 module.exports = router;
