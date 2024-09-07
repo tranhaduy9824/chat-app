@@ -5,6 +5,36 @@ const messageSchema = new mongoose.Schema(
     chatId: String,
     senderId: String,
     text: String,
+    media: {
+      url: {
+        type: String,
+      },
+      type: {
+        type: String,
+        enum: ["image", "video", "file"],
+      },
+    },
+    type: {
+      type: String,
+      enum: ["text", "image", "video", "file"],
+      default: "text",
+    },
+    reactions: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        reaction: {
+          type: String,
+        },
+      },
+    ],
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -12,5 +42,4 @@ const messageSchema = new mongoose.Schema(
 );
 
 const messageModel = mongoose.model("message", messageSchema);
-
 module.exports = messageModel;

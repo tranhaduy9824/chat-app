@@ -16,6 +16,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: "../assets/avatar_default.png",
     },
+    blockedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
