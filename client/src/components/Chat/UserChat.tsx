@@ -8,6 +8,7 @@ import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage.js";
 import moment from "moment";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
 import { MessageContext } from "../../context/MessageContext.js";
+import { AuthContext } from "../../context/AuthContext.js";
 
 interface UserChatProps {
   chat: Chat;
@@ -92,11 +93,14 @@ const UserChat: React.FC<UserChatProps> = ({
         <div className="flex-grow-1 pe-5">
           <span className="fw-bold">{recipientUser?.fullname}</span>
           <div>
-            {latestMessage?.text && (
+            {latestMessage?.type && (
               <>
                 <span className="fa-sm">
                   {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
                   {truncateText(latestMessage?.text)}{" "}
+                  {latestMessage?.type === "image" && "Đã gửi một ảnh"}{" "}
+                  {latestMessage?.type === "video" && "Đã gửi một video"}{" "}
+                  {latestMessage?.type === "file" && "Đã gửi một file"}{" "}
                 </span>
                 <span className="message-footer fa-sm">
                   - {moment(latestMessage?.createdAt).fromNow()}

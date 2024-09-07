@@ -2,18 +2,34 @@ export const baseUrl = "http://localhost:5000/api";
 
 export const postRequest = async (
   url: string,
-  body: string | object,
-  setProgress?: (value: number) => void
+  body: string | object | FormData,
+  setProgress?: (value: number) => void | undefined,
+  token: boolean = false,
+  formData: boolean = false
 ) => {
   try {
     if (setProgress) setProgress(20);
 
+    const headers: HeadersInit = {};
+
+    if (!formData) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (token) {
+      const userItem = localStorage.getItem("User");
+      const user = userItem ? JSON.parse(userItem) : null;
+      const userToken = user?.token;
+
+      if (userToken) {
+        headers["Authorization"] = `Bearer ${userToken}`;
+      }
+    }
+
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
+      headers,
+      body: formData ? (body as FormData) : JSON.stringify(body),
     });
 
     if (setProgress) setProgress(60);

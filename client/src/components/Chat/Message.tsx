@@ -1,4 +1,4 @@
-import { faSmile } from "@fortawesome/free-regular-svg-icons";
+import { faFileText, faSmile } from "@fortawesome/free-regular-svg-icons";
 import { faEllipsisV, faReply } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -78,8 +78,8 @@ function Message({
         {msg.senderId === recipientUser?._id ? (
           <>
             <div
-              className="d-flex align-items-center me-2 m-auto ms-0"
-              style={{ width: "35px", height: "35px" }}
+              className="d-flex align-items-end me-2 mt-auto"
+              style={{ width: "35px", height: "100%" }}
             >
               {showAvatar && (
                 <Avatar
@@ -92,15 +92,69 @@ function Message({
               )}
             </div>
             <div
-              className={
-                "d-flex align-items-center p-2 bg-white border border-secondary message position-relative"
-              }
+              className={`d-flex align-items-center message position-relative ${
+                msg.type === "text" && "border border-secondary"
+              } ${
+                msg.type === "image" || (msg.type === "video" && "border-none")
+              }`}
               style={{
                 maxWidth: "75%",
                 borderRadius: "50px 50px 50px 0",
+                backgroundColor:
+                  msg.type === "text" || msg.type === "file" ? "#ffffff" : "",
+                border: msg.type === "file" ? "1px solid #ea67a4" : "",
+                padding:
+                  msg.type === "image" || msg.type === "video"
+                    ? "0px !important"
+                    : "8px",
               }}
             >
-              <p className="m-0">{msg.text}</p>
+              {msg.mediaUrl ? (
+                msg.type === "image" ? (
+                  <img
+                    src={msg.mediaUrl}
+                    alt="media"
+                    style={{
+                      maxWidth: "280px",
+                      maxHeight: "300px",
+                      width: "auto",
+                      height: "auto",
+                      borderRadius: "10px",
+                    }}
+                  />
+                ) : msg.type === "video" ? (
+                  <video
+                    src={msg.mediaUrl}
+                    controls
+                    style={{
+                      maxWidth: "280px",
+                      maxHeight: "300px",
+                      width: "auto",
+                      height: "auto",
+                      borderRadius: "10px",
+                    }}
+                  />
+                ) : msg.type === "file" ? (
+                  <a
+                    href={msg.mediaUrl}
+                    download
+                    className="text-decoration-none text-black d-flex align-items-center"
+                  >
+                    <span className="mx-2">
+                      <FontAwesomeIcon
+                        icon={faFileText}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </span>
+                    <div className="d-flex flex-column">
+                      <span className="fw-bold">Tải về tập tin</span>
+                      <span className="small">1.8 KB</span>
+                    </div>
+                  </a>
+                ) : null
+              ) : (
+                <p className="m-0">{msg.text}</p>
+              )}
               <span className="position-absolute z-2 top-0 start-100 time-message ms-2 small">
                 {moment(msg.createdAt).calendar()}
               </span>
@@ -270,15 +324,70 @@ function Message({
             </div>
             <div
               className={
-                "d-flex align-items-center p-2 text-white message position-relative"
+                "d-flex align-items-center text-white message position-relative"
               }
               style={{
                 maxWidth: "75%",
-                backgroundColor: "#ea67a4",
+                backgroundColor:
+                  msg.type === "text"
+                    ? "#ea67a4"
+                    : msg.type === "file"
+                    ? "#ffffff"
+                    : "",
                 borderRadius: "50px 50px 0 50px ",
+                border: msg.type === "file" ? "1px solid #ea67a4" : "",
+                padding:
+                  msg.type === "image" || msg.type === "video"
+                    ? "0px !important"
+                    : "8px",
               }}
             >
-              <p className="m-0">{msg.text}</p>
+              {msg.mediaUrl ? (
+                msg.type === "image" ? (
+                  <img
+                    src={msg.mediaUrl}
+                    alt="media"
+                    style={{
+                      maxWidth: "280px",
+                      maxHeight: "300px",
+                      width: "auto",
+                      height: "auto",
+                      borderRadius: "10px",
+                    }}
+                  />
+                ) : msg.type === "video" ? (
+                  <video
+                    src={msg.mediaUrl}
+                    controls
+                    style={{
+                      maxWidth: "280px",
+                      maxHeight: "300px",
+                      width: "auto",
+                      height: "auto",
+                      borderRadius: "10px",
+                    }}
+                  />
+                ) : msg.type === "file" ? (
+                  <a
+                    href={msg.mediaUrl}
+                    download
+                    className="text-decoration-none text-black d-flex align-items-center"
+                  >
+                    <span className="mx-2">
+                      <FontAwesomeIcon
+                        icon={faFileText}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </span>
+                    <div className="d-flex flex-column">
+                      <span className="fw-bold">Tải về tập tin</span>
+                      <span className="small">1.8 KB</span>
+                    </div>
+                  </a>
+                ) : null
+              ) : (
+                <p className="m-0">{msg.text}</p>
+              )}
               <span className="position-absolute z-2 top-0 end-100 time-message me-2 small">
                 {moment(msg.createdAt).calendar()}
               </span>
@@ -305,8 +414,8 @@ function Message({
               </span>
             </div>
             <div
-              className="d-flex align-items-center ms-2 m-auto me-0"
-              style={{ width: "35px", height: "35px" }}
+              className="d-flex align-items-end ms-2 mt-auto"
+              style={{ width: "35px", height: "100%" }}
             >
               {showAvatar && (
                 <Avatar

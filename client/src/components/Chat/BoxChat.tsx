@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Users from "./Users";
@@ -39,10 +40,12 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
   const handleSendMessage = () => {
-    if (message.trim() || attachedFile) {
+    if (attachedFile) {
+      sendTextMessage("", user, currentChat?._id || "", attachedFile);
+      setAttachedFile(null);
+    } else if (message.trim()) {
       sendTextMessage(message, user, currentChat?._id || "");
       setMessage("");
-      setAttachedFile(null);
     }
     setReplyingTo(null);
     setEdit(null);
@@ -53,6 +56,12 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       setAttachedFile(e.target.files[0]);
     }
   };
+
+  useEffect(() => {
+    if (attachedFile) {
+      handleSendMessage();
+    }
+  }, [attachedFile]);
 
   const handleEmojiClick = (
     event: EmojiClickData,
@@ -88,9 +97,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
     }
-  }, [replyingTo, edit, messages]);
+  }, [replyingTo, edit, messages, attachedFile]);
 
   return (
     <div

@@ -18,7 +18,7 @@ function NavBar() {
     <>
       <Navbar
         bg="light"
-        className="mb-2 rounded-pill px-2 m-auto"
+        className="mb-2 rounded-pill px-2 m-auto navbar"
         style={{ maxWidth: "1296px", height: "3.25rem" }}
       >
         <Container>

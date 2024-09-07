@@ -4,6 +4,10 @@ interface Message {
   chatId: string;
   senderId: string;
   text: string;
+  mediaUrl: string;
+  type: string;
+  reactions: array;
+  replyTo: string;
   createdAt: string;
 }
 

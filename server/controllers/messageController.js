@@ -1,7 +1,9 @@
 const messageModel = require("../models/messageModel");
+const cloudinary = require("../config/cloudinaryConfig");
 
 const createMessage = async (req, res) => {
-  const { chatId, senderId, text } = req.body;
+  const senderId = req.userData._id;
+  const { chatId, text } = req.body;
   const file = req.file;
 
   let fileUrl = "";
@@ -26,7 +28,7 @@ const createMessage = async (req, res) => {
       chatId,
       senderId,
       text: text || "",
-      media: fileUrl,
+      mediaUrl: fileUrl,
       type: fileType,
     });
 

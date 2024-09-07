@@ -12,6 +12,7 @@ import { useNotification } from "./NotificationContext";
 import { ChatContext } from "./ChatContext";
 import { User } from "../types/auth";
 import { AuthContext } from "./AuthContext";
+import { useLoading } from "./LoadingContext";
 
 export const MessageContext = createContext<MessageContextProps | undefined>(
   undefined
@@ -26,6 +27,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
   const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
+  const { setProgress } = useLoading();
 
   const { addNotification } = useNotification();
 
@@ -79,14 +81,31 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   }, [socket, currentChat]);
 
   const sendTextMessage = useCallback(
-    async (textMessage: string, sender: User, currentChatId: string) => {
-      if (!textMessage) return console.log("You must type something...");
+    async (
+      textMessage: string,
+      sender: User,
+      currentChatId: string,
+      file?: File
+    ) => {
+      if (!textMessage && !file)
+        return console.log("You must type something or attach a file...");
 
-      const response = await postRequest(`${baseUrl}/messages`, {
-        chatId: currentChatId,
-        senderId: sender._id,
-        text: textMessage,
-      });
+      const formData = new FormData();
+      formData.append("chatId", currentChatId);
+      formData.append("senderId", sender._id);
+      formData.append("text", textMessage);
+
+      if (file) {
+        formData.append("file", file);
+      }
+
+      const response = await postRequest(
+        `${baseUrl}/messages`,
+        formData,
+        file ? setProgress : undefined,
+        true,
+        true
+      );
 
       if (response.error) {
         return addNotification(response.message, "error");
@@ -105,7 +124,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   }, []);
 
   const martNotificationAsRead = useCallback(
-    (n: any, userChats: User[], user: User, notifications: Message[]) => {
+    (n: any, userChats: Chat[], user: User, notifications: Message[]) => {
       const desiredChat = userChats.find((chat) => {
         const chatMembers = [user._id, n.senderId];
         const isDesiredChat = chat?.members.every((member: any) => {

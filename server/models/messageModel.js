@@ -5,14 +5,8 @@ const messageSchema = new mongoose.Schema(
     chatId: String,
     senderId: String,
     text: String,
-    media: {
-      url: {
-        type: String,
-      },
-      type: {
-        type: String,
-        enum: ["image", "video", "file"],
-      },
+    mediaUrl: {
+      type: String,
     },
     type: {
       type: String,

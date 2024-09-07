@@ -193,7 +193,7 @@
   }
 }
 
-.tippy-box {
+.navbar .tippy-box {
   box-shadow: var(--primary-light) 0px 8px 24px,
     var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px;
   background-color: white;
@@ -201,11 +201,11 @@
   padding: 0;
 }
 
-.tippy-content {
+.navbar .tippy-content {
   padding: 0;
 }
 
-.tippy-arrow {
+.navbar .tippy-arrow {
   color: white;
 }
 
