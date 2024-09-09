@@ -212,3 +212,10 @@
 .avatar-upload:hover > div {
   display: block !important;
 }
+
+.chat-messages {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 100%;
+  overflow-y: auto;
+}

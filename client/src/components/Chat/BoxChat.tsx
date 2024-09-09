@@ -24,59 +24,69 @@ import Avatar from "../Avatar";
 import { MessageContext } from "../../context/MessageContext";
 import moment from "moment";
 import backgroundImage from "../../assets/background-chat.png";
+import MediaPreview from "./MediaPreview";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [replyingTo, setReplyingTo] = useState<null | Message>(null);
   const [edit, setEdit] = useState<null | Message>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers } = useContext(ChatContext)!;
   const { messages, sendTextMessage } = useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
-  const handleSendMessage = () => {
+  useEffect(() => {
     if (attachedFile) {
-      sendTextMessage("", user, currentChat?._id || "", attachedFile);
-      setAttachedFile(null);
-    } else if (message.trim()) {
+      const sendFile = async () => {
+        await sendTextMessage(
+          "",
+          user,
+          currentChat?._id || "",
+          attachedFile,
+          setMediaPreview
+        );
+        setAttachedFile(null);
+      };
+      sendFile();
+    }
+  }, [attachedFile]);
+
+  const handleSendMessage = () => {
+    if (message.trim() || attachedFile) {
       sendTextMessage(message, user, currentChat?._id || "");
       setMessage("");
+      setReplyingTo(null);
+      setEdit(null);
     }
-    setReplyingTo(null);
-    setEdit(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setAttachedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setAttachedFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
-
-  useEffect(() => {
-    if (attachedFile) {
-      handleSendMessage();
-    }
-  }, [attachedFile]);
 
   const handleEmojiClick = (
     event: EmojiClickData,
     emojiObject?: EmojiClickData
   ) => {
-    if (emojiObject && emojiObject.emoji) {
-      setMessage(message + emojiObject.emoji);
-    } else if (event.emoji) {
-      setMessage(message + event.emoji);
-    }
+    setMessage(message + (emojiObject?.emoji || event.emoji));
   };
 
   const timeDiffInMinutes = (date1: Date, date2: Date): number => {
-    const diffInMs = date2.getTime() - date1.getTime();
-    return Math.floor(diffInMs / (1000 * 60));
+    return Math.floor((date2.getTime() - date1.getTime()) / (1000 * 60));
   };
 
   useEffect(() => {
@@ -94,17 +104,6 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      }, 100);
-    }
-  }, [replyingTo, edit, messages, attachedFile]);
 
   return (
     <div
@@ -174,7 +173,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
               </Tippy>
             </div>
           </div>
-          <div className="flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
+          <div className="chat-messages flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
             <div className="d-flex flex-column gap-2">
               {messages?.map((msg, index) => {
                 const showTimestamp =
@@ -193,13 +192,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   ) >= 10;
 
                 return (
-                  <div key={msg.id}>
+                  <div key={msg._id}>
                     {showTimestamp && (
                       <div className="text-center text-muted small my-2 fw-bold">
                         {moment(msg.createdAt).calendar()}
                       </div>
                     )}
                     <Message
+                      key={msg._id}
                       msg={msg}
                       recipientUser={recipientUser}
                       showAvatar={showAvatar}
@@ -209,7 +209,18 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   </div>
                 );
               })}
-              <div ref={messagesEndRef} />
+              {mediaPreview && (
+                <MediaPreview
+                  type={
+                    attachedFile?.type.startsWith("image/")
+                      ? "image"
+                      : attachedFile?.type.startsWith("video/")
+                      ? "video"
+                      : "file"
+                  }
+                  mediaPreview={mediaPreview}
+                />
+              )}
             </div>
           </div>
           {(replyingTo || edit) && (

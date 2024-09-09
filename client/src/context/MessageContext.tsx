@@ -85,7 +85,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       textMessage: string,
       sender: User,
       currentChatId: string,
-      file?: File
+      file?: File,
+      setMediaPreview?: (preview: null) => void,
     ) => {
       if (!textMessage && !file)
         return console.log("You must type something or attach a file...");
@@ -111,6 +112,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         return addNotification(response.message, "error");
       }
 
+      setMediaPreview?.(null);
       setNewMessage(response);
       setMessages((prev) => [...(prev || []), response]);
     },
