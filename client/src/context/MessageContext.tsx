@@ -24,6 +24,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [newMessage, setNewMessage] = useState<Message[] | null>(null);
   const [notifications, setNotifications] = useState<Message[] | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
@@ -31,20 +32,27 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
   const { addNotification } = useNotification();
 
-  useEffect(() => {
-    const getMessages = async () => {
+  const getMessages = useCallback(
+    async (page: number, limit: number) => {
       const response = await getRequest(
-        `${baseUrl}/messages/${currentChat?._id}`
+        `${baseUrl}/messages/${currentChat?._id}?page=${page}&limit=${limit}`
       );
 
       if (response.error) {
         return addNotification(response.message, "error");
       }
 
-      setMessages(response);
-    };
+      setMessages((prevMessages) => [
+        ...(prevMessages ?? []),
+        ...response.messages,
+      ]);
+      setHasMore(response.hasMore);
+    },
+    [currentChat]
+  );
 
-    getMessages();
+  useEffect(() => {
+    setMessages([]);
   }, [currentChat]);
 
   useEffect(() => {
@@ -61,7 +69,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     socket.on("getMessage", (res: Message) => {
       if (currentChat?._id !== res.chatId) return;
 
-      setMessages((prev) => [...(prev || []), res]);
+      setMessages((prev) => [res, ...(prev || [])]);
     });
 
     socket.on("getNotifications", (res: Message) => {
@@ -86,7 +94,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       sender: User,
       currentChatId: string,
       file?: File,
-      setMediaPreview?: (preview: null) => void,
+      setMediaPreview?: (preview: null) => void
     ) => {
       if (!textMessage && !file)
         return console.log("You must type something or attach a file...");
@@ -114,7 +122,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
       setMediaPreview?.(null);
       setNewMessage(response);
-      setMessages((prev) => [...(prev || []), response]);
+      setMessages((prev) => [response, ...(prev || [])]);
     },
     []
   );
@@ -181,6 +189,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         markAllNotificationsAsRead,
         martNotificationAsRead,
         markThisUserNotificationsAsRead,
+        getMessages,
+        hasMore,
       }}
     >
       {children}

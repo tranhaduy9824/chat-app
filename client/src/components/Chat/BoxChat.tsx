@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Users from "./Users";
 import {
@@ -27,6 +26,7 @@ import backgroundImage from "../../assets/background-chat.png";
 import MediaPreview from "./MediaPreview";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
+  const [page, setPage] = useState<number>(1);
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -34,10 +34,12 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [replyingTo, setReplyingTo] = useState<null | Message>(null);
   const [edit, setEdit] = useState<null | Message>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers } = useContext(ChatContext)!;
-  const { messages, sendTextMessage } = useContext(MessageContext)!;
+  const { messages, sendTextMessage, getMessages, hasMore } =
+    useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
   useEffect(() => {
@@ -104,6 +106,41 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [currentChat]);
+
+  useEffect(() => {
+    if (currentChat) {
+      getMessages(page, 10);
+    }
+  }, [currentChat, page]);
+
+  const loadMoreMessages = () => {
+    if (hasMore) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    const chatMessagesElement = chatMessagesRef.current;
+    if (chatMessagesElement) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = chatMessagesElement;
+        if (clientHeight - scrollTop >= scrollHeight - 0.7) {
+          loadMoreMessages();
+        }
+      };
+
+      chatMessagesElement.addEventListener("scroll", handleScroll);
+      return () => {
+        chatMessagesElement.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [hasMore, loadMoreMessages, currentChat]);
+
+  console.log(messages);
 
   return (
     <div
@@ -173,22 +210,37 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
               </Tippy>
             </div>
           </div>
-          <div className="chat-messages flex-grow-1 overflow-x-hidden overflow-y-auto py-3">
-            <div className="d-flex flex-column gap-2">
+          <div
+            className="chat-messages flex-grow-1 overflow-x-hidden overflow-y-auto py-3 gap-2"
+            ref={chatMessagesRef}
+          >
+            <div className="d-flex flex-column-reverse gap-2">
+              {mediaPreview && (
+                <MediaPreview
+                  type={
+                    attachedFile?.type.startsWith("image/")
+                      ? "image"
+                      : attachedFile?.type.startsWith("video/")
+                      ? "video"
+                      : "file"
+                  }
+                  mediaPreview={mediaPreview}
+                />
+              )}
               {messages?.map((msg, index) => {
                 const showTimestamp =
-                  index === 0 ||
-                  (messages[index - 1]?.createdAt &&
+                  index === messages?.length - 1 ||
+                  (messages[index + 1]?.createdAt &&
                     msg?.createdAt &&
                     timeDiffInMinutes(
-                      new Date(messages[index - 1].createdAt),
+                      new Date(messages[index + 1].createdAt),
                       new Date(msg.createdAt)
                     ) >= 10);
                 const showAvatar =
-                  messages[index + 1]?.senderId !== msg.senderId ||
+                  messages[index - 1]?.senderId !== msg.senderId ||
                   timeDiffInMinutes(
                     new Date(msg.createdAt),
-                    new Date(messages[index + 1].createdAt)
+                    new Date(messages[index - 1].createdAt)
                   ) >= 10;
 
                 return (
@@ -209,18 +261,6 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   </div>
                 );
               })}
-              {mediaPreview && (
-                <MediaPreview
-                  type={
-                    attachedFile?.type.startsWith("image/")
-                      ? "image"
-                      : attachedFile?.type.startsWith("video/")
-                      ? "video"
-                      : "file"
-                  }
-                  mediaPreview={mediaPreview}
-                />
-              )}
             </div>
           </div>
           {(replyingTo || edit) && (

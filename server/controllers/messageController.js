@@ -42,10 +42,21 @@ const createMessage = async (req, res) => {
 
 const getMessages = async (req, res) => {
   const { chatId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
 
   try {
-    const response = await messageModel.find({ chatId });
-    return res.status(200).json(response);
+    const messages = await messageModel
+      .find({ chatId })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const totalMessages = await messageModel.countDocuments({ chatId });
+
+    return res.status(200).json({
+      messages,
+      hasMore: totalMessages > page * limit,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
