@@ -8,7 +8,6 @@ import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage.js";
 import moment from "moment";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
 import { MessageContext } from "../../context/MessageContext.js";
-import { AuthContext } from "../../context/AuthContext.js";
 
 interface UserChatProps {
   chat: Chat;
@@ -50,6 +49,8 @@ const UserChat: React.FC<UserChatProps> = ({
 
     return shortText;
   };
+
+  console.log(latestMessage);
 
   return (
     <div

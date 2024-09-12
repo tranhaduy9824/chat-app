@@ -10,22 +10,25 @@ export const useFetchLatestMessage = (
   chat: Chat | null
 ): FetchLatestMessageProps => {
   const [latestMessage, setLatestMessage] = useState<Message | null>(null);
-
   const { newMessage, notifications } = useContext(MessageContext)!;
 
   useEffect(() => {
     const getMessages = async () => {
-      const response: Message[] | { error: string } = await getRequest(
-        `${baseUrl}/messages/${chat?._id}`
-      );
+      if (!chat) return;
 
-      if ("error" in response) {
-        return console.log("Error getting messages...", response.error);
+      const response: { messages?: Message[]; error?: string } =
+        await getRequest(`${baseUrl}/messages/${chat._id}?page=1&limit=10`);
+
+      if (response.error) {
+        console.error("Error getting messages:", response.error);
+        return;
       }
 
-      const lastMessage = response[response.length - 1];
-
-      setLatestMessage(lastMessage);
+      if (response.messages && response.messages.length > 0) {
+        const reverseMessage = response.messages.reverse();
+        const lastMessage = reverseMessage[reverseMessage.length - 1];
+        setLatestMessage(lastMessage);
+      }
     };
 
     getMessages();
