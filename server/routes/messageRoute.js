@@ -12,9 +12,9 @@ const upload = require("../middleware/multer");
 const router = express.Router();
 
 router.post("/", checkAuth, upload.single("file"), createMessage);
-router.get("/:chatId", getMessages);
-router.patch("/react/:messageId", reactToMessage);
-router.post("/reply/:messageId", replyToMessage);
-router.delete("/:messageId", deleteMessage);
+router.get("/:chatId", checkAuth, getMessages);
+router.patch("/react/:messageId", checkAuth, reactToMessage);
+router.post("/reply/:messageId", checkAuth, replyToMessage);
+router.delete("/:messageId", checkAuth, deleteMessage);
 
 module.exports = router;

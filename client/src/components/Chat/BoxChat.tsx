@@ -128,7 +128,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
     if (chatMessagesElement) {
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = chatMessagesElement;
-        if (clientHeight - scrollTop >= scrollHeight - 0.7) {
+        if (clientHeight - scrollTop >= scrollHeight - 1) {
           loadMoreMessages();
         }
       };
@@ -139,8 +139,6 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       };
     }
   }, [hasMore, loadMoreMessages, currentChat]);
-
-  console.log(messages);
 
   return (
     <div
@@ -290,7 +288,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
               </>
             </div>
           )}
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center pt-2">
             <div className="d-flex align-items-center gap-2">
               <Tippy content="Chụp ảnh">
                 <span

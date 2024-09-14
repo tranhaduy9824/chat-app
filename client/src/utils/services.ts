@@ -69,12 +69,29 @@ export const postRequest = async (
 
 export const getRequest = async (
   url: string,
-  setProgress?: (value: number) => void
+  setProgress?: (value: number) => void,
+  token: boolean = false
 ) => {
   try {
     if (setProgress) setProgress(20);
 
-    const response = await fetch(url);
+    const headers: HeadersInit = {};
+
+    if (token) {
+      const userItem = localStorage.getItem("User");
+      const user = userItem ? JSON.parse(userItem) : null;
+      const userToken = user?.token;
+
+      if (userToken) {
+        headers["Authorization"] = `Bearer ${userToken}`;
+      }
+    }
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+
     if (setProgress) setProgress(60);
 
     const data = await response.json();
@@ -114,7 +131,7 @@ export const getRequest = async (
 export const patchRequest = async (
   url: string,
   body: string | object,
-  setProgress?: (value: number) => void,
+  setProgress?: (value: number) => void | undefined,
   token: boolean = false,
   formData: boolean = false
 ) => {

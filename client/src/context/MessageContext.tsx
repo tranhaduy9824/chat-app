@@ -7,7 +7,12 @@ import React, {
   useCallback,
   useContext,
 } from "react";
-import { baseUrl, getRequest, postRequest } from "../utils/services";
+import {
+  baseUrl,
+  getRequest,
+  patchRequest,
+  postRequest,
+} from "../utils/services";
 import { useNotification } from "./NotificationContext";
 import { ChatContext } from "./ChatContext";
 import { User } from "../types/auth";
@@ -35,7 +40,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const getMessages = useCallback(
     async (page: number, limit: number) => {
       const response = await getRequest(
-        `${baseUrl}/messages/${currentChat?._id}?page=${page}&limit=${limit}`
+        `${baseUrl}/messages/${currentChat?._id}?page=${page}&limit=${limit}`,
+        undefined,
+        true
       );
 
       if (response.error) {
@@ -72,6 +79,30 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       setMessages((prev) => [res, ...(prev || [])]);
     });
 
+    socket.on(
+      "messageReaction",
+      (data: { messageId: string; reaction: string }) => {
+        const { messageId, reaction } = data;
+
+        setMessages((prevMessages) => {
+          return (
+            prevMessages?.map((msg) => {
+              if (msg._id === messageId) {
+                return {
+                  ...msg,
+                  reactions: [
+                    ...(msg.reactions || []),
+                    { userId: user?._id, reaction },
+                  ],
+                };
+              }
+              return msg;
+            }) || []
+          );
+        });
+      }
+    );
+
     socket.on("getNotifications", (res: Message) => {
       const isChatOpen = currentChat?.members.some((id) => id === res.senderId);
 
@@ -84,6 +115,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
     return () => {
       socket.off("getMessage");
+      socket.off("messageReaction");
       socket.off("getNotifications");
     };
   }, [socket, currentChat]);
@@ -125,6 +157,39 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       setMessages((prev) => [response, ...(prev || [])]);
     },
     []
+  );
+
+  const reactToMessage = useCallback(
+    async (messageId: string, reaction: string) => {
+      if (socket) {
+        socket.emit("reactToMessage", {
+          messageId,
+          reaction,
+          members: currentChat?.members,
+        });
+      }
+
+      const response = await patchRequest(
+        `${baseUrl}/messages/react/${messageId}`,
+        { reaction },
+        undefined,
+        true
+      );
+
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+
+      setMessages(
+        (prevMessages) =>
+          prevMessages?.map((msg) =>
+            msg._id === messageId
+              ? { ...msg, reactions: response.messageUpdate.reactions }
+              : msg
+          ) || []
+      );
+    },
+    [user, currentChat]
   );
 
   const markAllNotificationsAsRead = useCallback((notifications: Message[]) => {
@@ -191,6 +256,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         markThisUserNotificationsAsRead,
         getMessages,
         hasMore,
+        reactToMessage,
       }}
     >
       {children}

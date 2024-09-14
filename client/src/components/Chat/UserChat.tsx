@@ -50,8 +50,6 @@ const UserChat: React.FC<UserChatProps> = ({
     return shortText;
   };
 
-  console.log(latestMessage);
-
   return (
     <div
       style={{ backgroundColor: "#e9ecf5", cursor: "pointer" }}

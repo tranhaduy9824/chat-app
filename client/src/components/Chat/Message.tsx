@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { faFileText, faSmile } from "@fortawesome/free-regular-svg-icons";
 import { faEllipsisV, faReply } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,6 +9,8 @@ import Avatar from "../Avatar";
 import { AuthContext } from "../../context/AuthContext";
 import moment from "moment";
 import { User } from "../../types/auth";
+import { MessageContext } from "../../context/MessageContext";
+import { ChatContext } from "../../context/ChatContext";
 
 interface MessageProps {
   msg: Message;
@@ -32,9 +35,11 @@ function Message({
   const moreRef = useRef<HTMLDivElement | null>(null);
 
   const { user } = useContext(AuthContext)!;
+  const { reactToMessage } = useContext(MessageContext)!;
 
   const handleEmojiClick = (event: EmojiClickData) => {
     setSelectedEmoji(event.emoji);
+    reactToMessage(msg?._id, event.emoji);
     setShowEmojiPicker(false);
   };
 
@@ -55,6 +60,12 @@ function Message({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (msg.reactions.length > 0) {
+      setSelectedEmoji(msg?.reactions[0]?.reaction);
+    }
+  }, [msg]);
 
   return (
     <div key={msg._id}>
@@ -158,16 +169,31 @@ function Message({
               <span className="position-absolute z-2 top-0 start-100 time-message ms-2 small">
                 {moment(msg.createdAt).calendar()}
               </span>
-              {selectedEmoji && (
-                <span
-                  className="position-absolute top-100 end-0 rounded-circle"
+              {msg.reactions.length > 0 && (
+                <div
+                  className="d-flex position-absolute top-100 end-0 rounded-4"
                   style={{
-                    transform: "translate(-50%, -50%)",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
                     backgroundColor: "var(--primary-light)",
                   }}
                 >
-                  {selectedEmoji}
-                </span>
+                  {msg.reactions
+                    .slice(0, 3)
+                    .map((reaction: any, index: number) => (
+                      <span
+                        key={index}
+                        style={{
+                          fontSize: "14px",
+                        }}
+                      >
+                        {reaction.reaction}
+                      </span>
+                    ))}
+                  {msg.reactions.length > 3 && (
+                    <span className="small me-1">{msg.reactions.length}</span>
+                  )}
+                </div>
               )}
               <span
                 className={`position-absolute top-0 start-0 pin-icon ${
@@ -391,16 +417,29 @@ function Message({
               <span className="position-absolute z-2 top-0 end-100 time-message me-2 small">
                 {moment(msg.createdAt).calendar()}
               </span>
-              {selectedEmoji && (
-                <span
-                  className="position-absolute top-100 start-0 rounded-circle"
+              {msg.reactions.length > 0 && (
+                <div
+                  className="d-flex position-absolute top-100 start-0 rounded-4"
                   style={{
-                    transform: "translate(50%, -50%)",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
                     backgroundColor: "var(--primary-light)",
                   }}
                 >
-                  {selectedEmoji}
-                </span>
+                  {msg.reactions.map((reaction: any, index: number) => (
+                    <span
+                      key={index}
+                      style={{
+                        fontSize: "14px",
+                      }}
+                    >
+                      {reaction.reaction}
+                    </span>
+                  ))}
+                  {msg.reactions.length > 3 && (
+                    <span className="small me-1">{msg.reactions.length}</span>
+                  )}
+                </div>
               )}
               <span
                 className={`position-absolute top-0 end-0 pin-icon ${

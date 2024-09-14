@@ -1,5 +1,6 @@
 const messageModel = require("../models/messageModel");
 const cloudinary = require("../config/cloudinaryConfig");
+const chatModel = require("../models/chatModel");
 
 const createMessage = async (req, res) => {
   const senderId = req.userData._id;
@@ -43,8 +44,19 @@ const createMessage = async (req, res) => {
 const getMessages = async (req, res) => {
   const { chatId } = req.params;
   const { page = 1, limit = 10 } = req.query;
+  const userId = req.userData._id;
 
   try {
+    const chat = await chatModel.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (!chat.members.includes(userId.toString())) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
     const messages = await messageModel
       .find({ chatId })
       .sort({ createdAt: -1 })
@@ -65,7 +77,8 @@ const getMessages = async (req, res) => {
 
 const reactToMessage = async (req, res) => {
   const { messageId } = req.params;
-  const { userId, reaction } = req.body;
+  const { reaction } = req.body;
+  const userId = req.userData._id;
 
   try {
     const message = await messageModel.findById(messageId);
@@ -83,7 +96,9 @@ const reactToMessage = async (req, res) => {
     }
 
     await message.save();
-    return res.status(200).json({ message: "Reaction updated", message });
+    return res
+      .status(200)
+      .json({ message: "Reaction updated", messageUpdate: message });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error.message);

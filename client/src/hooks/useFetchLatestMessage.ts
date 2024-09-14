@@ -17,7 +17,11 @@ export const useFetchLatestMessage = (
       if (!chat) return;
 
       const response: { messages?: Message[]; error?: string } =
-        await getRequest(`${baseUrl}/messages/${chat._id}?page=1&limit=10`);
+        await getRequest(
+          `${baseUrl}/messages/${chat._id}?page=1&limit=10`,
+          undefined,
+          true
+        );
 
       if (response.error) {
         console.error("Error getting messages:", response.error);
