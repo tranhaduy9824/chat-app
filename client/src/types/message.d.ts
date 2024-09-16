@@ -25,7 +25,7 @@ interface MessageContextProps {
   markThisUserNotificationsAsRead: any;
   getMessages: (page: number, limit: number) => void;
   hasMore: boolean;
-  reactToMessage: (messageId: string) => void;
+  reactToMessage: (messageId: string, reaction: string) => void;
 }
 
 interface MessageContextProviderProps {

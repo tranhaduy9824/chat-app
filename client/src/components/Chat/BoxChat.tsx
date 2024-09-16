@@ -237,19 +237,19 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                 const showAvatar =
                   messages[index - 1]?.senderId !== msg.senderId ||
                   timeDiffInMinutes(
-                    new Date(msg.createdAt),
-                    new Date(messages[index - 1].createdAt)
+                    new Date(msg?.createdAt),
+                    new Date(messages[index - 1]?.createdAt)
                   ) >= 10;
 
                 return (
-                  <div key={msg._id}>
+                  <div key={index}>
                     {showTimestamp && (
                       <div className="text-center text-muted small my-2 fw-bold">
                         {moment(msg.createdAt).calendar()}
                       </div>
                     )}
                     <Message
-                      key={msg._id}
+                      key={index}
                       msg={msg}
                       recipientUser={recipientUser}
                       showAvatar={showAvatar}

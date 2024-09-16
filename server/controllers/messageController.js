@@ -107,7 +107,8 @@ const reactToMessage = async (req, res) => {
 
 const replyToMessage = async (req, res) => {
   const { messageId } = req.params;
-  const { userId, text, media, type } = req.body;
+  const { text, media, type } = req.body;
+  const userId = req.userData._id;
 
   try {
     const originalMessage = await messageModel.findById(messageId);

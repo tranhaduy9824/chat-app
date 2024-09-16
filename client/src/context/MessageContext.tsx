@@ -55,7 +55,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       ]);
       setHasMore(response.hasMore);
     },
-    [currentChat]
+    [currentChat, addNotification]
   );
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     const recipientId = currentChat?.members?.find((id) => id !== user?._id);
 
     socket.emit("sendMessage", { ...newMessage, recipientId });
-  }, [newMessage]);
+  }, [newMessage, user, socket, currentChat]);
 
   useEffect(() => {
     if (socket === null) return;
@@ -104,6 +104,10 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     );
 
     socket.on("getNotifications", (res: Message) => {
+      if (!res.senderId) {
+        return;
+      }
+
       const isChatOpen = currentChat?.members.some((id) => id === res.senderId);
 
       if (isChatOpen) {
@@ -118,7 +122,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("messageReaction");
       socket.off("getNotifications");
     };
-  }, [socket, currentChat]);
+  }, [socket, currentChat, user]);
 
   const sendTextMessage = useCallback(
     async (
@@ -156,7 +160,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       setNewMessage(response);
       setMessages((prev) => [response, ...(prev || [])]);
     },
-    []
+    [addNotification, setProgress]
   );
 
   const reactToMessage = useCallback(
@@ -189,7 +193,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
           ) || []
       );
     },
-    [user, currentChat]
+    [currentChat, socket, addNotification]
   );
 
   const markAllNotificationsAsRead = useCallback((notifications: Message[]) => {
@@ -220,7 +224,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       updateCurrentChat(desiredChat);
       setNotifications(mNotification);
     },
-    []
+    [updateCurrentChat]
   );
 
   const markThisUserNotificationsAsRead = useCallback(
