@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Users from "./Users";
@@ -24,6 +25,7 @@ import { MessageContext } from "../../context/MessageContext";
 import moment from "moment";
 import backgroundImage from "../../assets/background-chat.png";
 import MediaPreview from "./MediaPreview";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [page, setPage] = useState<number>(1);
@@ -35,23 +37,30 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [edit, setEdit] = useState<null | Message>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+  const inputMessageRef = useRef<HTMLInputElement | null>(null);
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers } = useContext(ChatContext)!;
-  const { messages, sendTextMessage, getMessages, hasMore } =
+  const { messages, sendTextMessage, getMessages, hasMore, replyToMessage } =
     useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
   useEffect(() => {
     if (attachedFile) {
       const sendFile = async () => {
-        await sendTextMessage(
-          "",
-          user,
-          currentChat?._id || "",
-          attachedFile,
-          setMediaPreview
-        );
+        if (replyingTo) {
+          setReplyingTo(null);
+          setEdit(null);
+          await replyToMessage(replyingTo._id, "", attachedFile, setMediaPreview);
+        } else {
+          await sendTextMessage(
+            "",
+            user,
+            currentChat?._id || "",
+            attachedFile,
+            setMediaPreview
+          );
+        }
         setAttachedFile(null);
       };
       sendFile();
@@ -60,7 +69,11 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
 
   const handleSendMessage = () => {
     if (message.trim() || attachedFile) {
-      sendTextMessage(message, user, currentChat?._id || "");
+      if (replyingTo) {
+        replyToMessage(replyingTo._id, message, attachedFile || undefined);
+      } else {
+        sendTextMessage(message, user, currentChat?._id || "");
+      }
       setMessage("");
       setReplyingTo(null);
       setEdit(null);
@@ -140,6 +153,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
     }
   }, [hasMore, loadMoreMessages, currentChat]);
 
+  useEffect(() => {
+    if (inputMessageRef.current) {
+      inputMessageRef.current.focus();
+    }
+  }, [replyingTo, edit]);
+
+  console.log(messages);
+
   return (
     <div
       className="flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between"
@@ -161,7 +182,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       ) : (
         <div className="flex-grow-1 ps-3 d-flex flex-column">
           <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 position-relative">
               <Avatar
                 user={recipientUser}
                 style={{
@@ -169,6 +190,20 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                     "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
                 }}
               />
+              <div
+                className={`position-absolute rounded-circle ${
+                  !onlineUsers?.some(
+                    (user) => user?.userId === recipientUser?._id
+                  ) && "d-none"
+                }`}
+                style={{
+                  width: "15px",
+                  height: "15px",
+                  top: "35px",
+                  left: "35px",
+                  backgroundColor: "#31a24c",
+                }}
+              ></div>
               <div>
                 <p className="fw-bold m-0">{recipientUser?.fullname}</p>
                 <span className="message-footer fa-sm">
@@ -187,7 +222,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   style={{ width: "2.1rem", height: "2.1rem" }}
                 >
                   <FontAwesomeIcon
-                    icon={faVideo}
+                    icon={faVideo as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </span>
@@ -201,7 +236,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   onClick={() => setShowInfoChat(!showInfoChat)}
                 >
                   <FontAwesomeIcon
-                    icon={faEllipsisH}
+                    icon={faEllipsisH as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </span>
@@ -271,9 +306,18 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   <div className="fw-bold">
                     {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
                     {!edit &&
-                      (replyingTo?.sender === "Duy" ? "Duy" : "Chính mình")}
+                      (replyingTo?.senderId !== user?._id
+                        ? recipientUser?.fullname
+                        : "Chính mình")}
                   </div>
-                  <div className="small">{replyingTo?.text}</div>
+                  <div className="small">
+                    {replyingTo?.text}{" "}
+                    {replyingTo?.type === "video"
+                      ? "Video"
+                      : replyingTo?.type === "image"
+                      ? "Hình ảnh"
+                      : "File đính kèm"}
+                  </div>
                 </div>
                 <span
                   className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
@@ -283,7 +327,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                     setEdit(null);
                   }}
                 >
-                  <FontAwesomeIcon icon={faTimes} />
+                  <FontAwesomeIcon icon={faTimes as IconProp} />
                 </span>
               </>
             </div>
@@ -296,7 +340,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   style={{ width: "2.1rem", height: "2.1rem" }}
                 >
                   <FontAwesomeIcon
-                    icon={faCamera}
+                    icon={faCamera as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </span>
@@ -312,7 +356,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   }}
                 >
                   <FontAwesomeIcon
-                    icon={faImages}
+                    icon={faImages as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </label>
@@ -329,7 +373,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   style={{ width: "2.1rem", height: "2.1rem" }}
                 >
                   <FontAwesomeIcon
-                    icon={faStickyNote}
+                    icon={faStickyNote as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </span>
@@ -342,6 +386,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                 style={{ paddingRight: "38px" }}
                 placeholder="Enter message..."
                 value={edit?.text || message}
+                ref={inputMessageRef}
                 onChange={(e) => setMessage(e.target.value)}
                 onFocus={() => setShowEmojiPicker(false)}
                 onKeyDown={(e) => {
@@ -363,7 +408,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 >
                   <FontAwesomeIcon
-                    icon={faSmile}
+                    icon={faSmile as IconProp}
                     style={{ fontSize: "20px" }}
                   />
                 </span>
@@ -374,7 +419,11 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                   style={{ zIndex: 1000 }}
                   ref={emojiPickerRef}
                 >
-                  <Picker onEmojiClick={handleEmojiClick} />
+                  <Picker
+                    onEmojiClick={(emojiObject) =>
+                      handleEmojiClick(emojiObject)
+                    }
+                  />
                 </div>
               )}
             </div>
@@ -384,9 +433,9 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
               onClick={handleSendMessage}
             >
               {!edit ? (
-                <FontAwesomeIcon icon={faPaperPlane} />
+                <FontAwesomeIcon icon={faPaperPlane as IconProp} />
               ) : (
-                <FontAwesomeIcon icon={faCheck} />
+                <FontAwesomeIcon icon={faCheck as IconProp} />
               )}
             </button>
           </div>

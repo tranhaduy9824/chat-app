@@ -61,7 +61,8 @@ const getMessages = async (req, res) => {
       .find({ chatId })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate("replyTo");
 
     const totalMessages = await messageModel.countDocuments({ chatId });
 
@@ -107,8 +108,12 @@ const reactToMessage = async (req, res) => {
 
 const replyToMessage = async (req, res) => {
   const { messageId } = req.params;
-  const { text, media, type } = req.body;
+  const { text } = req.body;
   const userId = req.userData._id;
+  const file = req.file;
+
+  let fileUrl = "";
+  let fileType = "text";
 
   try {
     const originalMessage = await messageModel.findById(messageId);
@@ -116,14 +121,30 @@ const replyToMessage = async (req, res) => {
     if (!originalMessage)
       return res.status(404).json("Original message not found");
 
+    if (file) {
+      const uploadResult = await cloudinary.uploader.upload(file.path, {
+        resource_type: "auto",
+      });
+
+      fileUrl = uploadResult.secure_url;
+      fileType =
+        uploadResult.resource_type === "image"
+          ? "image"
+          : uploadResult.resource_type === "video"
+          ? "video"
+          : "file";
+    }
+
     const newMessage = new messageModel({
       chatId: originalMessage.chatId,
       senderId: userId,
       text: text || "",
-      media: media || "",
-      type: type || "text",
+      mediaUrl: fileUrl,
+      type: fileType,
       replyTo: messageId,
     });
+
+    await newMessage.populate("replyTo");
 
     await newMessage.save();
     return res.status(200).json({ message: "Reply sent", newMessage });

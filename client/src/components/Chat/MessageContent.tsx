@@ -8,6 +8,7 @@ import moment from "moment";
 import { useContext, useEffect, useRef } from "react";
 import { MessageContext } from "../../context/MessageContext";
 import { AuthContext } from "../../context/AuthContext";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface MessageContentProps {
   msg: Message;
@@ -51,7 +52,7 @@ const MessageContent = ({
       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
       ref={emojiPickerRef}
     >
-      <FontAwesomeIcon icon={faSmile} />
+      <FontAwesomeIcon icon={faSmile as IconProp} />
       {showEmojiPicker && (
         <div
           className="position-absolute bottom-100 start-50 mb-2"
@@ -72,7 +73,7 @@ const MessageContent = ({
         setReplyingTo(msg);
       }}
     >
-      <FontAwesomeIcon icon={faReply} />
+      <FontAwesomeIcon icon={faReply as IconProp} />
     </span>
   );
 
@@ -113,7 +114,7 @@ const MessageContent = ({
             style={{ width: "2rem", height: "2rem" }}
             onClick={() => setShowMore(!showMore)}
           >
-            <FontAwesomeIcon icon={faEllipsisV} />
+            <FontAwesomeIcon icon={faEllipsisV as IconProp} />
             {showMore && (
               <div
                 className="position-absolute start-50 bottom-100 border rounded p-2"
@@ -215,7 +216,10 @@ const MessageContent = ({
             className="text-decoration-none text-black d-flex align-items-center"
           >
             <span className="mx-2">
-              <FontAwesomeIcon icon={faFileText} style={{ fontSize: "20px" }} />
+              <FontAwesomeIcon
+                icon={faFileText as IconProp}
+                style={{ fontSize: "20px" }}
+              />
             </span>
             <div className="d-flex flex-column">
               <span className="fw-bold">Tải về tập tin</span>
@@ -282,7 +286,7 @@ const MessageContent = ({
             style={{ width: "2rem", height: "2rem" }}
             onClick={() => setShowMore(!showMore)}
           >
-            <FontAwesomeIcon icon={faEllipsisV} />
+            <FontAwesomeIcon icon={faEllipsisV as IconProp} />
             {showMore && (
               <div
                 className="position-absolute start-50 bottom-100 border rounded-4 p-2"

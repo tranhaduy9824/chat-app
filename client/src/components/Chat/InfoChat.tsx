@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FontIcon } from "../Icons";
 import Tippy from "@tippyjs/react";
 import 'tippy.js/dist/tippy.css';
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function InfoChat() {
   return (
@@ -61,7 +62,7 @@ function InfoChat() {
             }}
           >
             <FontAwesomeIcon
-              icon={faSearch}
+              icon={faSearch as IconProp}
               style={{ color: "#97803d", cursor: "pointer" }}
             />
           </div>
@@ -70,7 +71,7 @@ function InfoChat() {
       <div className="item-info-chat w-100 mt-3 rounded-5 overflow-hidden">
         <div style={{ backgroundColor: "#dee4ed" }}>
           <div style={{ backgroundColor: "#eaf1f5" }}>
-            <FontAwesomeIcon icon={faThumbTack} style={{ color: "#888fa0" }} />
+            <FontAwesomeIcon icon={faThumbTack as IconProp} style={{ color: "#888fa0" }} />
           </div>
           Xem tin nhắn đã ghim
         </div>

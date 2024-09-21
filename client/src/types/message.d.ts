@@ -7,7 +7,7 @@ interface Message {
   mediaUrl: string;
   type: string;
   reactions: array;
-  replyTo: string;
+  replyTo: Message | null;
   createdAt: string;
 }
 
@@ -16,7 +16,9 @@ interface MessageContextProps {
   sendTextMessage: (
     textMessage: string,
     sender: User,
-    currentChatId: string
+    currentChatId: string,
+    file?: File,
+    setMediaPreview?: (preview: null) => void
   ) => Promise<void>;
   newMessage: Message[] | null;
   notifications: Message[] | null;
@@ -26,6 +28,13 @@ interface MessageContextProps {
   getMessages: (page: number, limit: number) => void;
   hasMore: boolean;
   reactToMessage: (messageId: string, reaction: string) => void;
+  replyToMessage: (
+    messageId: string,
+    text: string,
+    media?: File,
+    setMediaPreview?: (preview: null) => void
+  ) => void;
+  deleteMessage: (messageId: string) => void;
 }
 
 interface MessageContextProviderProps {

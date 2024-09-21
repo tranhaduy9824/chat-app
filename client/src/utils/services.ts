@@ -192,3 +192,64 @@ export const patchRequest = async (
     return { error: true, message: "An unexpected error occurred" };
   }
 };
+
+export const deleteRequest = async (
+  url: string,
+  setProgress?: (value: number) => void,
+  token: boolean = false
+) => {
+  try {
+    if (setProgress) setProgress(20);
+
+    const headers: HeadersInit = {};
+
+    if (token) {
+      const userItem = localStorage.getItem("User");
+      const user = userItem ? JSON.parse(userItem) : null;
+      const userToken = user?.token;
+
+      if (userToken) {
+        headers["Authorization"] = `Bearer ${userToken}`;
+      }
+    }
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (setProgress) setProgress(60);
+
+    const data = await response.json();
+    if (setProgress) setProgress(100);
+
+    if (!response.ok) {
+      let message;
+
+      if (setProgress) {
+        setTimeout(() => {
+          setProgress(-1);
+        }, 800);
+      }
+
+      if (data?.message) {
+        message = data.message;
+      } else {
+        message = data;
+      }
+
+      return { error: true, message };
+    }
+
+    if (setProgress) {
+      setTimeout(() => {
+        setProgress(-1);
+      }, 800);
+    }
+    return data;
+  } catch (error) {
+    if (setProgress) setProgress(0);
+    console.error("Error during delete request:", error);
+    return { error: true, message: "An unexpected error occurred" };
+  }
+};

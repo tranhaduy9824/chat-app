@@ -22,10 +22,41 @@ const handleReactToMessage = (io, socket, onlineUsers) => {
     members.forEach((userId) => {
       const user = onlineUsers.find((user) => user.userId === userId);
       if (user) {
-        io.to(user.socketId).emit("messageReaction", { messageId, reaction });
+        io.to(user.socketId).emit("messageReaction", {
+          messageId,
+          reaction,
+          senderId: userId,
+        });
       }
     });
   });
 };
 
-module.exports = { handleSendMessage, handleReactToMessage };
+const handleReplyToMessage = (io, socket, onlineUsers) => {
+  socket.on("replyToMessage", (replyData) => {
+    const { message, members } = replyData;
+
+    members.forEach((userId) => {
+      const user = onlineUsers.find((user) => user.userId === userId);
+      if (user) {
+        io.to(user.socketId).emit("messageReply", message);
+      }
+    });
+  });
+};
+
+const handleDeleteMessage = (io, socket, onlineUsers) => {
+  socket.on("deleteMessage", (messageId) => {
+    const user = onlineUsers.find((user) => user.userId === userId);
+    if (user) {
+      io.to(user.socketId).emit("messageDeleted", messageId);
+    }
+  });
+};
+
+module.exports = {
+  handleSendMessage,
+  handleReactToMessage,
+  handleReplyToMessage,
+  handleDeleteMessage,
+};

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   createContext,
   useEffect,
@@ -9,6 +8,7 @@ import React, {
 } from "react";
 import {
   baseUrl,
+  deleteRequest,
   getRequest,
   patchRequest,
   postRequest,
@@ -81,27 +81,33 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
     socket.on(
       "messageReaction",
-      (data: { messageId: string; reaction: string }) => {
-        const { messageId, reaction } = data;
+      (data: { messageId: string; reaction: string; senderId: string }) => {
+        const { messageId, reaction, senderId } = data;
 
-        setMessages((prevMessages) => {
-          return (
-            prevMessages?.map((msg) => {
-              if (msg._id === messageId) {
-                return {
-                  ...msg,
-                  reactions: [
-                    ...(msg.reactions || []),
-                    { userId: user?._id, reaction },
-                  ],
-                };
-              }
-              return msg;
-            }) || []
-          );
-        });
+        setMessages(
+          (prevMessages) =>
+            prevMessages?.map((msg) =>
+              msg._id === messageId
+                ? {
+                    ...msg,
+                    reactions: [
+                      ...(msg.reactions?.filter(
+                        (r: any) => r.userId === senderId
+                      ) || []),
+                      { userId: senderId, reaction },
+                    ],
+                  }
+                : msg
+            ) || []
+        );
       }
     );
+
+    socket.on("messageReply", (res: Message) => {
+      if (currentChat?._id !== res.chatId) return;
+
+      setMessages((prev) => [res, ...(prev || [])]);
+    });
 
     socket.on("getNotifications", (res: Message) => {
       if (!res.senderId) {
@@ -120,6 +126,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     return () => {
       socket.off("getMessage");
       socket.off("messageReaction");
+      socket.off("messageReply");
       socket.off("getNotifications");
     };
   }, [socket, currentChat, user]);
@@ -196,6 +203,68 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     [currentChat, socket, addNotification]
   );
 
+  const replyToMessage = useCallback(
+    async (
+      messageId: string,
+      text: string,
+      file?: File,
+      setMediaPreview?: (preview: null) => void
+    ) => {
+      if (!text && !file)
+        return addNotification(
+          "You need to enter content or attach files...",
+          "info"
+        );
+
+      const formData = new FormData();
+      formData.append("text", text);
+      formData.append("messageId", messageId);
+
+      if (file) {
+        formData.append("file", file);
+      }
+
+      const response = await postRequest(
+        `${baseUrl}/messages/reply/${messageId}`,
+        formData,
+        file ? setProgress : undefined,
+        true,
+        true
+      );
+
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+
+      if (socket) {
+        socket.emit("replyToMessage", {
+          message: response.newMessage,
+          members: currentChat?.members,
+        });
+      }
+
+      setMediaPreview?.(null);
+    },
+    [addNotification, setProgress, socket, currentChat]
+  );
+
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      const response = await deleteRequest(
+        `${baseUrl}/messages/delete/${messageId}`,
+        undefined,
+        true
+      );
+
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+
+      setMessages((prev) => prev?.filter((msg) => msg._id !== messageId) || []);
+    },
+    [addNotification]
+  );
+
   const markAllNotificationsAsRead = useCallback((notifications: Message[]) => {
     const mNotifications = notifications.map((n) => ({ ...n, isRead: true }));
 
@@ -221,7 +290,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         }
       });
 
-      updateCurrentChat(desiredChat);
+      if (desiredChat) {
+        updateCurrentChat(desiredChat);
+      }
       setNotifications(mNotification);
     },
     [updateCurrentChat]
@@ -229,14 +300,12 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
   const markThisUserNotificationsAsRead = useCallback(
     (thisUserNotifications: any, notifications: Message[]) => {
-      const mNotifications = notifications.map((el) => {
-        let notification;
+      const mNotifications = notifications?.map((el) => {
+        let notification = el;
 
-        thisUserNotifications.forEach((n) => {
+        thisUserNotifications.forEach((n: any) => {
           if (n.senderId === el.senderId) {
             notification = { ...n, isRead: true };
-          } else {
-            notification = el;
           }
         });
 
@@ -261,6 +330,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         getMessages,
         hasMore,
         reactToMessage,
+        replyToMessage,
+        deleteMessage,
       }}
     >
       {children}
