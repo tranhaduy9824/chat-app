@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { User } from "../../types/auth";
 import LabelMessage from "./LabelMessage";
@@ -14,6 +14,7 @@ interface MessageProps {
   showAvatar: boolean;
   setReplyingTo: React.Dispatch<React.SetStateAction<null | Message>>;
   setEdit: React.Dispatch<React.SetStateAction<null | Message>>;
+  handleReplyClick: (id: string) => void;
 }
 
 function Message({
@@ -22,10 +23,12 @@ function Message({
   showAvatar,
   setReplyingTo,
   setEdit,
+  handleReplyClick,
 }: MessageProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [showMore, setShowMore] = useState<boolean>(false);
   const [pin, setPin] = useState<boolean>(false);
+  const messageRef = useRef<HTMLDivElement | null>(null);
 
   const { user } = useContext(AuthContext)!;
 
@@ -55,7 +58,9 @@ function Message({
               msg.replyTo.mediaUrl && msg.replyTo.type !== "file"
                 ? "0px !important"
                 : "8px",
+            cursor: "pointer",
           }}
+          onClick={() => msg.replyTo?._id && handleReplyClick(msg.replyTo._id)}
         >
           {msg.replyTo.type === "text" && (
             <p className="m-0">{msg.replyTo.text}</p>
@@ -110,11 +115,13 @@ function Message({
         </div>
       )}
       <div
+        id={msg._id}
         className={`position-relative item-message d-flex align-items-start ${
           msg.senderId === recipientUser?._id
             ? "justify-content-start"
             : "justify-content-end"
         }`}
+        ref={messageRef}
       >
         {msg.senderId === recipientUser?._id ? (
           <MessageForRecipient

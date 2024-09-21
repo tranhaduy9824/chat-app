@@ -40,6 +40,11 @@ const handleReplyToMessage = (io, socket, onlineUsers) => {
       const user = onlineUsers.find((user) => user.userId === userId);
       if (user) {
         io.to(user.socketId).emit("messageReply", message);
+        io.to(user.socketId).emit("getNotifications", {
+          senderId: message.senderId,
+          isRead: false,
+          date: new Date(),
+        });
       }
     });
   });

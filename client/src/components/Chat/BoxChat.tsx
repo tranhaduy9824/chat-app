@@ -45,13 +45,25 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
     useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
+  const scrollToBottom = () => {
+    if (chatMessagesRef.current) {
+      chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+    }
+  };
+
   useEffect(() => {
     if (attachedFile) {
       const sendFile = async () => {
+        scrollToBottom();
         if (replyingTo) {
+          await replyToMessage(
+            replyingTo._id,
+            "",
+            attachedFile,
+            setMediaPreview
+          );
           setReplyingTo(null);
           setEdit(null);
-          await replyToMessage(replyingTo._id, "", attachedFile, setMediaPreview);
         } else {
           await sendTextMessage(
             "",
@@ -77,6 +89,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
       setMessage("");
       setReplyingTo(null);
       setEdit(null);
+      scrollToBottom();
     }
   };
 
@@ -159,7 +172,29 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
     }
   }, [replyingTo, edit]);
 
-  console.log(messages);
+  const handleReplyClick = async (messageId: string) => {
+    const findMessage = () => document.getElementById(messageId);
+
+    let targetMessage = findMessage();
+    while (!targetMessage && hasMore) {
+      await new Promise((resolve) => {
+        setPage((prevPage) => {
+          const nextPage = prevPage + 1;
+          setTimeout(resolve, 400);
+          return nextPage;
+        });
+      });
+      targetMessage = findMessage();
+    }
+
+    if (targetMessage) {
+      targetMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+      targetMessage.classList.add("highlight");
+      setTimeout(() => {
+        targetMessage.classList.remove("highlight");
+      }, 2000);
+    }
+  };
 
   return (
     <div
@@ -258,6 +293,8 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                       : "file"
                   }
                   mediaPreview={mediaPreview}
+                  replyingTo={replyingTo}
+                  handleReplyClick={handleReplyClick}
                 />
               )}
               {messages?.map((msg, index) => {
@@ -290,13 +327,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                       showAvatar={showAvatar}
                       setReplyingTo={setReplyingTo}
                       setEdit={setEdit}
+                      handleReplyClick={handleReplyClick}
                     />
                   </div>
                 );
               })}
             </div>
           </div>
-          {(replyingTo || edit) && (
+          {(replyingTo || edit) && !mediaPreview && (
             <div
               className="d-flex align-items-center justify-content-between"
               style={{ padding: "10px 0 5px", borderTop: "1px solid #7e889c" }}
@@ -311,12 +349,13 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                         : "Chính mình")}
                   </div>
                   <div className="small">
-                    {replyingTo?.text}{" "}
                     {replyingTo?.type === "video"
                       ? "Video"
                       : replyingTo?.type === "image"
                       ? "Hình ảnh"
-                      : "File đính kèm"}
+                      : replyingTo?.type === "file"
+                      ? "File đính kèm"
+                      : replyingTo?.text}
                   </div>
                 </div>
                 <span

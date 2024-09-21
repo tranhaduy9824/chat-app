@@ -218,3 +218,9 @@
   flex-direction: column-reverse;
   height: 100%;
 }
+
+.highlight {
+  border-top: 2px solid var(--primary-light);
+  border-bottom: 2px solid var(--primary-light);
+  transition: background-color 0.5s ease;
+}

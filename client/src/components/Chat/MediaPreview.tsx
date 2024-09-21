@@ -3,17 +3,97 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext } from "react";
 import Avatar from "../Avatar";
 import { AuthContext } from "../../context/AuthContext";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface MediaPreviewProps {
   mediaPreview: string;
   type: "image" | "video" | "file";
+  replyingTo: null | Message;
+  handleReplyClick: (id: string) => void;
 }
 
-function MediaPreview({ mediaPreview, type }: MediaPreviewProps) {
+function MediaPreview({
+  mediaPreview,
+  type,
+  replyingTo,
+  handleReplyClick,
+}: MediaPreviewProps) {
   const { user } = useContext(AuthContext)!;
 
   return (
     <div>
+      {replyingTo && (
+        <div
+          className="d-flex align-items-center message position-relative pb-3 ms-auto"
+          style={{
+            width: "max-content",
+            maxWidth: "75%",
+            marginBottom: "-16px",
+            marginRight: "43px",
+            borderRadius: "50px 50px 0 50px ",
+            backgroundColor:
+              replyingTo.type === "text" || replyingTo.type === "file"
+                ? "#dce2f0"
+                : "",
+            padding:
+              replyingTo.mediaUrl && replyingTo.type !== "file"
+                ? "0px !important"
+                : "8px",
+          }}
+          onClick={() => handleReplyClick(replyingTo._id)}
+        >
+          {replyingTo.type === "text" && (
+            <p className="m-0">{replyingTo.text}</p>
+          )}
+          {replyingTo.type === "image" && (
+            <img
+              src={replyingTo.mediaUrl}
+              alt="media"
+              style={{
+                maxWidth: "140px",
+                maxHeight: "160px",
+                marginBottom: "-16px",
+                width: "auto",
+                height: "auto",
+                borderRadius: "10px",
+                opacity: 0.5,
+              }}
+            />
+          )}
+          {replyingTo.type === "video" && (
+            <video
+              src={replyingTo.mediaUrl}
+              style={{
+                maxWidth: "140px",
+                maxHeight: "160px",
+                marginBottom: "-16px",
+                width: "auto",
+                height: "auto",
+                borderRadius: "10px",
+                opacity: 0.5,
+              }}
+            />
+          )}
+          {replyingTo.type === "file" && (
+            <a className="text-decoration-none text-black d-flex align-items-center">
+              <span className="mx-2">
+                <FontAwesomeIcon
+                  icon={faFileText as IconProp}
+                  style={{
+                    fontSize: "14px",
+                    marginBottom: "-16px",
+                    opacity: 0.5,
+                  }}
+                />
+              </span>
+              <div className="d-flex flex-column">
+                <span className="fw-bold">Tải về tập tin</span>
+                <span className="small">1.8 KB</span>
+              </div>
+            </a>
+          )}
+        </div>
+      )}
       <div className="position-relative item-message d-flex align-items-start justify-content-end">
         <div
           className="d-flex align-items-center bg-white message position-relative"
@@ -59,7 +139,7 @@ function MediaPreview({ mediaPreview, type }: MediaPreviewProps) {
             >
               <span className="mx-2">
                 <FontAwesomeIcon
-                  icon={faFileText}
+                  icon={faFileText as IconProp}
                   style={{ fontSize: "20px" }}
                 />
               </span>
