@@ -26,6 +26,7 @@ import moment from "moment";
 import backgroundImage from "../../assets/background-chat.png";
 import MediaPreview from "./MediaPreview";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import Camera from "./Camera";
 
 function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [page, setPage] = useState<number>(1);
@@ -38,6 +39,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputMessageRef = useRef<HTMLInputElement | null>(null);
+  const [showCamera, setShowCamera] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers } = useContext(ChatContext)!;
@@ -194,6 +196,11 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
         targetMessage.classList.remove("highlight");
       }, 2000);
     }
+  };
+
+  const handleCapturePhoto = (file: File) => {
+    setAttachedFile(file);
+    setShowCamera(false);
   };
 
   return (
@@ -377,6 +384,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                 <span
                   className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
                   style={{ width: "2.1rem", height: "2.1rem" }}
+                  onClick={() => setShowCamera(true)}
                 >
                   <FontAwesomeIcon
                     icon={faCamera as IconProp}
@@ -479,6 +487,13 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
             </button>
           </div>
         </div>
+      )}
+      {showCamera && (
+        <Camera
+          onCapture={handleCapturePhoto}
+          onClose={() => setShowCamera(false)}
+          setMediaPreview={setMediaPreview}
+        />
       )}
     </div>
   );
