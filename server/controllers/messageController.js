@@ -180,10 +180,39 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+const editMessage = async (req, res) => {
+  const messageId = req.params.messageId;
+  const userId = req.userData._id;
+  const { text } = req.body;
+
+  try {
+    const message = await messageModel.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    if (message.senderId.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this message" });
+    }
+
+    message.text = text;
+    await message.save();
+
+    return res.status(200).json({ message: "Message edited", message });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error.message);
+  }
+};
+
 module.exports = {
   createMessage,
   getMessages,
   reactToMessage,
   replyToMessage,
   deleteMessage,
+  editMessage
 };

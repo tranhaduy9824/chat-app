@@ -99,6 +99,11 @@ const MessageContent = ({
     };
   }, [setShowMore, setShowEmojiPicker]);
 
+  const handleEditClick = () => {
+    setEdit(msg);
+    setShowMore(false);
+  };
+
   return (
     <>
       {user?._id === msg?.senderId && (
@@ -131,10 +136,7 @@ const MessageContent = ({
                 >
                   <div
                     className="p-1 w-100"
-                    onClick={() => {
-                      setReplyingTo(null);
-                      setEdit(msg);
-                    }}
+                    onClick={handleEditClick}
                   >
                     Chỉnh sửa
                   </div>

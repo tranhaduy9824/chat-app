@@ -35,6 +35,7 @@ interface MessageContextProps {
     setMediaPreview?: (preview: null) => void
   ) => void;
   deleteMessage: (messageId: string) => void;
+  editMessage: (messageId: string, text: string) => void;
 }
 
 interface MessageContextProviderProps {

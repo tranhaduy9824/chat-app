@@ -5,6 +5,7 @@ const {
   handleReactToMessage,
   handleReplyToMessage,
   handleDeleteMessage,
+  handleEditMessage
 } = require("./messages");
 
 const socketHandler = (server) => {
@@ -29,6 +30,8 @@ const socketHandler = (server) => {
     handleReplyToMessage(io, socket, onlineUsers);
 
     handleDeleteMessage(io, socket, onlineUsers);
+
+    handleEditMessage(io, socket, onlineUsers);
 
     handleUserDisconnection(io, socket, onlineUsers);
   });

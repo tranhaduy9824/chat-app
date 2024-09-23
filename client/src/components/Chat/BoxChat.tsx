@@ -43,8 +43,14 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers } = useContext(ChatContext)!;
-  const { messages, sendTextMessage, getMessages, hasMore, replyToMessage } =
-    useContext(MessageContext)!;
+  const {
+    messages,
+    sendTextMessage,
+    getMessages,
+    hasMore,
+    replyToMessage,
+    editMessage,
+  } = useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
   const scrollToBottom = () => {
@@ -83,10 +89,17 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
 
   const handleSendMessage = () => {
     if (message.trim() || attachedFile) {
-      if (replyingTo) {
+      if (edit) {
+        editMessage(edit._id, message);
+      } else if (replyingTo) {
         replyToMessage(replyingTo._id, message, attachedFile || undefined);
       } else {
-        sendTextMessage(message, user, currentChat?._id || "");
+        sendTextMessage(
+          message,
+          user,
+          currentChat?._id || "",
+          attachedFile || undefined
+        );
       }
       setMessage("");
       setReplyingTo(null);
@@ -432,9 +445,17 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                 className="form-control rounded-pill me-2"
                 style={{ paddingRight: "38px" }}
                 placeholder="Enter message..."
-                value={edit?.text || message}
+                value={edit ? edit.text : message}
                 ref={inputMessageRef}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  if (edit) {
+                    setEdit((prevEdit) =>
+                      prevEdit ? { ...prevEdit, text: newValue } : null
+                    );
+                  }
+                  setMessage(newValue);
+                }}
                 onFocus={() => setShowEmojiPicker(false)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {

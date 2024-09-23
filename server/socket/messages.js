@@ -63,9 +63,23 @@ const handleDeleteMessage = (io, socket, onlineUsers) => {
   });
 };
 
+const handleEditMessage = (io, socket, onlineUsers) => {
+  socket.on("editMessage", (editData) => {
+    const { messageId, text, members } = editData;
+
+    members.forEach((userId) => {
+      const user = onlineUsers.find((user) => user.userId === userId);
+      if (user) {
+        io.to(user.socketId).emit("messageEdited", { messageId, text });
+      }
+    });
+  });
+};
+
 module.exports = {
   handleSendMessage,
   handleReactToMessage,
   handleReplyToMessage,
   handleDeleteMessage,
+  handleEditMessage
 };

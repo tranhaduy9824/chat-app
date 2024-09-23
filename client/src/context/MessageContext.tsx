@@ -113,6 +113,17 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       setMessages((prev) => prev?.filter((msg) => msg._id !== messageId) || []);
     });
 
+    socket.on("messageEdited", (data: { messageId: string; text: string }) => {
+      const { messageId, text } = data;
+
+      setMessages(
+        (prev) =>
+          prev?.map((msg) =>
+            msg._id === messageId ? { ...msg, text } : msg
+          ) || []
+      );
+    });
+
     socket.on("getNotifications", (res: Message) => {
       if (!res.senderId) {
         return;
@@ -133,6 +144,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("messageReply");
       socket.off("getNotifications");
       socket.off("messageDeleted");
+      socket.off("messageEdited");
     };
   }, [socket, currentChat, user]);
 
@@ -260,19 +272,50 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         undefined,
         true
       );
-  
+
       if (response.error) {
         return addNotification(response.message, "error");
       }
-  
+
       if (socket) {
         socket.emit("deleteMessage", {
           messageId,
           members: currentChat?.members,
         });
       }
-  
+
       setMessages((prev) => prev?.filter((msg) => msg._id !== messageId) || []);
+    },
+    [addNotification, socket, currentChat]
+  );
+
+  const editMessage = useCallback(
+    async (messageId: string, newText: string) => {
+      const response = await patchRequest(
+        `${baseUrl}/messages/edit/${messageId}`,
+        { text: newText },
+        undefined,
+        true
+      );
+
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+
+      if (socket) {
+        socket.emit("editMessage", {
+          messageId,
+          text: newText,
+          members: currentChat?.members,
+        });
+      }
+
+      setMessages(
+        (prev) =>
+          prev?.map((msg) =>
+            msg._id === messageId ? { ...msg, text: newText } : msg
+          ) || []
+      );
     },
     [addNotification, socket, currentChat]
   );
@@ -344,6 +387,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         reactToMessage,
         replyToMessage,
         deleteMessage,
+        editMessage,
       }}
     >
       {children}
