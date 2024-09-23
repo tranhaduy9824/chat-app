@@ -109,6 +109,10 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       setMessages((prev) => [res, ...(prev || [])]);
     });
 
+    socket.on("messageDeleted", (messageId: string) => {
+      setMessages((prev) => prev?.filter((msg) => msg._id !== messageId) || []);
+    });
+
     socket.on("getNotifications", (res: Message) => {
       if (!res.senderId) {
         return;
@@ -128,6 +132,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("messageReaction");
       socket.off("messageReply");
       socket.off("getNotifications");
+      socket.off("messageDeleted");
     };
   }, [socket, currentChat, user]);
 
@@ -251,18 +256,25 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const deleteMessage = useCallback(
     async (messageId: string) => {
       const response = await deleteRequest(
-        `${baseUrl}/messages/delete/${messageId}`,
+        `${baseUrl}/messages/${messageId}`,
         undefined,
         true
       );
-
+  
       if (response.error) {
         return addNotification(response.message, "error");
       }
-
+  
+      if (socket) {
+        socket.emit("deleteMessage", {
+          messageId,
+          members: currentChat?.members,
+        });
+      }
+  
       setMessages((prev) => prev?.filter((msg) => msg._id !== messageId) || []);
     },
-    [addNotification]
+    [addNotification, socket, currentChat]
   );
 
   const markAllNotificationsAsRead = useCallback((notifications: Message[]) => {

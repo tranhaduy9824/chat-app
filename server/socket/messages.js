@@ -51,11 +51,15 @@ const handleReplyToMessage = (io, socket, onlineUsers) => {
 };
 
 const handleDeleteMessage = (io, socket, onlineUsers) => {
-  socket.on("deleteMessage", (messageId) => {
-    const user = onlineUsers.find((user) => user.userId === userId);
-    if (user) {
-      io.to(user.socketId).emit("messageDeleted", messageId);
-    }
+  socket.on("deleteMessage", (deleteData) => {
+    const { messageId, members } = deleteData;
+
+    members.forEach((userId) => {
+      const user = onlineUsers.find((user) => user.userId === userId);
+      if (user) {
+        io.to(user.socketId).emit("messageDeleted", messageId);
+      }
+    });
   });
 };
 

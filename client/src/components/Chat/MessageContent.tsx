@@ -35,7 +35,7 @@ const MessageContent = ({
 }: MessageContentProps) => {
   const moreRef = useRef<HTMLDivElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
-  const { reactToMessage } = useContext(MessageContext)!;
+  const { reactToMessage, deleteMessage } = useContext(MessageContext)!;
   const { user } = useContext(AuthContext)!;
 
   const handleEmojiClick = (event: EmojiClickData) => {
@@ -138,7 +138,12 @@ const MessageContent = ({
                   >
                     Chỉnh sửa
                   </div>
-                  <div className="p-1 w-100">Thu hồi</div>
+                  <div
+                    className="p-1 w-100"
+                    onClick={() => deleteMessage(msg?._id)}
+                  >
+                    Thu hồi
+                  </div>
                   <div className="p-1 w-100" onClick={() => setPin(!pin)}>
                     {!pin ? "Ghim" : "Bỏ ghim"}
                   </div>

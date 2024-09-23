@@ -156,11 +156,24 @@ const replyToMessage = async (req, res) => {
 
 const deleteMessage = async (req, res) => {
   const messageId = req.params.messageId;
+  const userId = req.userData._id;
 
   try {
+    const message = await messageModel.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    if (message.senderId.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this message" });
+    }
+
     await messageModel.findByIdAndDelete(messageId);
 
-    return res.status(200).json("Message deleted");
+    return res.status(200).json({ message: "Message deleted", messageId });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error.message);

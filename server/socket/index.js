@@ -1,6 +1,11 @@
 const { Server } = require("socket.io");
 const { handleUserConnection, handleUserDisconnection } = require("./users");
-const { handleSendMessage, handleReactToMessage, handleReplyToMessage } = require("./messages");
+const {
+  handleSendMessage,
+  handleReactToMessage,
+  handleReplyToMessage,
+  handleDeleteMessage,
+} = require("./messages");
 
 const socketHandler = (server) => {
   const io = new Server(server, {
@@ -16,13 +21,15 @@ const socketHandler = (server) => {
     console.log("New connection", socket.id);
 
     handleUserConnection(io, socket, onlineUsers);
-    
+
     handleSendMessage(io, socket, onlineUsers);
-    
+
     handleReactToMessage(io, socket, onlineUsers);
 
     handleReplyToMessage(io, socket, onlineUsers);
-    
+
+    handleDeleteMessage(io, socket, onlineUsers);
+
     handleUserDisconnection(io, socket, onlineUsers);
   });
 
