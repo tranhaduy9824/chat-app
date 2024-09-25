@@ -28,7 +28,7 @@ import MediaPreview from "./MediaPreview";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Camera from "./Camera";
 
-function BoxChat({ showInfoChat, setShowInfoChat }: any) {
+function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
   const [page, setPage] = useState<number>(1);
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -42,7 +42,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
   const [showCamera, setShowCamera] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext)!;
-  const { currentChat, onlineUsers } = useContext(ChatContext)!;
+  const { currentChat, onlineUsers, socket } = useContext(ChatContext)!;
   const {
     messages,
     sendTextMessage,
@@ -216,6 +216,18 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
     setShowCamera(false);
   };
 
+  const handleStartCall = () => {
+    setIsCalling(true);
+    socket.emit("startCall", {
+      chatId: currentChat?._id,
+      userId: user?._id,
+      userName: user?.fullname,
+      userAvatar: user?.avatar,
+      members: Array.isArray(currentChat?.members) ? currentChat.members : [],
+      offer: undefined,
+    });
+  };
+
   return (
     <div
       className="flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between"
@@ -275,6 +287,7 @@ function BoxChat({ showInfoChat, setShowInfoChat }: any) {
                 <span
                   className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
                   style={{ width: "2.1rem", height: "2.1rem" }}
+                  onClick={handleStartCall}
                 >
                   <FontAwesomeIcon
                     icon={faVideo as IconProp}

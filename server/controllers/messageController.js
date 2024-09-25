@@ -208,11 +208,27 @@ const editMessage = async (req, res) => {
   }
 };
 
+const createCallMessage = async (chatId, senderId, callType, callStatus) => {
+  try {
+    const message = new messageModel({
+      chatId,
+      senderId,
+      text: `${callType} call ${callStatus}`,
+      type: "call",
+    });
+
+    await message.save();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   createMessage,
   getMessages,
   reactToMessage,
   replyToMessage,
   deleteMessage,
-  editMessage
+  editMessage,
+  createCallMessage,
 };

@@ -5,7 +5,8 @@ const {
   handleReactToMessage,
   handleReplyToMessage,
   handleDeleteMessage,
-  handleEditMessage
+  handleEditMessage,
+  handleVideoCall,
 } = require("./messages");
 
 const socketHandler = (server) => {
@@ -32,6 +33,8 @@ const socketHandler = (server) => {
     handleDeleteMessage(io, socket, onlineUsers);
 
     handleEditMessage(io, socket, onlineUsers);
+
+    handleVideoCall(io, socket, onlineUsers);
 
     handleUserDisconnection(io, socket, onlineUsers);
   });
