@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faReply, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
+import {
+  faReply,
+  faEllipsisV,
+  faVideo,
+  faPhone,
+} from "@fortawesome/free-solid-svg-icons";
 import { faFileText, faSmile } from "@fortawesome/free-regular-svg-icons";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import { PinIcon } from "../Icons";
@@ -134,10 +139,7 @@ const MessageContent = ({
                   className="d-flex flex-column align-items-start"
                   style={{ minWidth: "max-content" }}
                 >
-                  <div
-                    className="p-1 w-100"
-                    onClick={handleEditClick}
-                  >
+                  <div className="p-1 w-100" onClick={handleEditClick}>
                     Chỉnh sửa
                   </div>
                   <div
@@ -233,6 +235,19 @@ const MessageContent = ({
               <span className="small">1.8 KB</span>
             </div>
           </a>
+        )}
+        {msg.type === "call" && (
+          <div className="d-flex align-items-center">
+            <FontAwesomeIcon
+              icon={
+                msg.text.includes("bỏ lỡ")
+                  ? (faPhone as IconProp)
+                  : (faVideo as IconProp)
+              }
+              style={{ fontSize: "20px", marginRight: "8px" }}
+            />
+            <span>{msg.text}</span>
+          </div>
         )}
         <span
           className={`position-absolute z-2 top-0 time-message small ${

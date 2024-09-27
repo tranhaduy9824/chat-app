@@ -1,4 +1,5 @@
 const messageController = require("../controllers/messageController");
+const User = require("../models/userModel");
 
 const handleSendMessage = (io, socket, onlineUsers) => {
   socket.on("sendMessage", (message) => {
@@ -97,42 +98,50 @@ const handleEditMessage = (io, socket, onlineUsers) => {
 };
 
 const handleVideoCall = (io, socket, onlineUsers) => {
-  socket.on("startCall", async ({ chatId, userId, members, offer, canNotAccept = false }) => {
-    if (!Array.isArray(members)) {
-      socket.emit("error", {
-        message: "Members list is not defined or not an array.",
-      });
-      return;
-    }
-
-    let caller = onlineUsers.find((user) => user.userId === userId);
-    if (!caller) {
-      return;
-    }
-
-    members.forEach((member) => {
-      if (member !== userId) {
-        const recipient = onlineUsers.find((user) => user.userId === member);
-        if (recipient) {
-          io.to(recipient.socketId).emit("incomingCall", {
-            chatId,
-            callerId: userId,
-            callerName: caller.name,
-            callerAvatar: caller.avatar,
-            offer,
-            members,
-            canNotAccept
-          });
-        }
+  socket.on(
+    "startCall",
+    async ({ chatId, userId, members, offer, canNotAccept = false }) => {
+      if (!Array.isArray(members)) {
+        socket.emit("error", {
+          message: "Members list is not defined or not an array.",
+        });
+        return;
       }
-    });
-    await messageController.createCallMessage(
-      chatId,
-      userId,
-      "Video",
-      "started"
-    );
-  });
+
+      let callerOnline = onlineUsers.find((user) => user.userId === userId);
+      if (!callerOnline) {
+        return;
+      }
+
+      let caller = await User.findById(userId).select("fullname avatar");
+      if (!caller) {
+        return;
+      }
+
+      members.forEach((member) => {
+        if (member !== userId) {
+          const recipient = onlineUsers.find((user) => user.userId === member);
+          if (recipient) {
+            io.to(recipient.socketId).emit("incomingCall", {
+              chatId,
+              callerId: userId,
+              callerName: caller.fullname,
+              callerAvatar: caller.avatar,
+              offer,
+              members,
+              canNotAccept,
+            });
+          }
+        }
+      });
+      await messageController.createCallMessage(
+        chatId,
+        userId,
+        "Video",
+        "started"
+      );
+    }
+  );
 
   socket.on("answerCall", async ({ chatId, userId, members, answer }) => {
     if (!Array.isArray(members)) {
@@ -168,11 +177,9 @@ const handleVideoCall = (io, socket, onlineUsers) => {
     }
 
     members.forEach((member) => {
-      if (member !== userId) {
-        const recipient = onlineUsers.find((user) => user.userId === member);
-        if (recipient) {
-          io.to(recipient.socketId).emit("callEnded");
-        }
+      const recipient = onlineUsers.find((user) => user.userId === member);
+      if (recipient) {
+        io.to(recipient.socketId).emit("callEnded");
       }
     });
     await messageController.createCallMessage(chatId, userId, "Video", "ended");

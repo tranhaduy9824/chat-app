@@ -48,8 +48,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const [savedChatId, setSavedChatId] = useState<string | null>(null);
   const [savedMembers, setSavedMembers] = useState<string[]>([]);
 
-  console.log(user?._id);
-
   const startCall = async () => {
     console.log("Starting call...");
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -401,8 +399,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
             <Avatar
               user={{
                 _id: callerInfo?.callerId || "",
-                email: "", // Provide a valid email if available
-                token: "", // Provide a valid token if available
+                email: "",
+                token: "",
                 avatar: callerInfo?.callerAvatar || "",
                 fullname: callerInfo?.callerName || "",
               }}
