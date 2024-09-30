@@ -27,6 +27,7 @@ import backgroundImage from "../../assets/background-chat.png";
 import MediaPreview from "./MediaPreview";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Camera from "./Camera";
+import { useNotification } from "../../context/NotificationContext";
 
 function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
   const [page, setPage] = useState<number>(1);
@@ -52,6 +53,7 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
     editMessage,
   } = useContext(MessageContext)!;
   const { recipientUser } = useFetchRecipientUser(currentChat, user);
+  const { addNotification } = useNotification();
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -216,16 +218,25 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
     setShowCamera(false);
   };
 
-  const handleStartCall = () => {
-    setIsCalling(true);
-    socket.emit("startCall", {
-      chatId: currentChat?._id,
-      userId: user?._id,
-      userName: user?.fullname,
-      userAvatar: user?.avatar,
-      members: Array.isArray(currentChat?.members) ? currentChat.members : [],
-      offer: undefined,
-    });
+  const handleStartCall = async () => {
+    try {
+      if (currentChat) {
+        await setIsCalling(true);
+        socket.emit("startCall", {
+          chatId: currentChat?._id,
+          userId: user?._id,
+          userName: user?.fullname,
+          userAvatar: user?.avatar,
+          members: Array.isArray(currentChat?.members)
+            ? currentChat.members
+            : [],
+          offer: undefined,
+          canNotAccept: true,
+        });
+      }
+    } catch (error: any) {
+      addNotification("Error starting call:", error);
+    }
   };
 
   return (

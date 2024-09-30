@@ -264,8 +264,7 @@
 
 .local-video,
 .remote-video {
-  width: 100%;
-  max-width: 600px;
+  width: 70vw;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -275,8 +274,9 @@
   top: 0;
   right: 0;
   z-index: 2;
-  width: 40%;
-  height: 50%;
+  width: max-content;
+  max-width: 35%;
+  height: max-content;
 }
 
 .controls {
@@ -288,6 +288,7 @@
 }
 
 .control-btn {
+  z-index: 3;
   width: 45px;
   height: 45px;
   border-radius: 100%;

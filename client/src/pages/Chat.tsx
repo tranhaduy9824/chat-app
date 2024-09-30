@@ -13,12 +13,14 @@ function Chat() {
   const { currentChat, socket } = useContext(ChatContext)!;
 
   useEffect(() => {
-    socket.on("incomingCall", ({ chatId }: { chatId: string }) => {
+    const handleIncomingCall = ({ chatId }: { chatId: string }) => {
       setIsCalling(true);
-    });
+    };
+
+    socket.on("incomingCall", handleIncomingCall);
 
     return () => {
-      socket.off("incomingCall");
+      socket.off("incomingCall", handleIncomingCall);
     };
   }, [currentChat, socket]);
 

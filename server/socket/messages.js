@@ -101,6 +101,52 @@ const handleVideoCall = (io, socket, onlineUsers) => {
   socket.on(
     "startCall",
     async ({ chatId, userId, members, offer, canNotAccept = false }) => {
+      try {
+        if (!Array.isArray(members)) {
+          socket.emit("error", {
+            message: "Members list is not defined or not an array.",
+          });
+          return;
+        }
+
+        console.log("Starting call", userId, members);
+
+        const callerOnline = onlineUsers.find((user) => user.userId === userId);
+        if (!callerOnline) {
+          return;
+        }
+
+        const caller = await User.findById(userId).select("fullname avatar");
+        if (!caller) {
+          return;
+        }
+
+        members.forEach((member) => {
+          if (member !== userId) {
+            const recipient = onlineUsers.find(
+              (user) => user.userId === member
+            );
+            if (recipient) {
+              io.to(recipient.socketId).emit("incomingCall", {
+                chatId,
+                callerId: userId,
+                callerName: caller.fullname,
+                callerAvatar: caller.avatar,
+                offer,
+                members,
+                canNotAccept,
+              });
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Error handling startCall:", error);
+      }
+    }
+  );
+
+  socket.on("answerCall", async ({ chatId, userId, members, answer }) => {
+    try {
       if (!Array.isArray(members)) {
         socket.emit("error", {
           message: "Members list is not defined or not an array.",
@@ -108,13 +154,75 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         return;
       }
 
-      let callerOnline = onlineUsers.find((user) => user.userId === userId);
-      if (!callerOnline) {
+      console.log("Answering call", userId, members);
+
+      members.forEach((member) => {
+        if (member !== userId) {
+          const caller = onlineUsers.find((user) => user.userId === member);
+          if (caller) {
+            io.to(caller.socketId).emit("callAnswered", { answer });
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error handling answerCall:", error);
+    }
+  });
+
+  socket.on("iceCandidate", ({ candidate, chatId, members }) => {
+    try {
+      if (!Array.isArray(members)) {
+        socket.emit("error", {
+          message: "Members list is not defined or not an array.",
+        });
         return;
       }
 
-      let caller = await User.findById(userId).select("fullname avatar");
-      if (!caller) {
+      members.forEach((member) => {
+        const recipient = onlineUsers.find((user) => user.userId === member);
+        if (recipient) {
+          io.to(recipient.socketId).emit("iceCandidate", candidate);
+        }
+      });
+    } catch (error) {
+      console.error("Error handling iceCandidate:", error);
+    }
+  });
+
+  socket.on("endCall", async ({ chatId, userId, members }) => {
+    try {
+      if (!Array.isArray(members)) {
+        socket.emit("error", {
+          message: "Members list is not defined or not an array.",
+        });
+        return;
+      }
+
+      console.log("Ending call");
+
+      members.forEach((member) => {
+        const recipient = onlineUsers.find((user) => user.userId === member);
+        if (recipient) {
+          io.to(recipient.socketId).emit("callEnded");
+        }
+      });
+      await messageController.createCallMessage(
+        chatId,
+        userId,
+        "Video",
+        "ended"
+      );
+    } catch (error) {
+      console.error("Error handling endCall:", error);
+    }
+  });
+
+  socket.on("rejectCall", async ({ chatId, userId, members }) => {
+    try {
+      if (!Array.isArray(members)) {
+        socket.emit("error", {
+          message: "Members list is not defined or not an array.",
+        });
         return;
       }
 
@@ -122,15 +230,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         if (member !== userId) {
           const recipient = onlineUsers.find((user) => user.userId === member);
           if (recipient) {
-            io.to(recipient.socketId).emit("incomingCall", {
-              chatId,
-              callerId: userId,
-              callerName: caller.fullname,
-              callerAvatar: caller.avatar,
-              offer,
-              members,
-              canNotAccept,
-            });
+            io.to(recipient.socketId).emit("callRejected");
           }
         }
       });
@@ -138,88 +238,11 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         chatId,
         userId,
         "Video",
-        "started"
+        "missed"
       );
+    } catch (error) {
+      console.error("Error handling rejectCall:", error);
     }
-  );
-
-  socket.on("answerCall", async ({ chatId, userId, members, answer }) => {
-    if (!Array.isArray(members)) {
-      socket.emit("error", {
-        message: "Members list is not defined or not an array.",
-      });
-      return;
-    }
-
-    members.forEach((member) => {
-      if (member !== userId) {
-        const caller = onlineUsers.find((user) => user.userId === member);
-        if (caller) {
-          console.log("Answering call", userId);
-          io.to(caller.socketId).emit("callAnswered", { answer });
-        }
-      }
-    });
-    await messageController.createCallMessage(
-      chatId,
-      userId,
-      "Video",
-      "answered"
-    );
-  });
-
-  socket.on("endCall", async ({ chatId, userId, members }) => {
-    if (!Array.isArray(members)) {
-      socket.emit("error", {
-        message: "Members list is not defined or not an array.",
-      });
-      return;
-    }
-
-    members.forEach((member) => {
-      const recipient = onlineUsers.find((user) => user.userId === member);
-      if (recipient) {
-        io.to(recipient.socketId).emit("callEnded");
-      }
-    });
-    await messageController.createCallMessage(chatId, userId, "Video", "ended");
-  });
-
-  socket.on("iceCandidate", ({ candidate, chatId, members }) => {
-    if (!Array.isArray(members)) {
-      socket.emit("error", {
-        message: "Members list is not defined or not an array.",
-      });
-      return;
-    }
-
-    members.forEach((member) => {
-      const recipient = onlineUsers.find((user) => user.userId === member);
-      if (recipient) {
-        io.to(recipient.socketId).emit("iceCandidate", candidate);
-      }
-    });
-  });
-
-  socket.on("rejectCall", ({ chatId, userId, members }) => {
-    console.log(members);
-    if (!Array.isArray(members)) {
-      socket.emit("error", {
-        message: "Members list is not defined or not an array.",
-      });
-      return;
-    }
-
-    console.log(members);
-
-    members.forEach((member) => {
-      if (member !== userId) {
-        const recipient = onlineUsers.find((user) => user.userId === member);
-        if (recipient) {
-          io.to(recipient.socketId).emit("callRejected");
-        }
-      }
-    });
   });
 };
 
