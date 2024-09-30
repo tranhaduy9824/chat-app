@@ -231,7 +231,6 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
             ? currentChat.members
             : [],
           offer: undefined,
-          canNotAccept: true,
         });
       }
     } catch (error: any) {

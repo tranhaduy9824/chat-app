@@ -8,13 +8,15 @@ import { AuthContext } from "../context/AuthContext";
 function Chat() {
   const [showInfoChat, setShowInfoChat] = useState<boolean>(false);
   const [isCalling, setIsCalling] = useState<boolean>(false);
+  const [canNotStart, setCanNotStart] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, socket } = useContext(ChatContext)!;
 
   useEffect(() => {
-    const handleIncomingCall = ({ chatId }: { chatId: string }) => {
+    const handleIncomingCall = () => {
       setIsCalling(true);
+      setCanNotStart(true);
     };
 
     socket.on("incomingCall", handleIncomingCall);
@@ -42,6 +44,8 @@ function Chat() {
           user={user}
           isCalling={isCalling}
           setIsCalling={setIsCalling}
+          canNotStart={canNotStart}
+          setCanNotStart={setCanNotStart}
         />
       )}
     </div>

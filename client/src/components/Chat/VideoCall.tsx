@@ -21,6 +21,8 @@ interface VideoCallProps {
   user: User | null;
   isCalling: boolean;
   setIsCalling: React.Dispatch<React.SetStateAction<boolean>>;
+  canNotStart?: boolean;
+  setCanNotStart: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -29,6 +31,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
   user,
   isCalling,
   setIsCalling,
+  canNotStart = false,
+  setCanNotStart
 }) => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -47,7 +51,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
   } | null>(null);
   const [savedChatId, setSavedChatId] = useState<string | null>(null);
   const [savedMembers, setSavedMembers] = useState<string[]>([]);
-
   const [isMounted, setIsMounted] = useState(isCalling);
 
   useEffect(() => {
@@ -77,7 +80,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
           .forEach((track) => peerConnection.addTrack(track, stream));
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
-            console.log("Sending ICE candidate:", event.candidate);
             socket.emit("iceCandidate", {
               candidate: event.candidate,
               chatId: savedChatId || currentChat?._id,
@@ -99,7 +101,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
 
-        console.log("Sending startCall event with offer:", offer);
         socket.emit("startCall", {
           chatId: currentChat?._id,
           userId: user?._id,
@@ -128,8 +129,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
   useEffect(() => {
     if (!isMounted) return;
 
-    console.log("isCalling changed:", isCalling);
-    if (isCalling) {
+    console.log(canNotStart);
+    
+
+    if (isCalling && !canNotStart) {
       startCall();
     }
 
@@ -168,9 +171,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
     if (!isMounted) return;
 
     try {
-      console.log("Incoming call from:", callerName);
       if (!canNotAccept) {
         setIsIncomingCall(true);
+      } else {
+        setIsIncomingCall(false);
       }
       setCallerInfo({ callerId, callerName, callerAvatar });
       setSavedChatId(chatId);
@@ -190,7 +194,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
         .forEach((track) => peerConnection.addTrack(track, stream));
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          console.log("Sending ICE candidate:", event.candidate);
           socket.emit("iceCandidate", {
             candidate: event.candidate,
             chatId,
@@ -212,7 +215,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
       );
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
-      console.log("Answering call", members, chatId, user?._id, answer);
       socket.emit("answerCall", {
         chatId,
         userId: user?._id,
@@ -222,7 +224,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
       // Add queued ICE candidates
       for (const candidate of iceCandidatesQueue) {
-        console.log("Adding queued ICE candidate:", candidate);
         await peerConnection.addIceCandidate(candidate);
       }
       setIceCandidatesQueue([]);
@@ -232,12 +233,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
   };
 
   socket.on("iceCandidate", (candidate) => {
-    console.log("Received ICE candidate from socket:", candidate);
     onIceCandidateReceived(candidate);
   });
 
   const onIceCandidateReceived = (candidate: RTCIceCandidate) => {
-    console.log("Received ICE candidate:", candidate);
     if (peerConnectionRef.current) {
       peerConnectionRef.current.addIceCandidate(candidate);
     } else {
@@ -247,7 +246,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
   const handleIceCandidate = async (candidate: RTCIceCandidate) => {
     try {
-      console.log("Received ICE candidate:", candidate);
       if (
         peerConnectionRef.current &&
         peerConnectionRef.current.remoteDescription
@@ -291,6 +289,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       }
 
       setIsCalling(false);
+      setCanNotStart(false)
       setIsIncomingCall(false);
       setIsCallAccepted(false);
       setCallerInfo(null);
@@ -306,7 +305,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
     answer: RTCSessionDescriptionInit;
   }) => {
     try {
-      console.log("Call answered with answer:", answer);
       if (peerConnectionRef.current) {
         if (peerConnectionRef.current.signalingState === "stable") {
           console.warn("PeerConnection is already in stable state.");
@@ -356,6 +354,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       }
 
       setIsCalling(false);
+      setCanNotStart(false)
       setIsIncomingCall(false);
       setIsCallAccepted(false);
       setCallerInfo(null);
@@ -416,7 +415,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
       .forEach((track) => peerConnection.addTrack(track, stream));
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("Sending ICE candidate:", event.candidate);
         socket.emit("iceCandidate", {
           candidate: event.candidate,
           chatId: savedChatId || currentChat?._id,
@@ -438,7 +436,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
-    console.log("Sending startCall event with offer:", offer);
     socket.emit("startCall", {
       chatId: savedChatId || currentChat?._id,
       userId: user?._id,
@@ -456,7 +453,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
       );
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
-      console.log("Sending answerCall event with answer:", answer);
       socket.emit("answerCall", {
         chatId: savedChatId || currentChat?._id,
         userId: user?._id,
@@ -470,7 +466,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    console.log("Sending answerCall event with answer:", answer);
     socket.emit("answerCall", {
       chatId: savedChatId || currentChat?._id,
       userId: user?._id,
@@ -501,10 +496,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
     setIsIncomingCall(false);
     endCall();
   };
-
-  useEffect(() => {
-    console.log("remoteVideoRef changed:", remoteVideoRef);
-  }, [remoteVideoRef]);
 
   return (
     <WrapperModal
@@ -544,7 +535,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 isCallAccepted ? "fullscreen" : "small"
               }`}
             />
-            {isCallAccepted && (
+            {isCallAccepted &&  (
               <video ref={remoteVideoRef} autoPlay className="remote-video" />
             )}
             <div className="controls">
