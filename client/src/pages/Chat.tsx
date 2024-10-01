@@ -2,8 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import BoxChat from "../components/Chat/BoxChat";
 import InfoChat from "../components/Chat/InfoChat";
 import { ChatContext } from "../context/ChatContext";
-import VideoCall from "../components/Chat/VideoCall";
+import VideoCall from "../components/Modal/VideoCall";
 import { AuthContext } from "../context/AuthContext";
+import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser";
 
 function Chat() {
   const [showInfoChat, setShowInfoChat] = useState<boolean>(false);
@@ -12,6 +13,8 @@ function Chat() {
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, socket } = useContext(ChatContext)!;
+
+  const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
   useEffect(() => {
     const handleIncomingCall = () => {
@@ -35,6 +38,7 @@ function Chat() {
         showInfoChat={showInfoChat}
         setShowInfoChat={setShowInfoChat}
         setIsCalling={setIsCalling}
+        recipientUser={recipientUser}
       />
       {showInfoChat && <InfoChat />}
       {isCalling && (
@@ -46,6 +50,7 @@ function Chat() {
           setIsCalling={setIsCalling}
           canNotStart={canNotStart}
           setCanNotStart={setCanNotStart}
+          recipientUser={recipientUser}
         />
       )}
     </div>

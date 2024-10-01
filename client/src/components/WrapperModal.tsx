@@ -10,6 +10,7 @@ interface WrapperModalProps {
   className?: string;
   style?: React.CSSProperties;
   closeBtn?: boolean;
+  outsideClick?: boolean;
 }
 
 const WrapperModal: React.FC<WrapperModalProps> = ({
@@ -19,6 +20,7 @@ const WrapperModal: React.FC<WrapperModalProps> = ({
   className = "",
   style = {},
   closeBtn = true,
+  outsideClick = true,
 }) => {
   const [showModal, setShowModal] = useState(show);
 
@@ -27,10 +29,10 @@ const WrapperModal: React.FC<WrapperModalProps> = ({
   }, [show]);
 
   const handleClose = () => {
-    setShowModal(false);
+    if (outsideClick) {setShowModal(false);
     setTimeout(() => {
       onClose();
-    }, 500);
+    }, 500);}
   };
 
   return (

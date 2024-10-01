@@ -17,7 +17,6 @@ import Message from "./Message";
 import Picker, { EmojiClickData } from "emoji-picker-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
-import { useFetchRecipientUser } from "../../hooks/useFetchRecipientUser";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
 import Avatar from "../Avatar";
@@ -29,7 +28,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Camera from "./Camera";
 import { useNotification } from "../../context/NotificationContext";
 
-function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
+function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }: any) {
   const [page, setPage] = useState<number>(1);
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -52,7 +51,6 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling }: any) {
     replyToMessage,
     editMessage,
   } = useContext(MessageContext)!;
-  const { recipientUser } = useFetchRecipientUser(currentChat, user);
   const { addNotification } = useNotification();
 
   const scrollToBottom = () => {

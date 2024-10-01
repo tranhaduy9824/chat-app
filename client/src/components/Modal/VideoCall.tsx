@@ -23,6 +23,7 @@ interface VideoCallProps {
   setIsCalling: React.Dispatch<React.SetStateAction<boolean>>;
   canNotStart?: boolean;
   setCanNotStart: React.Dispatch<React.SetStateAction<boolean>>;
+  recipientUser: User | null;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -32,7 +33,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
   isCalling,
   setIsCalling,
   canNotStart = false,
-  setCanNotStart
+  setCanNotStart,
+  recipientUser,
 }) => {
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -52,13 +54,63 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const [savedChatId, setSavedChatId] = useState<string | null>(null);
   const [savedMembers, setSavedMembers] = useState<string[]>([]);
   const [isMounted, setIsMounted] = useState(isCalling);
+  const [isRejected, setIsRejected] = useState<boolean>(false);
 
   useEffect(() => {
     setIsMounted(true);
+
     return () => {
       setIsMounted(false);
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (isCalling && savedMembers) {
+        endCall();
+        setIsRejected(false);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isCalling, savedMembers]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (isCalling && !canNotStart) {
+      startCall();
+    }
+
+    socket.on("incomingCall", handleIncomingCall);
+    socket.on("callAnswered", handleCallAnswered);
+    socket.on("callEnded", handleCallEnded);
+    socket.on("iceCandidate", handleIceCandidate);
+    socket.on("callRejected", handleCallRejected);
+    socket.on("activeCalls", (activeCalls) => console.log(activeCalls));
+
+    return () => {
+      socket.off("incomingCall", handleIncomingCall);
+      socket.off("callAnswered", handleCallAnswered);
+      socket.off("callEnded", handleCallEnded);
+      socket.off("iceCandidate", handleIceCandidate);
+      socket.off("callRejected", handleCallRejected);
+      socket.off("activeCalls", (activeCalls) => console.log(activeCalls));
+    };
+  }, [isCalling, socket, currentChat, isMounted]);
 
   const startCall = async () => {
     if (!isMounted) return;
@@ -69,8 +121,12 @@ const VideoCall: React.FC<VideoCallProps> = ({
         video: true,
         audio: true,
       });
+      console.log("Stream obtained:", stream);
+
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
+      } else {
+        console.warn("Local video ref is not available");
       }
 
       if (!peerConnectionRef.current) {
@@ -116,40 +172,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
       console.error("Error starting call:", error);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-        peerConnectionRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-
-    console.log(canNotStart);
-    
-
-    if (isCalling && !canNotStart) {
-      startCall();
-    }
-
-    socket.on("incomingCall", handleIncomingCall);
-    socket.on("callAnswered", handleCallAnswered);
-    socket.on("callEnded", handleCallEnded);
-    socket.on("iceCandidate", handleIceCandidate);
-    socket.on("callRejected", handleCallRejected);
-
-    return () => {
-      socket.off("incomingCall", handleIncomingCall);
-      socket.off("callAnswered", handleCallAnswered);
-      socket.off("callEnded", handleCallEnded);
-      socket.off("iceCandidate", handleIceCandidate);
-      socket.off("callRejected", handleCallRejected);
-    };
-  }, [isCalling, socket, currentChat, isMounted]);
 
   const handleIncomingCall = async ({
     callerId,
@@ -289,7 +311,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       }
 
       setIsCalling(false);
-      setCanNotStart(false)
+      setCanNotStart(false);
       setIsIncomingCall(false);
       setIsCallAccepted(false);
       setCallerInfo(null);
@@ -315,14 +337,12 @@ const VideoCall: React.FC<VideoCallProps> = ({
         );
         setIsCallAccepted(true);
 
-        // Add remote stream when call is accepted
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
           }
         };
 
-        // Add queued ICE candidates
         for (const candidate of iceCandidatesQueue) {
           await peerConnectionRef.current.addIceCandidate(candidate);
         }
@@ -354,7 +374,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       }
 
       setIsCalling(false);
-      setCanNotStart(false)
+      setCanNotStart(false);
       setIsIncomingCall(false);
       setIsCallAccepted(false);
       setCallerInfo(null);
@@ -365,10 +385,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
   const handleCallRejected = () => {
     try {
+      setIsRejected(true);
       console.log("Call rejected");
-      endCall();
-      setIsIncomingCall(false);
-      alert("The call was rejected.");
     } catch (error) {
       console.error("Error handling call rejected:", error);
     }
@@ -497,15 +515,24 @@ const VideoCall: React.FC<VideoCallProps> = ({
     endCall();
   };
 
+  useEffect(() => {
+    console.log(isRejected);
+    if (isRejected) {
+      endCall();
+      setIsIncomingCall(false);
+    }
+  }, [isRejected]);
+
   return (
     <WrapperModal
-      show={(isCalling || isIncomingCall) && isMounted}
+      show={(isCalling || isIncomingCall || isRejected) && isMounted}
       onClose={endCall}
       closeBtn={false}
+      outsideClick={false}
     >
       <div className="video-call-container">
         {isIncomingCall ? (
-          <div className="incoming-call">
+          <div className="incoming-call text-center">
             <Avatar
               user={{
                 _id: callerInfo?.callerId || "",
@@ -514,9 +541,11 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 avatar: callerInfo?.callerAvatar || "",
                 fullname: callerInfo?.callerName || "",
               }}
+              width={80}
+              height={80}
             />
-            <h3>{callerInfo?.callerName} is calling...</h3>
-            <div className="d-flex align-items-center justify-content-center gap-3">
+            <h3 className="my-2">{callerInfo?.callerName} gọi đến...</h3>
+            <div className="d-flex align-items-center justify-content-center gap-3 mt-4">
               <button onClick={rejectCall} className="control-btn bg-danger">
                 <FontAwesomeIcon icon={faTimes as IconProp} />
               </button>
@@ -531,12 +560,18 @@ const VideoCall: React.FC<VideoCallProps> = ({
               ref={localVideoRef}
               autoPlay
               muted
-              className={`local-video ${
-                isCallAccepted ? "fullscreen" : "small"
-              }`}
+              className={`local-video ${!canNotStart ? "fullscreen" : ""}`}
             />
-            {isCallAccepted &&  (
+            {isCallAccepted && canNotStart && (
               <video ref={remoteVideoRef} autoPlay className="remote-video" />
+            )}
+            {!canNotStart && (
+              <h3
+                className="position-absolute z-3"
+                style={{ bottom: "70px" }}
+              >
+                Đang gọi đến {recipientUser?.fullname}...
+              </h3>
             )}
             <div className="controls">
               <button onClick={toggleMute} className="control-btn">
@@ -561,6 +596,20 @@ const VideoCall: React.FC<VideoCallProps> = ({
               </button>
             </div>
           </>
+        )}
+        {isRejected && (
+          <div className="incoming-call text-center">
+            <Avatar user={recipientUser} width={80} height={80} />
+            <h3 className="my-2">{recipientUser?.fullname} đã từ chối...</h3>
+            <div className="d-flex align-items-center justify-content-center gap-3 mt-4">
+              <button onClick={startCall} className="control-btn bg-success">
+                <FontAwesomeIcon icon={faPhone as IconProp} />
+              </button>
+              <button onClick={() => setIsRejected(false)} className="control-btn">
+                <FontAwesomeIcon icon={faTimes as IconProp} />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </WrapperModal>

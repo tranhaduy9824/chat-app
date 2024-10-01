@@ -32,12 +32,9 @@ const handleVideoCall = (io, socket, onlineUsers) => {
             activeCalls.has(member) && !members.every((m) => activeCalls.has(m))
         );
 
-        console.log("activeCalls", activeCalls);
-
         if (isAnyMemberInCall) {
-          socket.emit("error", {
-            message:
-              "Cannot start call. One or more members are already in a call.",
+          io.to(callerOnline.socketId).emit("activeCalls", {
+            activeCalls: Array.from(activeCalls),
           });
           return;
         }
@@ -114,6 +111,8 @@ const handleVideoCall = (io, socket, onlineUsers) => {
 
   socket.on("endCall", async ({ chatId, userId, members }) => {
     try {
+        console.log(userId, members);
+        
       if (!Array.isArray(members)) {
         socket.emit("error", {
           message: "Members list is not defined or not an array.",
@@ -125,8 +124,6 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         (member) =>
           activeCalls.has(member) && !members.every((m) => activeCalls.has(m))
       );
-
-      console.log("activeCalls", activeCalls);
 
       if (isAnyMemberInCall) {
         socket.emit("error", {
@@ -145,6 +142,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         }
         activeCalls.delete(member);
       });
+      
       await messageController.createCallMessage(
         chatId,
         userId,
@@ -174,6 +172,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         }
         activeCalls.delete(member);
       });
+
       await messageController.createCallMessage(
         chatId,
         userId,

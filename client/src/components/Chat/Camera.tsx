@@ -1,4 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCamera,
+  faTimes,
+  faUndoAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 
 interface CameraProps {
@@ -93,31 +101,53 @@ function Camera({ onCapture, onClose, setMediaPreview }: CameraProps) {
     <div className="camera-container">
       {capturedPhoto ? (
         <>
-          <img src={capturedPhoto} alt="Captured" style={{ height: "100%" }} />
-          <button className="rounded-4" onClick={handleSendPhoto}>
-            Gửi ảnh
-          </button>
-          <button
-            className="rounded-4"
-            onClick={() => {
-              setCapturedPhoto(null);
-              console.log("Đang khởi động lại camera");
-            }}
+          <img
+            src={capturedPhoto}
+            alt="Captured"
+            style={{ height: "100%" }}
+            className="p-3 bg-white rounded-3 mb-3"
+          />
+          <div
+            className="d-flex align-items-center gap-2 position-absolute"
+            style={{ bottom: "130px" }}
           >
-            Chụp lại
-          </button>
+            <button
+              className="control-btn"
+              onClick={() => {
+                setCapturedPhoto(null);
+                console.log("Đang khởi động lại camera");
+              }}
+            >
+              <FontAwesomeIcon icon={faUndoAlt as IconProp} />
+            </button>
+            <button
+              className="control-btn bg-primary-subtle"
+              onClick={handleSendPhoto}
+            >
+              <FontAwesomeIcon icon={faPaperPlane as IconProp} />
+            </button>
+          </div>
         </>
       ) : (
         <>
-          <video ref={videoRef} style={{ width: "100%" }} autoPlay></video>
-          <button className="rounded-4" onClick={handleCapturePhoto}>
-            Chụp ảnh
-          </button>
-          <button className="rounded-4" onClick={onClose}>
-            Đóng
+          <video
+            ref={videoRef}
+            style={{ width: "max-content" }}
+            autoPlay
+            className="p-3 bg-white rounded-3 h-100 mb-3"
+          ></video>
+          <button
+            className="control-btn position-absolute"
+            style={{ bottom: "130px" }}
+            onClick={handleCapturePhoto}
+          >
+            <FontAwesomeIcon icon={faCamera as IconProp} />
           </button>
         </>
       )}
+      <button className="bg-danger-subtle control-btn" onClick={onClose}>
+        <FontAwesomeIcon icon={faTimes as IconProp} />
+      </button>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
     </div>
   );
