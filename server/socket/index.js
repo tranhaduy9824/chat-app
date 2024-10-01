@@ -6,8 +6,8 @@ const {
   handleReplyToMessage,
   handleDeleteMessage,
   handleEditMessage,
-  handleVideoCall,
 } = require("./messages");
+const { handleVideoCall } = require("./call");
 
 const socketHandler = (server) => {
   const io = new Server(server, {
