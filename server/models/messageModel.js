@@ -29,6 +29,10 @@ const messageSchema = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+    callDuration: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

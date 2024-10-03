@@ -208,13 +208,14 @@ const editMessage = async (req, res) => {
   }
 };
 
-const createCallMessage = async (chatId, senderId, callType, callStatus) => {
+const createCallMessage = async (chatId, senderId, callType, callStatus, callDuration = null) => {
   try {
     const message = new messageModel({
       chatId,
       senderId,
       text: `${callType} call ${callStatus}`,
       type: "call",
+      callDuration
     });
 
     await message.save();

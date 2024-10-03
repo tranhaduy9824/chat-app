@@ -2,6 +2,8 @@ const messageController = require("../controllers/messageController");
 const User = require("../models/userModel");
 
 const activeCalls = new Set();
+const callStartTimes = new Map();
+const callInitiators = new Map();
 
 const handleVideoCall = (io, socket, onlineUsers) => {
   socket.on(
@@ -15,7 +17,13 @@ const handleVideoCall = (io, socket, onlineUsers) => {
           return;
         }
 
-        console.log("Starting call", userId, members);
+        console.log(
+          "Starting call",
+          userId,
+          members,
+          activeCalls,
+          canNotAccept
+        );
 
         const callerOnline = onlineUsers.find((user) => user.userId === userId);
         if (!callerOnline) {
@@ -59,6 +67,10 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         });
 
         members.forEach((member) => activeCalls.add(member));
+        callStartTimes.set(chatId, Date.now());
+        if (!callInitiators.has(chatId)) {
+          callInitiators.set(chatId, userId);
+        }
       } catch (error) {
         console.error("Error handling startCall:", error);
       }
@@ -109,10 +121,8 @@ const handleVideoCall = (io, socket, onlineUsers) => {
     }
   });
 
-  socket.on("endCall", async ({ chatId, userId, members }) => {
+  socket.on("endCall", async ({ chatId, userId, members, createMessage }) => {
     try {
-        console.log(userId, members);
-        
       if (!Array.isArray(members)) {
         socket.emit("error", {
           message: "Members list is not defined or not an array.",
@@ -133,6 +143,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         return;
       }
 
+      console.log(createMessage);
       console.log("Ending call");
 
       members.forEach((member) => {
@@ -142,13 +153,24 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         }
         activeCalls.delete(member);
       });
-      
-      await messageController.createCallMessage(
-        chatId,
-        userId,
-        "Video",
-        "ended"
-      );
+
+      if (createMessage) {
+        const startTime = callStartTimes.get(chatId);
+        const callDuration = startTime
+          ? Math.floor((Date.now() - startTime) / 1000)
+          : null;
+        const callerId = callInitiators.get(chatId);
+        console.log("callDuration", callDuration, callerId);
+        await messageController.createCallMessage(
+          chatId,
+          callerId,
+          "Video",
+          "ended",
+          callDuration
+        );
+        callStartTimes.delete(chatId);
+        callInitiators.delete(chatId);
+      }
     } catch (error) {
       console.error("Error handling endCall:", error);
     }
@@ -173,12 +195,20 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         activeCalls.delete(member);
       });
 
+      const startTime = callStartTimes.get(chatId);
+      const callDuration = startTime
+        ? Math.floor((Date.now() - startTime) / 1000)
+        : null;
+      const callerId = callInitiators.get(chatId);
       await messageController.createCallMessage(
         chatId,
-        userId,
+        callerId,
         "Video",
-        "missed"
+        "missed",
+        callDuration
       );
+      callStartTimes.delete(chatId);
+      callInitiators.delete(chatId);
     } catch (error) {
       console.error("Error handling rejectCall:", error);
     }

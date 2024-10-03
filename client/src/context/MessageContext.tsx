@@ -76,7 +76,12 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     socket.on("getMessage", (res: Message) => {
       if (currentChat?._id !== res.chatId) return;
 
-      setMessages((prev) => [res, ...(prev || [])]);
+      setMessages((prev) => {
+        if (prev && prev[0]?._id === res._id) {
+          return prev;
+        }
+        return [res, ...(prev || [])];
+      });
     });
 
     socket.on(

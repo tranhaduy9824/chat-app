@@ -216,10 +216,10 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }:
     setShowCamera(false);
   };
 
-  const handleStartCall = async () => {
+  const handleStartCall = () => {
     try {
       if (currentChat) {
-        await setIsCalling(true);
+        setIsCalling(true);
         socket.emit("startCall", {
           chatId: currentChat?._id,
           userId: user?._id,

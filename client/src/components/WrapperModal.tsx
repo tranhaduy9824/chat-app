@@ -29,10 +29,12 @@ const WrapperModal: React.FC<WrapperModalProps> = ({
   }, [show]);
 
   const handleClose = () => {
-    if (outsideClick) {setShowModal(false);
-    setTimeout(() => {
-      onClose();
-    }, 500);}
+    if (outsideClick) {
+      setShowModal(false);
+      setTimeout(() => {
+        onClose();
+      }, 500);
+    }
   };
 
   return (

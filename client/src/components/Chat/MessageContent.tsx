@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faReply,
   faEllipsisV,
-  faVideo,
+  faPhoneSlash,
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import { faFileText, faSmile } from "@fortawesome/free-regular-svg-icons";
@@ -14,6 +14,7 @@ import { useContext, useEffect, useRef } from "react";
 import { MessageContext } from "../../context/MessageContext";
 import { AuthContext } from "../../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { formatCallDuration } from "../../utils/formatCallduration";
 
 interface MessageContentProps {
   msg: Message;
@@ -176,15 +177,24 @@ const MessageContent = ({
               : "50px 50px 0 50px ",
           backgroundColor:
             user?._id !== msg?.senderId
-              ? msg.type === "text" || msg.type === "file"
+              ? msg.type === "text" ||
+                msg.type === "file" ||
+                msg.type === "call"
                 ? "#ffffff"
                 : ""
               : msg.type === "text"
               ? "#ea67a4"
               : msg.type === "file"
               ? "#ffffff"
+              : msg.type === "call"
+              ? "#ffffff"
               : "",
-          border: msg.type === "file" ? "1px solid #ea67a4" : "",
+          border:
+            msg.type === "file"
+              ? "1px solid #ea67a4"
+              : msg.type === "call"
+              ? "1px solid var(--primary-light)"
+              : "",
           padding:
             msg.type === "image" || msg.type === "video"
               ? "0px !important"
@@ -237,16 +247,27 @@ const MessageContent = ({
           </a>
         )}
         {msg.type === "call" && (
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center text-black">
             <FontAwesomeIcon
               icon={
-                msg.text.includes("bỏ lỡ")
-                  ? (faPhone as IconProp)
-                  : (faVideo as IconProp)
+                msg.text.includes("missed")
+                  ? (faPhoneSlash as IconProp)
+                  : (faPhone as IconProp)
               }
               style={{ fontSize: "20px", marginRight: "8px" }}
             />
-            <span>{msg.text}</span>
+            <span className="fw-bold">
+              {msg.text.includes("missed") ? (
+                "Cuộc gọi nhỡ"
+              ) : (
+                <>
+                  Kết thúc cuộc gọi{" "}
+                  <div className="fw-normal">
+                    {formatCallDuration(msg?.callDuration)}
+                  </div>
+                </>
+              )}
+            </span>
           </div>
         )}
         <span

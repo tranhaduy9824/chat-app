@@ -9,6 +9,7 @@ interface Message {
   reactions: array;
   replyTo: Message | null;
   createdAt: string;
+  callDuration?: number | null;
 }
 
 interface MessageContextProps {
