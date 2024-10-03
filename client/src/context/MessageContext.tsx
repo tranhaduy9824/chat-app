@@ -74,6 +74,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     if (socket === null) return;
 
     socket.on("getMessage", (res: Message) => {
+      console.log(res);
       if (currentChat?._id !== res.chatId) return;
 
       setMessages((prev) => {

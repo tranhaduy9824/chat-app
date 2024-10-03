@@ -7,6 +7,8 @@ import MessageForSender from "./MessageForSender";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faFileText } from "@fortawesome/free-regular-svg-icons";
+import { faPhone, faPhoneSlash } from "@fortawesome/free-solid-svg-icons";
+import { formatCallDuration, formatFileSize } from "../../utils/format";
 
 interface MessageProps {
   msg: Message;
@@ -51,7 +53,9 @@ function Message({
                 ? "50px 50px 50px 0"
                 : "50px 50px 0 50px ",
             backgroundColor:
-              msg.replyTo.type === "text" || msg.replyTo.type === "file"
+              msg.replyTo.type === "text" ||
+              msg.replyTo.type === "file" ||
+              msg.replyTo.type === "call"
                 ? "#dce2f0"
                 : "",
             padding:
@@ -100,17 +104,41 @@ function Message({
                 <FontAwesomeIcon
                   icon={faFileText as IconProp}
                   style={{
-                    fontSize: "14px",
-                    marginBottom: "-16px",
-                    opacity: 0.5,
+                    fontSize: "20px",
                   }}
                 />
               </span>
               <div className="d-flex flex-column">
-                <span className="fw-bold">Tải về tập tin</span>
-                <span className="small">1.8 KB</span>
+                <span className="fw-bold">{msg.replyTo.infoFile.name}</span>
+                <span className="small">
+                  {formatFileSize(msg.replyTo.infoFile.size)}
+                </span>
               </div>
             </a>
+          )}
+          {msg.replyTo.type === "call" && (
+            <div className="d-flex align-items-center text-black">
+              <FontAwesomeIcon
+                icon={
+                  msg.replyTo.text.includes("missed")
+                    ? (faPhoneSlash as IconProp)
+                    : (faPhone as IconProp)
+                }
+                className="mx-2"
+              />
+              <span className="fw-bold">
+                {msg.replyTo.text.includes("missed") ? (
+                  "Cuộc gọi nhỡ"
+                ) : (
+                  <>
+                    Kết thúc cuộc gọi{" "}
+                    <div className="fw-normal">
+                      {formatCallDuration(msg?.replyTo.callDuration)}
+                    </div>
+                  </>
+                )}
+              </span>
+            </div>
           )}
         </div>
       )}

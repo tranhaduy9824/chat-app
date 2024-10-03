@@ -33,6 +33,16 @@ const messageSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    infoFile: {
+      name: {
+        type: String,
+        default: null,
+      },
+      size: {
+        type: Number,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

@@ -14,7 +14,7 @@ import { useContext, useEffect, useRef } from "react";
 import { MessageContext } from "../../context/MessageContext";
 import { AuthContext } from "../../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { formatCallDuration } from "../../utils/formatCallduration";
+import { formatCallDuration, formatFileSize } from "../../utils/format";
 
 interface MessageContentProps {
   msg: Message;
@@ -140,9 +140,11 @@ const MessageContent = ({
                   className="d-flex flex-column align-items-start"
                   style={{ minWidth: "max-content" }}
                 >
-                  <div className="p-1 w-100" onClick={handleEditClick}>
-                    Chỉnh sửa
-                  </div>
+                  {msg.type === "text" && (
+                    <div className="p-1 w-100" onClick={handleEditClick}>
+                      Chỉnh sửa
+                    </div>
+                  )}
                   <div
                     className="p-1 w-100"
                     onClick={() => deleteMessage(msg?._id)}
@@ -231,7 +233,7 @@ const MessageContent = ({
         {msg.type === "file" && (
           <a
             href={msg.mediaUrl}
-            download
+            download={msg.infoFile.name}
             className="text-decoration-none text-black d-flex align-items-center"
           >
             <span className="mx-2">
@@ -241,8 +243,8 @@ const MessageContent = ({
               />
             </span>
             <div className="d-flex flex-column">
-              <span className="fw-bold">Tải về tập tin</span>
-              <span className="small">1.8 KB</span>
+              <span className="fw-bold">{msg.infoFile.name}</span>
+              <span className="small">{formatFileSize(msg.infoFile.size)}</span>
             </div>
           </a>
         )}
@@ -254,7 +256,7 @@ const MessageContent = ({
                   ? (faPhoneSlash as IconProp)
                   : (faPhone as IconProp)
               }
-              style={{ fontSize: "20px", marginRight: "8px" }}
+              className="mx-2"
             />
             <span className="fw-bold">
               {msg.text.includes("missed") ? (

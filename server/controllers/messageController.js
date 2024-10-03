@@ -9,6 +9,8 @@ const createMessage = async (req, res) => {
 
   let fileUrl = "";
   let fileType = "text";
+  let fileName = "";
+  let fileSize = 0;
 
   try {
     if (file) {
@@ -23,6 +25,8 @@ const createMessage = async (req, res) => {
           : uploadResult.resource_type === "video"
           ? "video"
           : "file";
+      fileName = file.originalname;
+      fileSize = file.size;
     }
 
     const message = new messageModel({
@@ -31,6 +35,10 @@ const createMessage = async (req, res) => {
       text: text || "",
       mediaUrl: fileUrl,
       type: fileType,
+      infoFile: {
+        name: fileName,
+        size: fileSize,
+      },
     });
 
     const response = await message.save();
@@ -208,17 +216,24 @@ const editMessage = async (req, res) => {
   }
 };
 
-const createCallMessage = async (chatId, senderId, callType, callStatus, callDuration = null) => {
+const createCallMessage = async (
+  chatId,
+  senderId,
+  callType,
+  callStatus,
+  callDuration = null
+) => {
   try {
     const message = new messageModel({
       chatId,
       senderId,
       text: `${callType} call ${callStatus}`,
       type: "call",
-      callDuration
+      callDuration,
     });
 
-    await message.save();
+    const savedMessage = await message.save();
+    return savedMessage;
   } catch (error) {
     console.log(error);
   }

@@ -161,7 +161,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
           : null;
         const callerId = callInitiators.get(chatId);
         console.log("callDuration", callDuration, callerId);
-        await messageController.createCallMessage(
+        const callMessage = await messageController.createCallMessage(
           chatId,
           callerId,
           "Video",
@@ -170,6 +170,13 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         );
         callStartTimes.delete(chatId);
         callInitiators.delete(chatId);
+
+        members.forEach((member) => {
+          const recipient = onlineUsers.find((user) => user.userId === member);
+          if (recipient) {
+            io.to(recipient.socketId).emit("getMessage", callMessage);
+          }
+        });
       }
     } catch (error) {
       console.error("Error handling endCall:", error);
@@ -200,7 +207,7 @@ const handleVideoCall = (io, socket, onlineUsers) => {
         ? Math.floor((Date.now() - startTime) / 1000)
         : null;
       const callerId = callInitiators.get(chatId);
-      await messageController.createCallMessage(
+      const callMessage = await messageController.createCallMessage(
         chatId,
         callerId,
         "Video",
@@ -209,6 +216,13 @@ const handleVideoCall = (io, socket, onlineUsers) => {
       );
       callStartTimes.delete(chatId);
       callInitiators.delete(chatId);
+
+      members.forEach((member) => {
+        const recipient = onlineUsers.find((user) => user.userId === member);
+        if (recipient) {
+          io.to(recipient.socketId).emit("getMessage", callMessage);
+        }
+      });
     } catch (error) {
       console.error("Error handling rejectCall:", error);
     }

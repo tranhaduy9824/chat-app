@@ -10,6 +10,10 @@ interface Message {
   replyTo: Message | null;
   createdAt: string;
   callDuration?: number | null;
+  infoFile: {
+    name: string;
+    size: number;
+  };
 }
 
 interface MessageContextProps {
