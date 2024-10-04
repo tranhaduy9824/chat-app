@@ -94,10 +94,51 @@ const handleEditMessage = (io, socket, onlineUsers) => {
   });
 };
 
+const handleTyping = (io, socket, onlineUsers) => {
+  socket.on("typing", (data) => {
+    const { chatId, userId, members } = data;
+    
+    if (Array.isArray(members)) {
+      members.forEach((memberId) => {
+        if (memberId !== userId) {
+          const user = onlineUsers.find((user) => user.userId === memberId);
+          if (user) {
+            io.to(user.socketId).emit("typing", { userId, chatId });
+          }
+        }
+      });
+    } else {
+      socket.emit("error", {
+        message: "Members list is not defined or not an array.",
+      });
+    }
+  });
+
+  socket.on("stopTyping", (data) => {
+    const { chatId, userId, members } = data;
+
+    if (Array.isArray(members)) {
+      members.forEach((memberId) => {
+        if (memberId !== userId) {
+          const user = onlineUsers.find((user) => user.userId === memberId);
+          if (user) {
+            io.to(user.socketId).emit("stopTyping", { userId, chatId });
+          }
+        }
+      });
+    } else {
+      socket.emit("error", {
+        message: "Members list is not defined or not an array.",
+      });
+    }
+  });
+};
+
 module.exports = {
   handleSendMessage,
   handleReactToMessage,
   handleReplyToMessage,
   handleDeleteMessage,
   handleEditMessage,
+  handleTyping,
 };

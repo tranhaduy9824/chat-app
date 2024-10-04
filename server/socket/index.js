@@ -6,6 +6,7 @@ const {
   handleReplyToMessage,
   handleDeleteMessage,
   handleEditMessage,
+  handleTyping,
 } = require("./messages");
 const { handleVideoCall } = require("./call");
 
@@ -37,6 +38,8 @@ const socketHandler = (server) => {
     handleVideoCall(io, socket, onlineUsers);
 
     handleUserDisconnection(io, socket, onlineUsers);
+
+    handleTyping(io, socket, onlineUsers);
   });
 
   const socketPort = 3000;

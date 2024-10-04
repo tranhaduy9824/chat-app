@@ -28,7 +28,12 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Camera from "./Camera";
 import { useNotification } from "../../context/NotificationContext";
 
-function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }: any) {
+function BoxChat({
+  showInfoChat,
+  setShowInfoChat,
+  setIsCalling,
+  recipientUser,
+}: any) {
   const [page, setPage] = useState<number>(1);
   const [message, setMessage] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -50,6 +55,9 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }:
     hasMore,
     replyToMessage,
     editMessage,
+    typingUser,
+    handleTyping,
+    handleStopTyping,
   } = useContext(MessageContext)!;
   const { addNotification } = useNotification();
 
@@ -323,6 +331,27 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }:
             className="chat-messages flex-grow-1 overflow-x-hidden overflow-y-auto py-3 gap-2"
             ref={chatMessagesRef}
           >
+            {typingUser && (
+              <div className="d-flex align-items-center">
+                <div
+                  className="d-flex align-items-end me-2 mt-auto"
+                  style={{ width: "35px", height: "100%" }}
+                >
+                  <Avatar user={recipientUser} width={35} height={35} />
+                </div>
+                <div
+                  className="typing-indicator d-flex align-items-center message position-relative border border-secondary bg-white"
+                  style={{
+                    borderRadius: "50px 50px 50px 0",
+                    padding: "8px",
+                  }}
+                >
+                  <span>•</span>
+                  <span>•</span>
+                  <span>•</span>
+                </div>
+              </div>
+            )}
             <div className="d-flex flex-column-reverse gap-2">
               {mediaPreview && (
                 <MediaPreview
@@ -480,9 +509,13 @@ function BoxChat({ showInfoChat, setShowInfoChat, setIsCalling, recipientUser }:
                 onFocus={() => setShowEmojiPicker(false)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    handleStopTyping();
                     handleSendMessage();
+                  } else {
+                    handleTyping();
                   }
                 }}
+                onBlur={handleStopTyping}
               />
               <Tippy content="Chọn biểu tượng cảm xúc">
                 <span

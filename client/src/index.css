@@ -307,3 +307,31 @@
 .cancel-call:hover {
   transform: scale(1.1) rotate(135deg);
 }
+
+.typing-indicator span {
+  animation: wave 1.5s infinite;
+  margin-right: 2px;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes wave {
+  0%,
+  60%,
+  100% {
+    transform: initial;
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}

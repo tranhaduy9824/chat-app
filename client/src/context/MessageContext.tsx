@@ -33,6 +33,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [notifications, setNotifications] = useState<Message[] | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
 
   const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
@@ -149,6 +151,22 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       }
     });
 
+    socket.on("typing", (data: { userId: string; chatId: string }) => {
+      if (data.chatId !== currentChat?._id) return;
+
+      if (data.userId !== user?._id) {
+        setTypingUser(data.userId);
+      }
+    });
+
+    socket.on("stopTyping", (data: { userId: string; chatId: string }) => {
+      if (data.chatId !== currentChat?._id) return;
+
+      if (data.userId !== user?._id) {
+        setTypingUser(null);
+      }
+    });
+
     return () => {
       socket.off("getMessage");
       socket.off("messageReaction");
@@ -156,6 +174,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("getNotifications");
       socket.off("messageDeleted");
       socket.off("messageEdited");
+      socket.off("typing");
+      socket.off("stopTyping");
     };
   }, [socket, currentChat, user]);
 
@@ -393,6 +413,28 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     audioRef.current = new Audio(notificationSound);
   }, []);
 
+  const handleTyping = () => {
+    if (!isTyping) {
+      setIsTyping(true);
+      socket.emit("typing", {
+        chatId: currentChat?._id,
+        userId: user?._id,
+        members: currentChat?.members,
+      });
+    }
+  };
+
+  const handleStopTyping = () => {
+    if (isTyping) {
+      setIsTyping(false);
+      socket.emit("stopTyping", {
+        chatId: currentChat?._id,
+        userId: user?._id,
+        members: currentChat?.members,
+      });
+    }
+  };
+
   return (
     <MessageContext.Provider
       value={{
@@ -409,6 +451,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         replyToMessage,
         deleteMessage,
         editMessage,
+        typingUser,
+        handleTyping,
+        handleStopTyping,
       }}
     >
       {children}

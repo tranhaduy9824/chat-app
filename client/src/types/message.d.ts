@@ -41,6 +41,9 @@ interface MessageContextProps {
   ) => void;
   deleteMessage: (messageId: string) => void;
   editMessage: (messageId: string, text: string) => void;
+  typingUser: User | null;
+  handleTyping: () => void;
+  handleStopTyping: () => void;
 }
 
 interface MessageContextProviderProps {
