@@ -96,10 +96,16 @@ const UserChat: React.FC<UserChatProps> = ({
               <>
                 <span className="fa-sm">
                   {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
-                  {truncateText(latestMessage?.text)}{" "}
+                  {latestMessage?.type === "text" && truncateText(latestMessage?.text)}{" "}
                   {latestMessage?.type === "image" && "Đã gửi một ảnh"}{" "}
                   {latestMessage?.type === "video" && "Đã gửi một video"}{" "}
                   {latestMessage?.type === "file" && "Đã gửi một file"}{" "}
+                  {latestMessage?.type === "call" &&
+                    latestMessage?.text.includes("missed") &&
+                    "Cuộc gọi nhỡ"}{" "}
+                  {latestMessage?.type === "call" &&
+                    !latestMessage?.text.includes("missed") &&
+                    "Kết thúc cuộc gọi"}{" "}
                 </span>
                 <span className="message-footer fa-sm">
                   - {moment(latestMessage?.createdAt).fromNow()}

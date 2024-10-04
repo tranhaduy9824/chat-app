@@ -5,6 +5,7 @@ import React, {
   useState,
   useCallback,
   useContext,
+  useRef,
 } from "react";
 import {
   baseUrl,
@@ -18,6 +19,7 @@ import { ChatContext } from "./ChatContext";
 import { User } from "../types/auth";
 import { AuthContext } from "./AuthContext";
 import { useLoading } from "./LoadingContext";
+import notificationSound from "../assets/sound_notification.mp3";
 
 export const MessageContext = createContext<MessageContextProps | undefined>(
   undefined
@@ -30,6 +32,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [newMessage, setNewMessage] = useState<Message[] | null>(null);
   const [notifications, setNotifications] = useState<Message[] | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
@@ -74,8 +77,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     if (socket === null) return;
 
     socket.on("getMessage", (res: Message) => {
-      console.log(res);
-      if (currentChat?._id !== res.chatId) return;
+      if (res.type !== "call" && currentChat?._id !== res.chatId) {
+        return;
+      }
 
       setMessages((prev) => {
         if (prev && prev[0]?._id === res._id) {
@@ -141,6 +145,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         setNotifications((prev) => [{ ...res, isRead: true }, ...(prev || [])]);
       } else {
         setNotifications((prev) => [res, ...(prev || [])]);
+        playNotificationSound();
       }
     });
 
@@ -377,6 +382,16 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     },
     []
   );
+
+  const playNotificationSound = () => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  };
+
+  useEffect(() => {
+    audioRef.current = new Audio(notificationSound);
+  }, []);
 
   return (
     <MessageContext.Provider

@@ -10,7 +10,7 @@ export const useFetchLatestMessage = (
   chat: Chat | null
 ): FetchLatestMessageProps => {
   const [latestMessage, setLatestMessage] = useState<Message | null>(null);
-  const { newMessage, notifications } = useContext(MessageContext)!;
+  const { newMessage, notifications, messages } = useContext(MessageContext)!;
 
   useEffect(() => {
     const getMessages = async () => {
@@ -36,7 +36,7 @@ export const useFetchLatestMessage = (
     };
 
     getMessages();
-  }, [chat, newMessage, notifications]);
+  }, [chat, newMessage, notifications, messages]);
 
   return { latestMessage };
 };

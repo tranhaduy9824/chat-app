@@ -14,6 +14,7 @@ import {
   faVideoSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import callSound from "../../assets/sound_call.mp3";
 
 interface VideoCallProps {
   socket: Socket;
@@ -56,6 +57,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
   const [isMounted, setIsMounted] = useState(isCalling);
   const [isRejected, setIsRejected] = useState<boolean>(false);
   const [recipientOnAnotherCall, setRecipientOnAnotherCall] = useState(false);
+  let callAudio: HTMLAudioElement | null = null;
 
   const startCall = async () => {
     if (!isMounted) return;
@@ -118,10 +120,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
       console.error("Error starting call:", error);
     }
   };
-
-  useEffect(() => {
-    console.log("isIncomingCall:", isIncomingCall);
-  }, [isIncomingCall]);
 
   const handleIncomingCall = async ({
     callerId,
@@ -449,7 +447,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
     });
   };
 
-  const rejectCall = () => {
+  const rejectCall = (showNotificateReject: boolean = true) => {
     console.log("Call rejected");
     const chatId = savedChatId || currentChat?._id;
     const members =
@@ -462,6 +460,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
         chatId,
         userId: user?._id,
         members,
+        showNotificateReject
       });
     }
 
@@ -486,8 +485,24 @@ const VideoCall: React.FC<VideoCallProps> = ({
     }
   };
 
+  const playCallSound = () => {
+    const audio = new Audio(callSound);
+    audio.loop = true;
+    audio.autoplay = true;
+    audio.play();
+    return audio;
+  };
+
+  const stopCallSound = (audio: HTMLAudioElement) => {
+    audio.pause();
+    audio.currentTime = 0;
+  };
+
   useEffect(() => {
     setIsMounted(true);
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
 
     return () => {
       setIsMounted(false);
@@ -564,6 +579,40 @@ const VideoCall: React.FC<VideoCallProps> = ({
     }
   }, [isRejected, isIncomingCall]);
 
+  useEffect(() => {
+    if (isIncomingCall) {
+      if (Notification.permission === "granted") {
+        const notification = new Notification("Incoming call", {
+          body: "You have an incoming call",
+        });
+
+        notification.onclick = () => {
+          window.focus();
+        };
+
+        callAudio = playCallSound();
+      }
+    }
+
+    return () => {
+      if (callAudio) {
+        stopCallSound(callAudio);
+      }
+    };
+  }, [isIncomingCall]);
+
+  useEffect(() => {
+    if (isIncomingCall) {
+      const timer = setTimeout(() => {
+        if (!isCallAccepted) {
+          rejectCall();
+        }
+      }, 20000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isIncomingCall, isCallAccepted]);
+
   return (
     <WrapperModal
       show={
@@ -592,7 +641,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 />
                 <h3 className="my-2">{callerInfo?.callerName} gọi đến...</h3>
                 <div className="d-flex align-items-center justify-content-center gap-3 mt-4">
-                  <button onClick={rejectCall} className="control-btn">
+                  <button onClick={() => rejectCall()} className="control-btn">
                     <FontAwesomeIcon icon={faTimes as IconProp} />
                   </button>
                   <button
@@ -642,7 +691,11 @@ const VideoCall: React.FC<VideoCallProps> = ({
                     )}
                   </button>
                   <button
-                    onClick={() => endCall()}
+                    onClick={() =>
+                      !(isCallAccepted && canNotStart)
+                        ? rejectCall(false)
+                        : endCall()
+                    }
                     className="control-btn bg-danger cancel-call"
                   >
                     <FontAwesomeIcon icon={faPhone as IconProp} />

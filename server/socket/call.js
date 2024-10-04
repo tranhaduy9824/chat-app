@@ -183,50 +183,55 @@ const handleVideoCall = (io, socket, onlineUsers) => {
     }
   });
 
-  socket.on("rejectCall", async ({ chatId, userId, members }) => {
-    try {
-      if (!Array.isArray(members)) {
-        socket.emit("error", {
-          message: "Members list is not defined or not an array.",
-        });
-        return;
-      }
+  socket.on(
+    "rejectCall",
+    async ({ chatId, userId, members, showNotificateReject = true }) => {
+      try {
+        if (!Array.isArray(members)) {
+          socket.emit("error", {
+            message: "Members list is not defined or not an array.",
+          });
+          return;
+        }
 
-      members.forEach((member) => {
-        if (member !== userId) {
+        members.forEach((member) => {
+          if (showNotificateReject && member !== userId) {
+            const recipient = onlineUsers.find(
+              (user) => user.userId === member
+            );
+            if (recipient) {
+              io.to(recipient.socketId).emit("callRejected");
+            }
+          }
+          activeCalls.delete(member);
+        });
+
+        const startTime = callStartTimes.get(chatId);
+        const callDuration = startTime
+          ? Math.floor((Date.now() - startTime) / 1000)
+          : null;
+        const callerId = callInitiators.get(chatId);
+        const callMessage = await messageController.createCallMessage(
+          chatId,
+          callerId,
+          "Video",
+          "missed",
+          callDuration
+        );
+        callStartTimes.delete(chatId);
+        callInitiators.delete(chatId);
+
+        members.forEach((member) => {
           const recipient = onlineUsers.find((user) => user.userId === member);
           if (recipient) {
-            io.to(recipient.socketId).emit("callRejected");
+            io.to(recipient.socketId).emit("getMessage", callMessage);
           }
-        }
-        activeCalls.delete(member);
-      });
-
-      const startTime = callStartTimes.get(chatId);
-      const callDuration = startTime
-        ? Math.floor((Date.now() - startTime) / 1000)
-        : null;
-      const callerId = callInitiators.get(chatId);
-      const callMessage = await messageController.createCallMessage(
-        chatId,
-        callerId,
-        "Video",
-        "missed",
-        callDuration
-      );
-      callStartTimes.delete(chatId);
-      callInitiators.delete(chatId);
-
-      members.forEach((member) => {
-        const recipient = onlineUsers.find((user) => user.userId === member);
-        if (recipient) {
-          io.to(recipient.socketId).emit("getMessage", callMessage);
-        }
-      });
-    } catch (error) {
-      console.error("Error handling rejectCall:", error);
+        });
+      } catch (error) {
+        console.error("Error handling rejectCall:", error);
+      }
     }
-  });
+  );
 };
 
 module.exports = {
