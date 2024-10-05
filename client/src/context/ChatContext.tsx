@@ -1,10 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { baseUrl, getRequest, postRequest } from "../utils/services";
 import { User } from "../types/auth";
 import { useLoading } from "./LoadingContext";
 import { useNotification } from "./NotificationContext";
-import { io, Socket } from "socket.io-client";
+import { AuthContext } from "./AuthContext";
 
 export const ChatContext = createContext<ChatContextProps | undefined>(
   undefined
@@ -18,25 +25,17 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
   const [potentialChats, setPotentialChats] = useState<User[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   const { setProgress } = useLoading();
   const { addNotification } = useNotification();
 
-  useEffect(() => {
-    const newSocket = io("http://localhost:3000");
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [user]);
+  const { socket } = useContext(AuthContext)!;
 
   useEffect(() => {
-    if (socket === null) return;
+    if (socket === null || !user?._id) return;
     socket.emit("addNewUser", user?._id);
-    socket.on("getOnlineUsers", (res) => {
+    socket.on("getOnlineUsers", (res: any) => {
       setOnlineUsers(res);
     });
 
@@ -144,7 +143,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         updateCurrentChat,
         allUsers,
         onlineUsers,
-        socket
+        socket,
       }}
     >
       {children}

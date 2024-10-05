@@ -1,5 +1,9 @@
 const handleUserConnection = (io, socket, onlineUsers) => {
   socket.on("addNewUser", (userId) => {
+    if (!userId) {
+      return;
+    }
+
     const existingUserIndex = onlineUsers.findIndex(
       (user) => user.userId === userId
     );
@@ -17,7 +21,14 @@ const handleUserConnection = (io, socket, onlineUsers) => {
 
 const handleUserDisconnection = (io, socket, onlineUsers) => {
   socket.on("disconnect", () => {
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+    console.log("Disconnected", socket.id);
+    
+    const userIndex = onlineUsers.findIndex((user) => user.socketId === socket.id);
+    if (userIndex !== -1) {
+      onlineUsers.splice(userIndex, 1);
+    }
+
+    console.log("onlineUsers", onlineUsers);
     io.emit("getOnlineUsers", onlineUsers);
   });
 };

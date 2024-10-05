@@ -4,6 +4,8 @@ import { useContext } from "react";
 import Avatar from "../Avatar";
 import { AuthContext } from "../../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faPhone, faPhoneSlash } from "@fortawesome/free-solid-svg-icons";
+import { formatCallDuration } from "../../utils/format";
 
 interface MediaPreviewProps {
   mediaPreview: string;
@@ -32,7 +34,9 @@ function MediaPreview({
             marginRight: "43px",
             borderRadius: "50px 50px 0 50px ",
             backgroundColor:
-              replyingTo.type === "text" || replyingTo.type === "file"
+              replyingTo.type === "text" ||
+              replyingTo.type === "file" ||
+              replyingTo.type === "call"
                 ? "#dce2f0"
                 : "",
             padding:
@@ -91,6 +95,30 @@ function MediaPreview({
                 <span className="small">1.8 KB</span>
               </div>
             </a>
+          )}
+          {replyingTo.type === "call" && (
+            <div className="d-flex align-items-center text-black">
+              <FontAwesomeIcon
+                icon={
+                  replyingTo.text.includes("missed")
+                    ? (faPhoneSlash as IconProp)
+                    : (faPhone as IconProp)
+                }
+                className="mx-2"
+              />
+              <span className="fw-bold">
+                {replyingTo.text.includes("missed") ? (
+                  "Cuộc gọi nhỡ"
+                ) : (
+                  <>
+                    Kết thúc cuộc gọi{" "}
+                    <div className="fw-normal">
+                      {formatCallDuration(replyingTo?.callDuration)}
+                    </div>
+                  </>
+                )}
+              </span>
+            </div>
           )}
         </div>
       )}

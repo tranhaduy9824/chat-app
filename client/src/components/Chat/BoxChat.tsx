@@ -157,6 +157,8 @@ function BoxChat({
   }, []);
 
   useEffect(() => {
+    setEdit(null);
+    setReplyingTo(null);
     setPage(1);
   }, [currentChat]);
 
@@ -425,6 +427,10 @@ function BoxChat({
                       ? "Hình ảnh"
                       : replyingTo?.type === "file"
                       ? "File đính kèm"
+                      : replyingTo?.type === "call"
+                      ? replyingTo.text.includes("missed")
+                        ? "Cuộc gọi nhỡ"
+                        : "Kết thúc cuộc gọi"
                       : replyingTo?.text}
                   </div>
                 </div>

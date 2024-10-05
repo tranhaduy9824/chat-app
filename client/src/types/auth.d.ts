@@ -30,4 +30,6 @@ export interface AuthContextType {
   isLoginLoading: boolean;
   updateAvatar: (file: File) => Promise<void>;
   updateUser: (e: React.FormEvent) => Promise<void>;
+  socket: Socket;
+  setSocket: React.Dispatch<React.SetStateAction<Socket>>;
 }

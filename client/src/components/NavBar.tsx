@@ -9,6 +9,7 @@ import Avatar from "./Avatar";
 import Tippy from "@tippyjs/react";
 import "tippy.js/themes/light.css";
 import EditProfile from "./Modal/EditProfile";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function NavBar() {
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -24,7 +25,10 @@ function NavBar() {
         <Container>
           <h3 className="mb-0">
             <NavLink to="/" className="link-dark text-decoration-none fw-bold">
-              <FontAwesomeIcon icon={faComments} className=" me-2" />
+              <FontAwesomeIcon
+                icon={faComments as IconProp}
+                className=" me-2"
+              />
               Chat
             </NavLink>
           </h3>
@@ -48,7 +52,9 @@ function NavBar() {
                           Edit profile
                         </span>
                         <NavLink
-                          onClick={() => logoutUser()}
+                          onClick={() => {
+                            logoutUser();
+                          }}
                           to="/login"
                           className="link-dark text-decoration-none fw-bold p-2"
                         >

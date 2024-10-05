@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
   useCallback,
@@ -10,6 +11,7 @@ import { AuthContextType, User, RegisterInfo, LoginInfo } from "../types/auth";
 import { useLoading } from "./LoadingContext";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "./NotificationContext";
+import { io, Socket } from "socket.io-client";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
@@ -17,7 +19,8 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [user, setUser] = useState<User | null | any>(null);
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const [registerInfo, setRegisterInfo] = useState<RegisterInfo>({
     fullname: "",
@@ -32,6 +35,15 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const { setProgress } = useLoading();
   const { addNotification } = useNotification();
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:3000");
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
 
   const updateRegisterInfo = useCallback((info: RegisterInfo) => {
     setRegisterInfo(info);
@@ -112,7 +124,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const logoutUser = useCallback(() => {
     localStorage.removeItem("User");
     setUser(null);
-  }, []);
+    socket?.disconnect();
+  }, [socket]);
 
   const updateAvatar = useCallback(
     async (file: File) => {
@@ -192,6 +205,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         updateLoginInfo,
         updateAvatar,
         updateUser,
+        socket,
+        setSocket,
       }}
     >
       {children}
