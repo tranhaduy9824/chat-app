@@ -10,7 +10,7 @@
   width: 100vw;
   height: 100vh;
   font-family: "Mali", sans-serif !important;
-  background-image: linear-gradient(45deg, #a68bff, #dce2f0) !important;
+  background-image: linear-gradient(45deg, #a68bff, #dce2f0);
   padding: 10px;
 }
 
@@ -333,5 +333,56 @@
   }
   30% {
     transform: translateY(-10px);
+  }
+}
+
+.users-container {
+  border-radius: var(--border-radius);
+  min-width: 450px;
+  max-width: 450px;
+}
+
+@media (max-width: 1023px) {
+  .users-container {
+    min-width: 350px;
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .users-container {
+    min-width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: calc(100vh - 155px);
+  }
+
+  .camera-container video,
+  .camera-container img {
+    max-height: 30%;
+  }
+
+  .camera-container > div,
+  .camera-container > button {
+    bottom: calc(50% - 15% + 50px) !important;
+  }
+
+  .local-video,
+  .remote-video {
+    width: 100%;
+    height: max-content;
+  }
+
+  .local-video {
+    max-width: 35%;
+  }
+
+  .local-video.fullscreen {
+    height: 50vh;
+    height: max-content;
+  }
+
+  .message-media {
+    max-width: 140px !important;
+    max-height: 160px !important;
   }
 }

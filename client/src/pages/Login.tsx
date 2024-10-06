@@ -5,6 +5,7 @@ import { faFacebookF, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import gsap from "gsap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function Login() {
   const { loginUser, loginInfo, updateLoginInfo, isLoginLoading } =
@@ -19,8 +20,18 @@ function Login() {
       ease: "power1",
     });
   };
+
+  const animateBackground = (toGradient: string) => {
+    gsap.to("#root", {
+      duration: 0.8,
+      backgroundImage: toGradient,
+      ease: "power1.inOut",
+    });
+  };
+
   useEffect(() => {
     rotate();
+    animateBackground("linear-gradient(45deg, #a68bff, #dce2f0)");
 
     return () => {
       rotate();
@@ -89,11 +100,14 @@ function Login() {
             </div>
             <div className="mb-3">
               <Button variant="facebook" className="btn btn-primary w-100 mb-2">
-                <FontAwesomeIcon icon={faFacebookF} className="me-2" />
+                <FontAwesomeIcon
+                  icon={faFacebookF as IconProp}
+                  className="me-2"
+                />
                 Login with Facebook
               </Button>
               <Button variant="google" className="btn btn-danger w-100">
-                <FontAwesomeIcon icon={faGoogle} className="me-2" />
+                <FontAwesomeIcon icon={faGoogle as IconProp} className="me-2" />
                 Login with Google
               </Button>
             </div>

@@ -10,10 +10,12 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/themes/light.css";
 import EditProfile from "./Modal/EditProfile";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { ChatContext } from "../context/ChatContext";
 
 function NavBar() {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const { user, logoutUser } = useContext(AuthContext)!;
+  const { setCurrentChat } = useContext(ChatContext)!;
 
   return (
     <>
@@ -24,16 +26,23 @@ function NavBar() {
       >
         <Container>
           <h3 className="mb-0">
-            <NavLink to="/" className="link-dark text-decoration-none fw-bold">
+            <NavLink
+              to="/"
+              onClick={() => setCurrentChat(null)}
+              className="link-dark text-decoration-none fw-bold"
+            >
               <FontAwesomeIcon
                 icon={faComments as IconProp}
                 className=" me-2"
               />
-              Chat
+              <span className="d-none d-md-inline">Chat</span>
             </NavLink>
           </h3>
           {user && (
-            <span className="fw-bold">Logged in as {user?.fullname}</span>
+            <span className="fw-bold">
+              <span className="d-none d-md-inline">Logged in as </span>
+              {user?.fullname}
+            </span>
           )}
           <Nav>
             <Stack direction="horizontal" gap={3}>

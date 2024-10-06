@@ -21,8 +21,18 @@ function Register() {
       ease: "power1",
     });
   };
+
+  const animateBackground = (toGradient: string) => {
+    gsap.to("#root", {
+      duration: 0.8,
+      backgroundImage: toGradient,
+      ease: "power1.inOut",
+    });
+  };
+
   useEffect(() => {
     rotate();
+    animateBackground("linear-gradient(45deg, #dce2f0, #a68bff)");
 
     return () => {
       rotate();

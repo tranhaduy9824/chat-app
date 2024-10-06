@@ -144,6 +144,7 @@ function MediaPreview({
                 borderRadius: "10px",
                 opacity: 0.5,
               }}
+              className="message-media"
             />
           ) : type === "video" ? (
             <video
@@ -157,6 +158,7 @@ function MediaPreview({
                 borderRadius: "10px",
                 opacity: 0.5,
               }}
+              className="message-media"
             />
           ) : type === "file" ? (
             <a

@@ -215,6 +215,7 @@ const MessageContent = ({
               height: "auto",
               borderRadius: "10px",
             }}
+            className="message-media"
           />
         )}
         {msg.type === "video" && (
@@ -228,6 +229,7 @@ const MessageContent = ({
               height: "auto",
               borderRadius: "10px",
             }}
+            className="message-media"
           />
         )}
         {msg.type === "file" && (

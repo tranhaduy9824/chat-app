@@ -144,6 +144,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         allUsers,
         onlineUsers,
         socket,
+        setCurrentChat
       }}
     >
       {children}

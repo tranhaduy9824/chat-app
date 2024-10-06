@@ -8,6 +8,7 @@ import { AuthContext } from "../../context/AuthContext";
 import UserChat from "./UserChat";
 import { MessageContext } from "../../context/MessageContext";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
@@ -23,14 +24,7 @@ function Users() {
     useContext(MessageContext)!;
 
   return (
-    <div
-      className="bg-white py-3 shadow-sm"
-      style={{
-        borderRadius: "var(--border-radius)",
-        minWidth: "450px",
-        maxWidth: "450px",
-      }}
-    >
+    <div className="bg-white py-3 shadow-sm users-container">
       <div className="w-100 px-3 mb-3 position-relative">
         <input
           type="text"
@@ -49,7 +43,7 @@ function Users() {
             cursor: "pointer",
           }}
         >
-          <FontAwesomeIcon icon={faSearch} />
+          <FontAwesomeIcon icon={faSearch as IconProp} />
         </div>
       </div>
       <div className="list-friend mx-3 d-flex align-items-center gap-3 overflow-x-auto mb-3">

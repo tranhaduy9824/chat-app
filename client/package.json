@@ -20,6 +20,7 @@
     "bootstrap": "^5.3.3",
     "emoji-picker-react": "^4.11.1",
     "gsap": "^3.12.5",
+    "interactjs": "^1.10.27",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
     "react": "^18.3.1",

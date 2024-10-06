@@ -10,6 +10,7 @@ import {
   faTimes,
   faCamera,
   faCheck,
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { useContext, useEffect, useRef, useState } from "react";
 import { faImages, faSmile } from "@fortawesome/free-regular-svg-icons";
@@ -27,6 +28,9 @@ import MediaPreview from "./MediaPreview";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Camera from "./Camera";
 import { useNotification } from "../../context/NotificationContext";
+import useIsMobile from "../../hooks/useIsMobile";
+import gsap from "gsap";
+import { Draggable } from "gsap/all";
 
 function BoxChat({
   showInfoChat,
@@ -45,6 +49,10 @@ function BoxChat({
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
   const inputMessageRef = useRef<HTMLInputElement | null>(null);
   const [showCamera, setShowCamera] = useState<boolean>(false);
+  const [showUsers, setShowUsers] = useState(false);
+  const [chatBubbleTransform, setChatBubbleTransform] = useState(
+    "translate3d(0, 0, 0)"
+  );
 
   const { user } = useContext(AuthContext)!;
   const { currentChat, onlineUsers, socket } = useContext(ChatContext)!;
@@ -60,6 +68,7 @@ function BoxChat({
     handleStopTyping,
   } = useContext(MessageContext)!;
   const { addNotification } = useNotification();
+  const isMobile = useIsMobile();
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -246,6 +255,54 @@ function BoxChat({
     }
   };
 
+  useEffect(() => {
+    if (isMobile) {
+      gsap.registerPlugin(Draggable);
+    if (!showUsers) {
+      gsap.to("#chatBubble", {
+        transform: chatBubbleTransform,
+        top: "auto",
+        right: "auto",
+        duration: 0.5,
+      });
+
+      Draggable.create("#chatBubble", {
+        bounds: {
+          minX: -27,
+          minY: -85,
+          maxX: window.innerWidth - 77,
+          maxY: window.innerHeight - 140,
+        },
+        onDragEnd: function () {
+          const transform = window.getComputedStyle(this.target).transform;
+          setChatBubbleTransform(transform);
+        },
+      });
+    } else {
+      Draggable.get("#chatBubble")?.disable();
+    }
+    }
+  }, [showUsers, isMobile]);
+
+  useEffect(() => {
+    if (isMobile) {
+      if (showUsers) {
+        gsap.to("#chatBubble", {
+          transform: "translate3d(0, 0, 0)",
+          top: "85px",
+          right: "20px",
+          duration: 0.5,
+        });
+      }
+  
+      gsap.to(".users-container", {
+        y: showUsers ? "0%" : "-100%",
+        opacity: showUsers ? 1 : 0,
+        duration: 0.5,
+      });
+    }
+  }, [showUsers, isMobile]);  
+
   return (
     <div
       className="flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between"
@@ -254,9 +311,29 @@ function BoxChat({
         backgroundColor: "#e9ecf5",
       }}
     >
-      <Users />
+      {isMobile ? (
+        <div
+          className="users-container z-2"
+          style={{
+            position: "absolute",
+            left: "10px",
+            top: showUsers ? "145px" : "-100%",
+            right: "0",
+            bottom: "0",
+            opacity: 0,
+            transition: "top 0.5s",
+          }}
+        >
+          <Users />
+        </div>
+      ) : (
+        <Users />
+      )}
       {!currentChat ? (
-        <div className="flex-grow-1 ps-3 d-flex flex-column align-items-center justify-content-center">
+        <div
+          className="flex-grow-1 d-flex flex-column align-items-center justify-content-center"
+          style={{ paddingLeft: isMobile ? "0" : "16px" }}
+        >
           <h3>Welcome to ChatApp</h3>
           <img
             src={backgroundImage}
@@ -265,7 +342,10 @@ function BoxChat({
           />
         </div>
       ) : (
-        <div className="flex-grow-1 ps-3 d-flex flex-column">
+        <div
+          className="flex-grow-1 d-flex flex-column"
+          style={{ paddingLeft: isMobile ? "0" : "16px" }}
+        >
           <div className="d-flex align-items-center justify-content-between">
             <div className="d-flex align-items-center gap-2 position-relative">
               <Avatar
@@ -575,6 +655,25 @@ function BoxChat({
           onClose={() => setShowCamera(false)}
           setMediaPreview={setMediaPreview}
         />
+      )}
+      {isMobile && (
+        <span
+          id="chatBubble"
+          className="position-absolute icon-hover d-flex align-items-center justify-content-center rounded-circle text-white p-3 z-2"
+          style={{
+            width: "3.2rem",
+            height: "3.2rem",
+            backgroundColor: "rgb(234, 103, 164)",
+          }}
+          onClick={() => {
+            setShowUsers(!showUsers);
+          }}
+        >
+          <FontAwesomeIcon
+            icon={faUsers as IconProp}
+            style={{ fontSize: "24px" }}
+          />
+        </span>
       )}
     </div>
   );
