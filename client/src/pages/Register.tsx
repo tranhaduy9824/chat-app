@@ -32,8 +32,6 @@ function Register() {
     });
   };
 
-  console.log(isDarkTheme);
-
   useEffect(() => {
     rotate();
     setTimeout(() => {

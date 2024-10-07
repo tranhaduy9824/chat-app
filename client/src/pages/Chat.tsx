@@ -30,10 +30,12 @@ function Chat() {
   }, [currentChat, socket]);
 
   useEffect(() => {
-    const root = document.getElementById("root");
-    if (root) {
-      root.style.backgroundImage = "";
-    }
+    setTimeout(() => {
+      const root = document.getElementById("root");
+      if (root) {
+        root.style.removeProperty("background-image");
+      }
+    }, 1000);
   }, []);
 
   return (
