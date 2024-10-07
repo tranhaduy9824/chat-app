@@ -9,6 +9,7 @@ import UserChat from "./UserChat";
 import { MessageContext } from "../../context/MessageContext";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useTheme } from "../../context/ThemeContext";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
@@ -22,18 +23,26 @@ function Users() {
   } = useContext(ChatContext)!;
   const { notifications, markThisUserNotificationsAsRead } =
     useContext(MessageContext)!;
+  const { isDarkTheme } = useTheme();
 
   return (
-    <div className="bg-white py-3 shadow-sm users-container">
+    <div
+      className="py-3 shadow-sm users-container"
+      style={{ backgroundColor: isDarkTheme ? "black" : "white" }}
+    >
       <div className="w-100 px-3 mb-3 position-relative">
         <input
           type="text"
-          className="form-control rounded-pill fw-bold"
+          className={`form-control rounded-pill fw-bold  ${
+            isDarkTheme ? "bg-dark text-light" : ""
+          }`}
           placeholder="Search"
           style={{ backgroundColor: "#e9ecf5", padding: "8px 50px 8px 12px" }}
         />
         <div
-          className="d-flex align-items-center justify-content-center rounded-circle ml-2 position-absolute top-0 h-100"
+          className={`d-flex align-items-center justify-content-center rounded-circle ml-2 position-absolute top-0 h-100  ${
+            isDarkTheme ? "bg-dark text-light" : ""
+          }`}
           style={{
             width: "auto",
             aspectRatio: "1/1",

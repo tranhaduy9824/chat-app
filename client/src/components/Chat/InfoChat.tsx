@@ -33,7 +33,7 @@ function InfoChat() {
         height={72}
         style={{
           boxShadow:
-            "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
+            "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px",
         }}
       />
       <p className="fw-bold mt-2 mb-0" style={{ fontSize: "1.4rem" }}>

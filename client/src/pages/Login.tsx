@@ -6,10 +6,12 @@ import gsap from "gsap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useTheme } from "../context/ThemeContext";
 
 function Login() {
   const { loginUser, loginInfo, updateLoginInfo, isLoginLoading } =
     useContext(AuthContext)!;
+  const { isDarkTheme } = useTheme();
 
   const rotate = () => {
     gsap.to(".card", {
@@ -31,18 +33,27 @@ function Login() {
 
   useEffect(() => {
     rotate();
-    animateBackground("linear-gradient(45deg, #a68bff, #dce2f0)");
+    setTimeout(() => {
+      const rootStyles = getComputedStyle(document.documentElement);
+      const bgSubPrimary = rootStyles.getPropertyValue("--bg-primary").trim();
+      const bgPrimary = rootStyles.getPropertyValue("--bg-sub-primary").trim();
+      const gradient = `linear-gradient(45deg, ${bgSubPrimary}, ${bgPrimary})`;
+
+      animateBackground(gradient);
+    }, 100);
 
     return () => {
       rotate();
     };
-  }, []);
+  }, [isDarkTheme]);
 
   return (
     <Container className="d-flex justify-content-center align-items-center mt-5">
       <Col xs={12} sm={8} md={6} lg={4}>
         <div
-          className="card p-4"
+          className={`card p-4 ${
+            isDarkTheme ? "text-light bg-dark" : "bg-light"
+          }`}
           style={{
             opacity: 0,
             transform: "rotateY(180deg)",
@@ -58,7 +69,9 @@ function Login() {
                 name="email"
                 id="email"
                 placeholder="Enter email"
-                className="form-control"
+                className={`form-control ${
+                  isDarkTheme ? "bg-dark text-light" : ""
+                }`}
                 onChange={(e) =>
                   updateLoginInfo({ ...loginInfo, email: e.target.value })
                 }
@@ -71,7 +84,9 @@ function Login() {
                 name="password"
                 id="password"
                 placeholder="Enter password"
-                className="form-control"
+                className={`form-control ${
+                  isDarkTheme ? "bg-dark text-light" : ""
+                }`}
                 onChange={(e) =>
                   updateLoginInfo({ ...loginInfo, password: e.target.value })
                 }
@@ -81,9 +96,11 @@ function Login() {
               <Button
                 variant="primary"
                 type="submit"
-                className="fw-bold"
+                className={`fw-bold ${
+                  isDarkTheme ? "bg-black text-light" : ""
+                }`}
                 style={{
-                  border: "2px solid var(--primary-light)",
+                  border: "2px solid var(--bg-primary-gentle)",
                   backgroundColor: "white",
                   color: "var(--text-dark)",
                 }}

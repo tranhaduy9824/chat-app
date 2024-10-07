@@ -31,6 +31,7 @@ import { useNotification } from "../../context/NotificationContext";
 import useIsMobile from "../../hooks/useIsMobile";
 import gsap from "gsap";
 import { Draggable } from "gsap/all";
+import { useTheme } from "../../context/ThemeContext";
 
 function BoxChat({
   showInfoChat,
@@ -69,6 +70,7 @@ function BoxChat({
   } = useContext(MessageContext)!;
   const { addNotification } = useNotification();
   const isMobile = useIsMobile();
+  const { isDarkTheme } = useTheme();
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -258,29 +260,29 @@ function BoxChat({
   useEffect(() => {
     if (isMobile) {
       gsap.registerPlugin(Draggable);
-    if (!showUsers) {
-      gsap.to("#chatBubble", {
-        transform: chatBubbleTransform,
-        top: "auto",
-        right: "auto",
-        duration: 0.5,
-      });
+      if (!showUsers) {
+        gsap.to("#chatBubble", {
+          transform: chatBubbleTransform,
+          top: "auto",
+          right: "auto",
+          duration: 0.5,
+        });
 
-      Draggable.create("#chatBubble", {
-        bounds: {
-          minX: -27,
-          minY: -85,
-          maxX: window.innerWidth - 77,
-          maxY: window.innerHeight - 140,
-        },
-        onDragEnd: function () {
-          const transform = window.getComputedStyle(this.target).transform;
-          setChatBubbleTransform(transform);
-        },
-      });
-    } else {
-      Draggable.get("#chatBubble")?.disable();
-    }
+        Draggable.create("#chatBubble", {
+          bounds: {
+            minX: -27,
+            minY: -85,
+            maxX: window.innerWidth - 77,
+            maxY: window.innerHeight - 140,
+          },
+          onDragEnd: function () {
+            const transform = window.getComputedStyle(this.target).transform;
+            setChatBubbleTransform(transform);
+          },
+        });
+      } else {
+        Draggable.get("#chatBubble")?.disable();
+      }
     }
   }, [showUsers, isMobile]);
 
@@ -294,18 +296,20 @@ function BoxChat({
           duration: 0.5,
         });
       }
-  
+
       gsap.to(".users-container", {
         y: showUsers ? "0%" : "-100%",
         opacity: showUsers ? 1 : 0,
         duration: 0.5,
       });
     }
-  }, [showUsers, isMobile]);  
+  }, [showUsers, isMobile]);
 
   return (
     <div
-      className="flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between"
+      className={`flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between ${
+        isDarkTheme ? "bg-dark text-light" : ""
+      }`}
       style={{
         borderRadius: "var(--border-radius)",
         backgroundColor: "#e9ecf5",
@@ -331,7 +335,9 @@ function BoxChat({
       )}
       {!currentChat ? (
         <div
-          className="flex-grow-1 d-flex flex-column align-items-center justify-content-center"
+          className={`flex-grow-1 d-flex flex-column align-items-center justify-content-center ${
+            isDarkTheme ? "text-light" : ""
+          }`}
           style={{ paddingLeft: isMobile ? "0" : "16px" }}
         >
           <h3>Welcome to ChatApp</h3>
@@ -351,8 +357,9 @@ function BoxChat({
               <Avatar
                 user={recipientUser}
                 style={{
-                  boxShadow:
-                    "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
+                  boxShadow: !isDarkTheme
+                    ? "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px"
+                    : "#c2d6ff63 0px 8px 24px, #c2d6ff63 0px 16px 56px, #c2d6ff63 0px 24px 80px",
                 }}
               />
               <div
@@ -468,7 +475,11 @@ function BoxChat({
                 return (
                   <div key={index}>
                     {showTimestamp && (
-                      <div className="text-center text-muted small my-2 fw-bold">
+                      <div
+                        className={`text-center small my-2 fw-bold ${
+                          isDarkTheme ? "text-light" : "text-muted"
+                        }`}
+                      >
                         {moment(msg.createdAt).calendar()}
                       </div>
                     )}

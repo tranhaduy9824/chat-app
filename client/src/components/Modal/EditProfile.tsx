@@ -6,6 +6,7 @@ import Avatar from "../Avatar";
 import { Button } from "react-bootstrap";
 import { useNotification } from "../../context/NotificationContext";
 import validator from "validator";
+import { useTheme } from "../../context/ThemeContext";
 
 interface EditProfileProps {
   show: boolean;
@@ -22,6 +23,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
 
   const { user, updateAvatar, updateUser } = useContext(AuthContext)!;
   const { addNotification } = useNotification();
+  const { isDarkTheme } = useTheme();
 
   const resetInfo = () => {
     setFullname(user?.fullname || "");
@@ -123,7 +125,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                 <input
                   type="text"
                   id="fullname"
-                  className="form-control"
+                  className={`form-control ${
+                    isDarkTheme ? "bg-dark text-light" : ""
+                  }`}
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
                 />
@@ -135,7 +139,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                 <input
                   type="email"
                   id="email"
-                  className="form-control"
+                  className={`form-control ${
+                    isDarkTheme ? "bg-dark text-light" : ""
+                  }`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -146,8 +152,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                   type="button"
                   style={{
                     border: "2px solid rgb(234, 103, 164)",
-                    backgroundColor: "white",
-                    color: "var(--text-dark)",
+                    backgroundColor: isDarkTheme ? "black" : "white",
+                    color: isDarkTheme ? "white" : "black",
                   }}
                   onClick={() => setIsChangePasswordMode(true)}
                 >
@@ -157,9 +163,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                   variant="primary"
                   type="submit"
                   style={{
-                    border: "2px solid var(--primary-light)",
-                    backgroundColor: "white",
-                    color: "var(--text-dark)",
+                    border: "2px solid var(--bg-primary-gentle)",
+                    backgroundColor: isDarkTheme ? "black" : "white",
+                    color: isDarkTheme ? "white" : "black",
                   }}
                 >
                   Save
@@ -185,7 +191,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                 <input
                   type="password"
                   id="current-password"
-                  className="form-control"
+                  className={`form-control ${
+                    isDarkTheme ? "bg-dark text-light" : ""
+                  }`}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                 />
@@ -197,7 +205,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                 <input
                   type="password"
                   id="new-password"
-                  className="form-control"
+                  className={`form-control ${
+                    isDarkTheme ? "bg-dark text-light" : ""
+                  }`}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
@@ -209,7 +219,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                 <input
                   type="password"
                   id="confirm-password"
-                  className="form-control"
+                  className={`form-control ${
+                    isDarkTheme ? "bg-dark text-light" : ""
+                  }`}
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
                 />
@@ -220,8 +232,8 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                   className="me-2"
                   style={{
                     border: "2px solid rgb(234, 103, 164)",
-                    backgroundColor: "white",
-                    color: "var(--text-dark)",
+                    color: isDarkTheme ? "white" : "black",
+                    backgroundColor: isDarkTheme ? "black" : "white",
                   }}
                   onClick={() => setIsChangePasswordMode(false)}
                 >
@@ -231,9 +243,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ show, onClose }) => {
                   variant="primary"
                   type="submit"
                   style={{
-                    border: "2px solid var(--primary-light)",
-                    backgroundColor: "white",
-                    color: "var(--text-dark)",
+                    border: "2px solid var(--bg-primary-gentle)",
+                    color: isDarkTheme ? "white" : "black",
+                    backgroundColor: isDarkTheme ? "black" : "white",
                   }}
                 >
                   Update password

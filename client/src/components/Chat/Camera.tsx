@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 interface CameraProps {
   onCapture: (file: File) => void;
@@ -19,6 +20,8 @@ function Camera({ onCapture, onClose, setMediaPreview }: CameraProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+
+  const { isDarkTheme } = useTheme();
 
   const handleCapturePhoto = async () => {
     if (videoRef.current && canvasRef.current) {
@@ -104,8 +107,15 @@ function Camera({ onCapture, onClose, setMediaPreview }: CameraProps) {
           <img
             src={capturedPhoto}
             alt="Captured"
-            style={{ height: "100%" }}
-            className="p-3 bg-white rounded-3 mb-3"
+            style={{
+              height: "100%",
+              boxShadow: !isDarkTheme
+                ? "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px"
+                : "#c2d6ff63 0px 8px 24px, #c2d6ff63 0px 16px 56px, #c2d6ff63 0px 24px 80px",
+            }}
+            className={`p-3 rounded-3 mb-3 ${
+              isDarkTheme ? "bg-dark" : "bg-white"
+            }`}
           />
           <div
             className="d-flex align-items-center gap-2 position-absolute"
@@ -132,9 +142,16 @@ function Camera({ onCapture, onClose, setMediaPreview }: CameraProps) {
         <>
           <video
             ref={videoRef}
-            style={{ width: "max-content" }}
+            style={{
+              width: "max-content",
+              boxShadow: !isDarkTheme
+                ? "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px"
+                : "#c2d6ff63 0px 8px 24px, #c2d6ff63 0px 16px 56px, #c2d6ff63 0px 24px 80px",
+            }}
             autoPlay
-            className="p-3 bg-white rounded-3 h-100 mb-3"
+            className={`p-3 rounded-3 h-100 mb-3 ${
+              isDarkTheme ? "bg-dark" : "bg-white"
+            }`}
           ></video>
           <button
             className="control-btn position-absolute"

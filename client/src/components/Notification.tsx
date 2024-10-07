@@ -7,6 +7,8 @@ import moment from "moment";
 import { MessageContext } from "../context/MessageContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
+import { useTheme } from "../context/ThemeContext";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function Notification() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +18,7 @@ function Notification() {
   const { userChats, allUsers } = useContext(ChatContext)!;
   const { notifications, markAllNotificationsAsRead, martNotificationAsRead } =
     useContext(MessageContext)!;
+  const { isDarkTheme } = useTheme();
 
   const unReadNotifications = unReadNotificationsFunc(notifications);
   const modifiedNotifications: any = notifications?.map((n) => {
@@ -46,11 +49,11 @@ function Notification() {
   return (
     <div className="position-relative" ref={notificationRef}>
       <div
-        className="position-relative me-3"
+        className={`${isDarkTheme && "text-light"} position-relative me-3`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <FontAwesomeIcon
-          icon={faBell}
+          icon={faBell as IconProp}
           style={{ fontSize: "20px", cursor: "pointer" }}
         />
         {notifications?.length === 0 ? null : (
@@ -61,13 +64,14 @@ function Notification() {
       </div>
       {isOpen && (
         <div
-          className="bg-white position-absolute top-100 end-0 p-3 rounded-4 z-3"
+          className={`position-absolute top-100 end-0 p-3 rounded-4 z-3 ${isDarkTheme ? "bg-dark text-light" : "bg-light"}`}
           style={{
             maxHeight: "50vh",
             width: "300px",
             overflowY: "auto",
-            boxShadow:
-              "var(--primary-light) 0px 8px 24px, var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px",
+            boxShadow: !isDarkTheme
+              ? "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px"
+              : "#c2d6ff63 0px 8px 24px, #c2d6ff63 0px 16px 56px, #c2d6ff63 0px 24px 80px",
           }}
         >
           <div className="d-flex justify-content-between align-items-center">

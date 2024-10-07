@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipientUser.js";
 import { User } from "../../types/auth.js";
 import Avatar from "../Avatar.js";
@@ -8,6 +8,7 @@ import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage.js";
 import moment from "moment";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
 import { MessageContext } from "../../context/MessageContext.js";
+import { useTheme } from "../../context/ThemeContext.js";
 
 interface UserChatProps {
   chat: Chat;
@@ -30,6 +31,7 @@ const UserChat: React.FC<UserChatProps> = ({
   const { onlineUsers } = useContext(ChatContext)!;
   const { notifications, markThisUserNotificationsAsRead } =
     useContext(MessageContext)!;
+  const { isDarkTheme } = useTheme();
 
   const { latestMessage } = useFetchLatestMessage(chat);
 
@@ -50,9 +52,27 @@ const UserChat: React.FC<UserChatProps> = ({
     return shortText;
   };
 
+  useEffect(() => {
+    const chatItems = document.querySelectorAll(".item-user-chat");
+    chatItems.forEach((chatItem) => {
+      (chatItem as HTMLElement).style.transition = "none";
+    });
+    setTimeout(() => {
+      chatItems.forEach((chatItem) => {
+        (chatItem as HTMLElement).style.transition =
+          "background-color 0.3s ease, border-radius 0.3s ease,border-left 0.3s ease";
+      });
+    }, 100);
+  }, [isDarkTheme]);
+
   return (
     <div
-      style={{ backgroundColor: "#e9ecf5", cursor: "pointer" }}
+      style={{
+        backgroundColor: isDarkTheme
+          ? "rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important"
+          : "#e9ecf5",
+        cursor: "pointer",
+      }}
       onClick={() => {
         if (thisUserNotification?.length !== 0) {
           markThisUserNotificationsAsRead(thisUserNotification, notifications);
@@ -60,9 +80,9 @@ const UserChat: React.FC<UserChatProps> = ({
       }}
     >
       <div
-        className={`item-user-chat d-flex align-items-center gap-2 bg-white position-relative py-2 px-3 ${
+        className={`item-user-chat d-flex align-items-center gap-2 position-relative py-2 px-3 ${
           isSelected ? "selected" : ""
-        }`}
+        } ${isDarkTheme ? "theme-dark bg-black" : "bg-white"}`}
         onClick={() => updateCurrentChat(chat)}
         style={{
           borderRadius: previousChat
@@ -70,6 +90,7 @@ const UserChat: React.FC<UserChatProps> = ({
             : nextChat
             ? "0 0 50px 0"
             : "0",
+          backgroundColor: isDarkTheme ? "black !important" : "",
         }}
       >
         <div>
@@ -96,7 +117,8 @@ const UserChat: React.FC<UserChatProps> = ({
               <>
                 <span className="fa-sm">
                   {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
-                  {latestMessage?.type === "text" && truncateText(latestMessage?.text)}{" "}
+                  {latestMessage?.type === "text" &&
+                    truncateText(latestMessage?.text)}{" "}
                   {latestMessage?.type === "image" && "Đã gửi một ảnh"}{" "}
                   {latestMessage?.type === "video" && "Đã gửi một video"}{" "}
                   {latestMessage?.type === "file" && "Đã gửi một file"}{" "}

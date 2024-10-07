@@ -170,7 +170,7 @@ const MessageContent = ({
         } ${
           user?._id !== msg?.senderId &&
           (msg.type === "image" || (msg.type === "video" && "border-none"))
-        } ${user?._id === msg?.senderId && "text-white"}`}
+        } ${user?._id === msg?.senderId ? "text-white" : "text-dark"}`}
         style={{
           maxWidth: "75%",
           borderRadius:
@@ -195,7 +195,7 @@ const MessageContent = ({
             msg.type === "file"
               ? "1px solid #ea67a4"
               : msg.type === "call"
-              ? "1px solid var(--primary-light)"
+              ? "1px solid var(--bg-primary-gentle)"
               : "",
           padding:
             msg.type === "image" || msg.type === "video"
@@ -289,7 +289,7 @@ const MessageContent = ({
             style={{
               transform: "translateY(-50%)",
               cursor: "pointer",
-              backgroundColor: "var(--primary-light)",
+              backgroundColor: "var(--bg-primary-gentle)",
             }}
           >
             {msg.reactions.slice(0, 3).map((reaction: any, index: number) => (

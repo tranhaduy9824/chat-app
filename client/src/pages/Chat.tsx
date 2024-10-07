@@ -29,6 +29,13 @@ function Chat() {
     };
   }, [currentChat, socket]);
 
+  useEffect(() => {
+    const root = document.getElementById("root");
+    if (root) {
+      root.style.backgroundImage = "";
+    }
+  }, []);
+
   return (
     <div
       className="d-flex justify-content-between align-items-center"

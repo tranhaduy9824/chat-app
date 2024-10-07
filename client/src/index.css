@@ -6,26 +6,36 @@
   box-sizing: border-box;
 }
 
-#root {
-  width: 100vw;
-  height: 100vh;
-  font-family: "Mali", sans-serif !important;
-  background-image: linear-gradient(45deg, #a68bff, #dce2f0);
-  padding: 10px;
-}
-
 :root {
   --border-radius: 20px;
 
-  --primary-light: #c2d6ff;
-  --text-light: white;
+  --bg-primary: #a68bff;
+  --bg-sub-primary: #dce2f0;
+  --text-color: white;
 
-  --primary-dark: #a5c3ff;
-  --text-dark: black;
+  --bg-primary-gentle: #c2d6ff;
+  --bg-sub-primary-gentle: #f0f5ff;
 }
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+input.bg-dark::placeholder {
+  color: #cccccc;
+  opacity: 1;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  font-family: "Mali", sans-serif !important;
+  background-image: linear-gradient(
+    45deg,
+    var(--bg-primary),
+    var(--bg-sub-primary)
+  );
+  padding: 10px;
 }
 
 .item-user-chat {
@@ -39,6 +49,11 @@
   background-color: #e9ecf5 !important;
 }
 
+.item-user-chat.theme-dark:hover,
+.item-user-chat.theme-dark.selected {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+}
+
 .item-user-chat.selected {
   border-left: 5px solid #ea67a4;
 }
@@ -49,13 +64,13 @@
 
 .icon-hover.selected,
 .icon-hover:hover {
-  background-color: var(--primary-light);
+  background-color: var(--bg-primary-gentle);
   cursor: pointer;
 }
 
 .time-message {
   width: max-content;
-  background-color: var(--primary-light);
+  background-color: var(--bg-primary-gentle);
   color: var(--text-light);
   border-radius: var(--border-radius);
   padding: 0px 5px;
@@ -194,8 +209,9 @@
 }
 
 .navbar .tippy-box {
-  box-shadow: var(--primary-light) 0px 8px 24px,
-    var(--primary-light) 0px 16px 56px, var(--primary-light) 0px 24px 80px;
+  box-shadow: var(--bg-primary-gentle) 0px 8px 24px,
+    var(--bg-primary-gentle) 0px 16px 56px,
+    var(--bg-primary-gentle) 0px 24px 80px;
   background-color: white;
   color: black;
   padding: 0;
@@ -220,8 +236,8 @@
 }
 
 .highlight {
-  border-top: 2px solid var(--primary-light);
-  border-bottom: 2px solid var(--primary-light);
+  border-top: 2px solid var(--bg-primary-gentle);
+  border-bottom: 2px solid var(--bg-primary-gentle);
   transition: background-color 0.5s ease;
 }
 
