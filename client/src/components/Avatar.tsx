@@ -1,4 +1,5 @@
 import { User } from "../types/auth";
+import avatarDefault from "../assets/avatar_default.png";
 
 interface AvatarProps {
   user: User | null;
@@ -10,7 +11,11 @@ interface AvatarProps {
 function Avatar({ user, width = 50, height = 50, style }: AvatarProps) {
   return (
     <img
-      src={`http://localhost:5000/${user?.avatar}`}
+      src={
+        user?.avatar
+          ? `https://chat-app-zqoj.onrender.com/${user?.avatar}`
+          : avatarDefault
+      }
       alt={user?.fullname}
       className="rounded-circle mr-3"
       style={{ border: "1px solid var(--bg-primary-gentle)", ...style }}
