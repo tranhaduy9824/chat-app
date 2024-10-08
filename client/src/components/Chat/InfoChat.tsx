@@ -12,7 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FontIcon } from "../Icons";
 import Tippy from "@tippyjs/react";
-import 'tippy.js/dist/tippy.css';
+import "tippy.js/dist/tippy.css";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function InfoChat() {
@@ -49,7 +49,7 @@ function InfoChat() {
             }}
           >
             <FontAwesomeIcon
-              icon={faBell}
+              icon={faBell as IconProp}
               style={{ color: "#97803d", cursor: "pointer" }}
             />
           </div>
@@ -71,7 +71,10 @@ function InfoChat() {
       <div className="item-info-chat w-100 mt-3 rounded-5 overflow-hidden">
         <div style={{ backgroundColor: "#dee4ed" }}>
           <div style={{ backgroundColor: "#eaf1f5" }}>
-            <FontAwesomeIcon icon={faThumbTack as IconProp} style={{ color: "#888fa0" }} />
+            <FontAwesomeIcon
+              icon={faThumbTack as IconProp}
+              style={{ color: "#888fa0" }}
+            />
           </div>
           Xem tin nhắn đã ghim
         </div>
@@ -84,7 +87,7 @@ function InfoChat() {
         <div style={{ backgroundColor: "#dee4ed" }}>
           <div style={{ backgroundColor: "#eaf1f5" }}>
             <FontAwesomeIcon
-              icon={faImages}
+              icon={faImages as IconProp}
               style={{ color: "#888fa0" }}
             />
           </div>{" "}
@@ -92,7 +95,10 @@ function InfoChat() {
         </div>
         <div style={{ backgroundColor: "#dee4ed" }}>
           <div style={{ backgroundColor: "#eaf1f5" }}>
-            <FontAwesomeIcon icon={faFileAlt} style={{ color: "#888fa0" }} />
+            <FontAwesomeIcon
+              icon={faFileAlt as IconProp}
+              style={{ color: "#888fa0" }}
+            />
           </div>{" "}
           File
         </div>
@@ -100,13 +106,19 @@ function InfoChat() {
       <div className="item-info-chat w-100 mt-3 rounded-5 overflow-hidden">
         <div style={{ backgroundColor: "#f5e0e0" }}>
           <div style={{ backgroundColor: "#f5eeed" }}>
-            <FontAwesomeIcon icon={faBellSlash} style={{ color: "#c2a9aa" }} />
+            <FontAwesomeIcon
+              icon={faBellSlash as IconProp}
+              style={{ color: "#c2a9aa" }}
+            />
           </div>{" "}
           Tắt thông báo
         </div>
         <div style={{ backgroundColor: "#f5e0e0" }}>
           <div style={{ backgroundColor: "#f5eeed" }}>
-            <FontAwesomeIcon icon={faBan} style={{ color: "#c2a9aa" }} />
+            <FontAwesomeIcon
+              icon={faBan as IconProp}
+              style={{ color: "#c2a9aa" }}
+            />
           </div>{" "}
           Chặn
         </div>

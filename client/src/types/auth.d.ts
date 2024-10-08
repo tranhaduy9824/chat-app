@@ -3,7 +3,7 @@ export interface User {
   fullname: string;
   email: string;
   avatar: string;
-  token: string,
+  token: string;
 }
 
 export interface RegisterInfo {
@@ -29,7 +29,10 @@ export interface AuthContextType {
   updateLoginInfo: (info: LoginInfo) => void;
   isLoginLoading: boolean;
   updateAvatar: (file: File) => Promise<void>;
-  updateUser: (e: React.FormEvent) => Promise<void>;
+  updateUser: (
+    data: object,
+    handleChangePWSuccess?: () => void
+  ) => Promise<void>;
   socket: Socket;
   setSocket: React.Dispatch<React.SetStateAction<Socket>>;
 }

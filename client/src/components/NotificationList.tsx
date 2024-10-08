@@ -5,6 +5,7 @@ import {
   faCircleXmark,
 } from "@fortawesome/free-regular-svg-icons";
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 const NotificationList = () => {
   const { notifications, removeNotification } = useNotification();
@@ -18,13 +19,13 @@ const NotificationList = () => {
           onClick={() => removeNotification(notification.id)}
         >
           {notification.type === "error" && (
-            <FontAwesomeIcon icon={faCircleXmark} />
+            <FontAwesomeIcon icon={faCircleXmark as IconProp} />
           )}{" "}
           {notification.type === "info" && (
-            <FontAwesomeIcon icon={faCircleExclamation} />
+            <FontAwesomeIcon icon={faCircleExclamation as IconProp} />
           )}{" "}
           {notification.type === "success" && (
-            <FontAwesomeIcon icon={faCircleCheck} />
+            <FontAwesomeIcon icon={faCircleCheck as IconProp} />
           )}{" "}
           {notification.message}
         </div>
