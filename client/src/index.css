@@ -9,7 +9,7 @@
 :root {
   --border-radius: 20px;
 
-  --bg-primary: #a68bff;
+  --bg-primary: rgb(105, 199, 254);
   --bg-sub-primary: #dce2f0;
   --text-color: white;
 

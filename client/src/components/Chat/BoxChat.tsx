@@ -279,6 +279,9 @@ function BoxChat({
             const transform = window.getComputedStyle(this.target).transform;
             setChatBubbleTransform(transform);
           },
+          onClick: function () {
+            setShowUsers(!showUsers);
+          },
         });
       } else {
         Draggable.get("#chatBubble")?.disable();

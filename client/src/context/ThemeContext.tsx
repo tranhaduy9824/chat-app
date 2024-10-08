@@ -32,11 +32,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const root = document.documentElement;
 
     if (isDarkTheme) {
-      root.style.setProperty("--bg-primary", "#2d2d2d");
-      root.style.setProperty("--bg-sub-primary", "#6d6d6d");
+      root.style.setProperty("--bg-primary", "rgb(14, 19, 65)");
+      root.style.setProperty("--bg-sub-primary", "rgb(2 4 23)");
       root.style.setProperty("--text-color", "white");
     } else {
-      root.style.setProperty("--bg-primary", "#a68bff");
+      root.style.setProperty("--bg-primary", "rgb(105, 199, 254)");
       root.style.setProperty("--bg-sub-primary", "#dce2f0");
       root.style.setProperty("--text-color", "white");
       root.style.setProperty("--bg-primary-gentle", "#c2d6ff");

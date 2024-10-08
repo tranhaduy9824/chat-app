@@ -1,4 +1,4 @@
-export const baseUrl = "https://chat-app-zqoj.onrender.com/api";
+export const baseUrl = "http://localhost:5000/api";
 
 export const postRequest = async (
   url: string,

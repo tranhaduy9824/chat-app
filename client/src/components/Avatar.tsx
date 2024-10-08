@@ -13,7 +13,7 @@ function Avatar({ user, width = 50, height = 50, style }: AvatarProps) {
     <img
       src={
         user?.avatar
-          ? `https://chat-app-zqoj.onrender.com/${user?.avatar}`
+          ? `http://localhost:5000/${user?.avatar}`
           : avatarDefault
       }
       alt={user?.fullname}
