@@ -37,7 +37,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const { addNotification } = useNotification();
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3000");
+    const newSocket = io("https://chat-app-zqoj.onrender.com");
     setSocket(newSocket);
 
     return () => {
