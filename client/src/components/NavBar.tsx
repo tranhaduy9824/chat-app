@@ -47,9 +47,10 @@ function NavBar() {
   return (
     <>
       <Navbar
-        bg={isDarkTheme ? "dark" : "light"}
         className="mb-2 rounded-pill px-2 m-auto navbar"
-        style={{ maxWidth: "1296px", height: "3.25rem" }}
+        style={{ maxWidth: "1296px", height: "3.25rem", backgroundColor: !isDarkTheme
+          ? "var(--bg-cpn-light)"
+          : "var(--bg-cpn-dark)", }}
       >
         <Container>
           <h3 className="mb-0">

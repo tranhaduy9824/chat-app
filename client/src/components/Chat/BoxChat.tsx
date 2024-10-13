@@ -311,11 +311,16 @@ function BoxChat({
   return (
     <div
       className={`flex-grow-1 h-100 p-3 overflow-hidden d-flex justify-content-between ${
-        isDarkTheme ? "bg-dark text-light" : ""
+        isDarkTheme ? "text-light" : ""
       }`}
       style={{
         borderRadius: "var(--border-radius)",
-        backgroundColor: "#e9ecf5",
+        backgroundColor: !isDarkTheme
+          ? "var(--bg-cpn-light-gentle)"
+          : "var(--bg-cpn-dark-gentle)",
+        border: !isDarkTheme
+          ? "2px solid var(--bg-cpn-light)"
+          : "2px solid var(--bg-cpn-dark)",
       }}
     >
       {isMobile ? (
@@ -621,7 +626,7 @@ function BoxChat({
                 <span
                   className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
                     showEmojiPicker && "selected"
-                  }`}
+                  } ${isDarkTheme ? "text-dark" : ""}`}
                   style={{
                     width: "2.1rem",
                     height: "2.1rem",
