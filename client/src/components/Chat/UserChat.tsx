@@ -67,89 +67,82 @@ const UserChat: React.FC<UserChatProps> = ({
 
   return (
     <div
-      style={{
-        backgroundColor: isDarkTheme
-          ? "rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important"
-          : "#e9ecf5",
-        cursor: "pointer",
-      }}
+      className={`item-user-chat d-flex align-items-center gap-2 position-relative py-2 px-3 ${
+        isSelected ? "selected" : ""
+      } ${isDarkTheme ? "theme-dark" : ""}`}
       onClick={() => {
+        updateCurrentChat(chat);
         if (thisUserNotification?.length !== 0) {
           markThisUserNotificationsAsRead(thisUserNotification, notifications);
         }
       }}
+      style={{
+        borderRadius: previousChat
+          ? "0 50px 0 0"
+          : nextChat
+          ? "0 0 50px 0"
+          : "0",
+        backgroundColor: !isDarkTheme
+          ? "var(--bg-cpn-light)"
+          : "var(--bg-cpn-dark)",
+        cursor: "pointer",
+      }}
     >
-      <div
-        className={`item-user-chat d-flex align-items-center gap-2 position-relative py-2 px-3 ${
-          isSelected ? "selected" : ""
-        } ${isDarkTheme ? "theme-dark bg-black" : "bg-white"}`}
-        onClick={() => updateCurrentChat(chat)}
-        style={{
-          borderRadius: previousChat
-            ? "0 50px 0 0"
-            : nextChat
-            ? "0 0 50px 0"
-            : "0",
-          backgroundColor: isDarkTheme ? "black !important" : "",
-        }}
-      >
-        <div>
-          <Avatar user={recipientUser} />
-          <div
-            className={`position-absolute rounded-circle ${
-              !onlineUsers?.some(
-                (user) => user?.userId === recipientUser?._id
-              ) && "d-none"
-            }`}
-            style={{
-              width: "15px",
-              height: "15px",
-              top: "43px",
-              left: "51px",
-              backgroundColor: "#31a24c",
-            }}
-          ></div>
-        </div>
-        <div className="flex-grow-1 pe-5">
-          <span className="fw-bold">{recipientUser?.fullname}</span>
-          <div>
-            {latestMessage?.type && (
-              <>
-                <span className="fa-sm">
-                  {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
-                  {latestMessage?.type === "text" &&
-                    truncateText(latestMessage?.text)}{" "}
-                  {latestMessage?.type === "image" && "Đã gửi một ảnh"}{" "}
-                  {latestMessage?.type === "video" && "Đã gửi một video"}{" "}
-                  {latestMessage?.type === "file" && "Đã gửi một file"}{" "}
-                  {latestMessage?.type === "call" &&
-                    latestMessage?.text.includes("missed") &&
-                    "Cuộc gọi nhỡ"}{" "}
-                  {latestMessage?.type === "call" &&
-                    !latestMessage?.text.includes("missed") &&
-                    "Kết thúc cuộc gọi"}{" "}
-                </span>
-                <span className="message-footer fa-sm">
-                  - {moment(latestMessage?.createdAt).fromNow()}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-        {thisUserNotification?.length > 0 && (
-          <div
-            className="position-absolute rounded-circle"
-            style={{
-              width: "15px",
-              height: "15px",
-              top: "50%",
-              right: "36px",
-              transform: "translateY(-50%)",
-              backgroundColor: "#2e89ff",
-            }}
-          ></div>
-        )}
+      <div>
+        <Avatar user={recipientUser} />
+        <div
+          className={`position-absolute rounded-circle ${
+            !onlineUsers?.some((user) => user?.userId === recipientUser?._id) &&
+            "d-none"
+          }`}
+          style={{
+            width: "15px",
+            height: "15px",
+            top: "43px",
+            left: "51px",
+            backgroundColor: "#31a24c",
+          }}
+        ></div>
       </div>
+      <div className="flex-grow-1 pe-5">
+        <span className="fw-bold">{recipientUser?.fullname}</span>
+        <div>
+          {latestMessage?.type && (
+            <>
+              <span className="fa-sm">
+                {latestMessage?.senderId !== recipientUser?._id && "Bạn: "}{" "}
+                {latestMessage?.type === "text" &&
+                  truncateText(latestMessage?.text)}{" "}
+                {latestMessage?.type === "image" && "Đã gửi một ảnh"}{" "}
+                {latestMessage?.type === "video" && "Đã gửi một video"}{" "}
+                {latestMessage?.type === "file" && "Đã gửi một file"}{" "}
+                {latestMessage?.type === "call" &&
+                  latestMessage?.text.includes("missed") &&
+                  "Cuộc gọi nhỡ"}{" "}
+                {latestMessage?.type === "call" &&
+                  !latestMessage?.text.includes("missed") &&
+                  "Kết thúc cuộc gọi"}{" "}
+              </span>
+              <span className="message-footer fa-sm">
+                - {moment(latestMessage?.createdAt).fromNow()}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+      {thisUserNotification?.length > 0 && (
+        <div
+          className="position-absolute rounded-circle"
+          style={{
+            width: "15px",
+            height: "15px",
+            top: "50%",
+            right: "36px",
+            transform: "translateY(-50%)",
+            backgroundColor: "#2e89ff",
+          }}
+        ></div>
+      )}
     </div>
   );
 };

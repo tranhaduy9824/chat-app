@@ -26,36 +26,54 @@ function Users() {
   const { isDarkTheme } = useTheme();
 
   return (
-    <div
-      className="py-3 shadow-sm users-container"
-      style={{ backgroundColor: isDarkTheme ? "black" : "white" }}
-    >
-      <div className="w-100 px-3 mb-3 position-relative">
-        <input
-          type="text"
-          className={`form-control rounded-pill fw-bold  ${
-            isDarkTheme ? "bg-dark text-light" : ""
-          }`}
-          placeholder="Search"
-          style={{ backgroundColor: "#e9ecf5", padding: "8px 50px 8px 12px" }}
-        />
-        <div
-          className={`d-flex align-items-center justify-content-center rounded-circle ml-2 position-absolute top-0 h-100  ${
-            isDarkTheme ? "bg-dark text-light" : ""
-          }`}
-          style={{
-            width: "auto",
-            aspectRatio: "1/1",
-            right: "16px",
-            border: "1px solid #dee2e6",
-            backgroundColor: "#e9ecf5",
-            cursor: "pointer",
-          }}
-        >
-          <FontAwesomeIcon icon={faSearch as IconProp} />
+    <div className="shadow-sm users-container">
+      <div
+        className="w-100 p-3"
+        style={{
+          backgroundColor: !isDarkTheme
+            ? "var(--bg-cpn-light)"
+            : "var(--bg-cpn-dark)",
+        }}
+      >
+        <div className="w-100 px-3 mb-3 position-relative">
+          <input
+            type="text"
+            className={`form-control rounded-pill fw-bold  ${
+              isDarkTheme ? "bg-dark text-light" : ""
+            }`}
+            placeholder="Search"
+            style={{
+              backgroundColor: !isDarkTheme
+                ? "var(--bg-cpn-light-gentle)"
+                : "var(--bg-cpn-dark-gentle)",
+              padding: "8px 50px 8px 12px",
+            }}
+          />
+          <div
+            className={`d-flex align-items-center justify-content-center rounded-circle ml-2 position-absolute top-0 h-100  ${
+              isDarkTheme ? "bg-dark text-light" : ""
+            }`}
+            style={{
+              width: "auto",
+              aspectRatio: "1/1",
+              right: "16px",
+              border: "1px solid #dee2e6",
+              backgroundColor: "#e9ecf5",
+              cursor: "pointer",
+            }}
+          >
+            <FontAwesomeIcon icon={faSearch as IconProp} />
+          </div>
         </div>
       </div>
-      <div className="list-friend mx-3 d-flex align-items-center gap-3 overflow-x-auto mb-3">
+      <div
+        className="list-friend px-3 d-flex align-items-center gap-3 overflow-x-auto pb-3"
+        style={{
+          backgroundColor: !isDarkTheme
+            ? "var(--bg-cpn-light)"
+            : "var(--bg-cpn-dark)",
+        }}
+      >
         {allUsers
           .filter((u) => u._id !== user?._id)
           .map((u) => {
@@ -99,7 +117,7 @@ function Users() {
       </div>
       <div
         className="d-flex flex-column overflow-y-auto"
-        style={{ height: "400px" }}
+        style={{ height: "max-content", maxHeight: "400px" }}
       >
         {userChats?.map((chat, index) => {
           const isSelected = chat._id === currentChat?._id;
@@ -122,6 +140,14 @@ function Users() {
           );
         })}
       </div>
+      <div
+        className="flex-grow-1"
+        style={{
+          backgroundColor: !isDarkTheme
+            ? "var(--bg-cpn-light)"
+            : "var(--bg-cpn-dark)",
+        }}
+      ></div>
     </div>
   );
 }

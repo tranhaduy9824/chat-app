@@ -20,7 +20,7 @@ function App() {
         <ThemeProvider>
           <LoadingBar />
           <NotificationList />
-          <div className="w-100 h-100 m-0">
+          <div className="w-100 h-100 m-0 position-relative z-1">
             <NavBar />
             <Routes>
               <Route path="/" element={user ? <Chat /> : <Login />} />

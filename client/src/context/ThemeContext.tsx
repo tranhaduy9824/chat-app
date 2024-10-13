@@ -35,20 +35,75 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       root.style.setProperty("--bg-primary", "rgb(14, 19, 65)");
       root.style.setProperty("--bg-sub-primary", "rgb(2 4 23)");
       root.style.setProperty("--text-color", "white");
+      root.style.removeProperty("--clouds-display");
+      root.style.setProperty("--stars-display", "block");
     } else {
       root.style.setProperty("--bg-primary", "rgb(105, 199, 254)");
       root.style.setProperty("--bg-sub-primary", "#dce2f0");
       root.style.setProperty("--text-color", "white");
       root.style.setProperty("--bg-primary-gentle", "#c2d6ff");
       root.style.setProperty("--bg-sub-primary-gentle", "#f0f5ff");
+      root.style.setProperty("--clouds-display", "block");
+      root.style.removeProperty("--stars-display");
     }
 
     root.setAttribute("data-theme", isDarkTheme ? "dark" : "light");
   }, [isDarkTheme]);
 
+  useEffect(() => {
+    const createStars = () => {
+      const starsContainer = document.getElementById("stars");
+      if (starsContainer) {
+        starsContainer.innerHTML = "";
+        for (let i = 0; i < 100; i++) {
+          const star = document.createElement("div");
+          star.className = "star";
+          star.style.top = `${Math.random() * 100}%`;
+          star.style.left = `${Math.random() * 100}%`;
+          starsContainer.appendChild(star);
+        }
+      }
+    };
+
+    const createShootingStar = () => {
+      const starsContainer = document.getElementById("stars");
+      if (starsContainer) {
+        const shootingStar = document.createElement("div");
+        shootingStar.className = "shooting-star";
+        shootingStar.style.top = `${Math.random() * 100}%`;
+        shootingStar.style.left = `${Math.random() * 100}%`;
+        shootingStar.style.animationDuration = "2s";
+        starsContainer.appendChild(shootingStar);
+
+        setTimeout(() => {
+          starsContainer.removeChild(shootingStar);
+          createShootingStar();
+        }, 2000);
+      }
+    };
+
+    if (isDarkTheme) {
+      createStars();
+      setTimeout(createShootingStar, Math.random() * 5000);
+    }
+  }, [isDarkTheme]);
+
   return (
     <ThemeContext.Provider value={{ isDarkTheme, toggleTheme }}>
       {children}
+      <div id="clouds" style={{ display: "var(--clouds-display, none)" }}>
+        <div className="cloud x1"></div>
+        <div className="cloud x2"></div>
+        <div className="cloud x3"></div>
+        <div className="cloud x4"></div>
+        <div className="cloud x5"></div>
+        <div className="cloud x6"></div>
+        <div className="cloud x7"></div>
+        <div className="cloud x8"></div>
+        <div className="cloud x9"></div>
+        <div className="cloud x10"></div>
+      </div>
+      <div id="stars" style={{ display: "var(--stars-display, none)" }}></div>
     </ThemeContext.Provider>
   );
 };
