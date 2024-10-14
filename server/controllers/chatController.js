@@ -212,44 +212,6 @@ const updateNickname = async (req, res) => {
   }
 };
 
-const enableNotifications = async (req, res) => {
-  const chatId = req.params.chatId;
-  const { userId } = req.body;
-
-  try {
-    const chat = await chatModel.findById(chatId);
-
-    if (!chat) return res.status(404).json("Chat not found");
-
-    chat.notificationsEnabled.set(userId, true);
-    await chat.save();
-
-    return res.status(200).json(chat);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error.message);
-  }
-};
-
-const disableNotifications = async (req, res) => {
-  const chatId = req.params.chatId;
-  const { userId } = req.body;
-
-  try {
-    const chat = await chatModel.findById(chatId);
-
-    if (!chat) return res.status(404).json("Chat not found");
-
-    chat.notificationsEnabled.set(userId, false);
-    await chat.save();
-
-    return res.status(200).json(chat);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error.message);
-  }
-};
-
 module.exports = {
   createChat,
   findUserChats,
@@ -261,6 +223,4 @@ module.exports = {
   blockUser,
   unblockUser,
   updateNickname,
-  enableNotifications,
-  disableNotifications,
 };

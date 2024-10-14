@@ -3,11 +3,6 @@ const mongoose = require("mongoose");
 const chatSchema = new mongoose.Schema(
   {
     members: Array,
-    notificationsEnabled: {
-      type: Map,
-      of: Boolean,
-      default: {},
-    },
     nicknames: [
       {
         userId: {

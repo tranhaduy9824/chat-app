@@ -360,51 +360,6 @@ input.bg-dark::placeholder {
   overflow: hidden;
 }
 
-@media (max-width: 1023px) {
-  .users-container {
-    min-width: 350px;
-    max-width: 350px;
-  }
-}
-
-@media (max-width: 768px) {
-  .users-container {
-    min-width: calc(100% - 10px);
-    max-width: calc(100% - 10px);
-    height: calc(100vh - 155px);
-  }
-
-  .camera-container video,
-  .camera-container img {
-    max-height: 30%;
-  }
-
-  .camera-container > div,
-  .camera-container > button {
-    bottom: calc(50% - 15% + 50px) !important;
-  }
-
-  .local-video,
-  .remote-video {
-    width: 100%;
-    height: max-content;
-  }
-
-  .local-video {
-    max-width: 35%;
-  }
-
-  .local-video.fullscreen {
-    height: 50vh;
-    height: max-content;
-  }
-
-  .message-media {
-    max-width: 140px !important;
-    max-height: 160px !important;
-  }
-}
-
 /* CLouds */
 #clouds {
   position: fixed;
@@ -635,5 +590,50 @@ input.bg-dark::placeholder {
     transform: translate(300px, 300px) rotate(45deg);
     opacity: 0;
     width: 150px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .users-container {
+    min-width: 350px;
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .users-container {
+    min-width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    height: calc(100vh - 155px);
+  }
+
+  .camera-container video,
+  .camera-container img {
+    max-height: 30%;
+  }
+
+  .camera-container > div,
+  .camera-container > button {
+    bottom: calc(50% - 15% + 50px) !important;
+  }
+
+  .local-video,
+  .remote-video {
+    width: 100%;
+    height: max-content;
+  }
+
+  .local-video {
+    max-width: 35%;
+  }
+
+  .local-video.fullscreen {
+    height: 50vh;
+    height: max-content;
+  }
+
+  .message-media {
+    max-width: 140px !important;
+    max-height: 160px !important;
   }
 }

@@ -36,7 +36,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
 
-  const { currentChat, socket, updateCurrentChat } = useContext(ChatContext)!;
+  const { currentChat, socket, updateCurrentChat, isChatMuted } =
+    useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
   const { setProgress } = useLoading();
 
@@ -147,7 +148,10 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         setNotifications((prev) => [{ ...res, isRead: true }, ...(prev || [])]);
       } else {
         setNotifications((prev) => [res, ...(prev || [])]);
-        playNotificationSound();
+        if (!isChatMuted(res.chatId)) {
+          console.log(res.chatId);
+          playNotificationSound();
+        }
       }
     });
 
@@ -177,7 +181,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("typing");
       socket.off("stopTyping");
     };
-  }, [socket, currentChat, user]);
+  }, [socket, currentChat, user, isChatMuted]);
 
   const sendTextMessage = useCallback(
     async (

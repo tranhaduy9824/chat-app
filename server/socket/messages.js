@@ -8,6 +8,7 @@ const handleSendMessage = (io, socket, onlineUsers) => {
       io.to(user.socketId).emit("getMessage", message);
       io.to(user.socketId).emit("getNotifications", {
         senderId: message.senderId,
+        chatId: message.chatId,
         isRead: false,
         date: new Date(),
       });
@@ -38,7 +39,7 @@ const handleReactToMessage = (io, socket, onlineUsers) => {
 
 const handleReplyToMessage = (io, socket, onlineUsers) => {
   socket.on("replyToMessage", (replyData) => {
-    const { message, members } = replyData;
+    const { message, members, chatId } = replyData;
 
     if (Array.isArray(members)) {
       members.forEach((userId) => {
@@ -47,6 +48,7 @@ const handleReplyToMessage = (io, socket, onlineUsers) => {
           io.to(user.socketId).emit("messageReply", message);
           io.to(user.socketId).emit("getNotifications", {
             senderId: message.senderId,
+            chatId,
             isRead: false,
             date: new Date(),
           });

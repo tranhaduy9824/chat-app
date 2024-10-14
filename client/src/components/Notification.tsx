@@ -15,13 +15,17 @@ function Notification() {
   const notificationRef = useRef<HTMLDivElement>(null);
 
   const { user } = useContext(AuthContext)!;
-  const { userChats, allUsers } = useContext(ChatContext)!;
+  const { userChats, allUsers, isChatMuted } = useContext(ChatContext)!;
   const { notifications, markAllNotificationsAsRead, martNotificationAsRead } =
     useContext(MessageContext)!;
   const { isDarkTheme } = useTheme();
 
-  const unReadNotifications = unReadNotificationsFunc(notifications);
-  const modifiedNotifications: any = notifications?.map((n) => {
+  const filteredNotifications = notifications?.filter(
+    (n) => !isChatMuted(n.chatId)
+  );
+
+  const unReadNotifications = unReadNotificationsFunc(filteredNotifications);
+  const modifiedNotifications: any = filteredNotifications?.map((n) => {
     const sender = allUsers.find((user) => user._id === n.senderId);
 
     return {
@@ -56,7 +60,7 @@ function Notification() {
           icon={faBell as IconProp}
           style={{ fontSize: "20px", cursor: "pointer" }}
         />
-        {notifications?.length === 0 ? null : (
+        {filteredNotifications?.length === 0 ? null : (
           <span className="badge bg-success rounded-circle position-absolute top-0 start-100 translate-middle">
             {unReadNotifications?.length | 0}
           </span>
@@ -64,7 +68,9 @@ function Notification() {
       </div>
       {isOpen && (
         <div
-          className={`position-absolute top-100 end-0 p-3 rounded-4 z-3 ${isDarkTheme ? "bg-dark text-light" : "bg-light"}`}
+          className={`position-absolute top-100 end-0 p-3 rounded-4 z-3 ${
+            isDarkTheme ? "bg-dark text-light" : "bg-light"
+          }`}
           style={{
             maxHeight: "50vh",
             width: "300px",
@@ -79,7 +85,7 @@ function Notification() {
             <div
               className="small"
               style={{ cursor: "pointer", color: "rgb(234, 103, 164)" }}
-              onClick={() => markAllNotificationsAsRead(notifications)}
+              onClick={() => markAllNotificationsAsRead(filteredNotifications)}
             >
               Mark all as read
             </div>
