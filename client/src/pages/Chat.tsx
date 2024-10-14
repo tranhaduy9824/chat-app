@@ -49,7 +49,7 @@ function Chat() {
         setIsCalling={setIsCalling}
         recipientUser={recipientUser}
       />
-      {showInfoChat && <InfoChat />}
+      {showInfoChat && <InfoChat recipientUser={recipientUser} />}
       {isCalling && (
         <VideoCall
           socket={socket}

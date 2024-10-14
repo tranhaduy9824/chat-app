@@ -26,6 +26,10 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [mutedChats, setMutedChats] = useState<string[]>(() => {
+    const storedMutedChats = localStorage.getItem("mutedChats");
+    return storedMutedChats ? JSON.parse(storedMutedChats) : [];
+  });
 
   const { setProgress } = useLoading();
   const { addNotification } = useNotification();
@@ -46,7 +50,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
 
   useEffect(() => {
     const getUsers = async () => {
-      const response = await getRequest(`${baseUrl}/users`, setProgress);
+      const response = await getRequest(`${baseUrl}/users`, setProgress, true);
 
       if (response.error) {
         return console.log("Error fetching users", response);
@@ -77,7 +81,8 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
       if (user?._id) {
         const response = await getRequest(
           `${baseUrl}/chats/${user?._id}`,
-          setProgress
+          setProgress,
+          true
         );
 
         if (response.error) {
@@ -109,10 +114,15 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
           return;
         }
 
-        const response = await postRequest(`${baseUrl}/chats`, {
-          firstId,
-          secondId,
-        });
+        const response = await postRequest(
+          `${baseUrl}/chats`,
+          {
+            firstId,
+            secondId,
+          },
+          undefined,
+          true
+        );
 
         if (response.error) {
           console.log("Error creating chat", response);
@@ -133,6 +143,26 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
     updateCurrentChat(null);
   }, [user]);
 
+  const toggleMuteChat = useCallback((chatId: string) => {
+    setMutedChats((prev) => {
+      let updatedMutedChats;
+      if (prev.includes(chatId)) {
+        updatedMutedChats = prev.filter((id) => id !== chatId);
+      } else {
+        updatedMutedChats = [...prev, chatId];
+      }
+      localStorage.setItem("mutedChats", JSON.stringify(updatedMutedChats));
+      return updatedMutedChats;
+    });
+  }, []);
+
+  const isChatMuted = useCallback(
+    (chatId: string) => {
+      return mutedChats.includes(chatId);
+    },
+    [mutedChats]
+  );
+
   return (
     <ChatContext.Provider
       value={{
@@ -144,7 +174,9 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         allUsers,
         onlineUsers,
         socket,
-        setCurrentChat
+        setCurrentChat,
+        toggleMuteChat,
+        isChatMuted,
       }}
     >
       {children}

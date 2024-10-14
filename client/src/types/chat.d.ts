@@ -4,6 +4,7 @@ interface Chat {
   firstId: any;
   _id: string;
   members: string[];
+  notificationsEnabled: Map<string, boolean>;
 }
 
 interface ChatContextProps {
@@ -16,6 +17,8 @@ interface ChatContextProps {
   onlineUsers: User[];
   socket: Socket;
   setCurrentChat: (chat: Chat | null) => void;
+  toggleMuteChat: (chatId: string) => void;
+  isChatMuted: (chatId: string) => boolean;
 }
 
 interface ChatContextProviderProps {

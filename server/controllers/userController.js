@@ -100,7 +100,7 @@ const getUsers = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const userId = req.userData._id;
-  const avatar = path.join("uploads", req.file.filename);
+  const avatar = path.join("uploads", req.file?.filename);
 
   try {
     const user = await userModel.findByIdAndUpdate(

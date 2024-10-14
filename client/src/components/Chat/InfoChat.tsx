@@ -14,43 +14,81 @@ import { FontIcon } from "../Icons";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { User } from "../../types/auth";
+import Avatar from "../Avatar";
+import { useContext } from "react";
+import { ChatContext } from "../../context/ChatContext";
+import { useTheme } from "../../context/ThemeContext";
 
-function InfoChat() {
+function InfoChat({ recipientUser }: { recipientUser: User | null }) {
+  const { onlineUsers, currentChat, toggleMuteChat, isChatMuted } =
+    useContext(ChatContext)!;
+  const { isDarkTheme } = useTheme();
+
+  const handleToggleNotifications = () => {
+    if (currentChat) {
+      toggleMuteChat(currentChat._id);
+    }
+  };
+
   return (
     <div
-      className="h-100 p-3 ms-3 d-flex flex-column align-items-center"
+      className={`h-100 p-3 ms-3 d-flex flex-column align-items-center ${
+        isDarkTheme ? "text-light" : ""
+      }`}
       style={{
         minWidth: "300px",
         borderRadius: "var(--border-radius)",
-        backgroundColor: "#e9ecf5",
+        backgroundColor: !isDarkTheme
+          ? "var(--bg-cpn-light-gentle)"
+          : "var(--bg-cpn-dark-gentle)",
       }}
     >
-      <img
-        src="https://scontent.fdad1-4.fna.fbcdn.net/v/t1.15752-9/454583821_1018517906242047_1037832760614467948_n.png?_nc_cat=100&ccb=1-7&_nc_sid=9f807c&_nc_eui2=AeFqGICRLsMdpmhCWZVEdV4oX98J-AHrGFhf3wn4AesYWLNMxYOhBQIg83QNUuFNISU57X2yBRk9z7P5rOpLCL0_&_nc_ohc=7Q_ZFTdXkpgQ7kNvgGqEZgO&_nc_ht=scontent.fdad1-4.fna&oh=03_Q7cD1QHLaUh-z3Dg4f1-eKQ0oSUzSxOdU3oKSJ1Y-0Dauombmg&oe=66EEB4DD"
-        alt="Duy"
-        className="rounded-circle mr-3"
+      <Avatar
         width={72}
         height={72}
+        user={recipientUser}
         style={{
           boxShadow:
-            "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px",
+            "rgba(194, 214, 255, 0.39) 0px 8px 24px, rgba(194, 214, 255, 0.39) 0px 16px 56px, rgba(194, 214, 255, 0.39) 0px 24px 80px",
         }}
       />
       <p className="fw-bold mt-2 mb-0" style={{ fontSize: "1.4rem" }}>
-        Trần Hà Duy
+        {recipientUser?.fullname}
       </p>
-      <span className="small text-secondary mb-4">Đang hoạt động</span>
+      <span
+        className={`small text-secondary mb-4 ${
+          isDarkTheme ? "text-light" : ""
+        }`}
+      >
+        {onlineUsers?.some((user) => user?.userId === recipientUser?._id)
+          ? "Online"
+          : "Offline"}
+      </span>
       <div className="d-flex align-items-center justify-content-center gap-2">
-        <Tippy content="Tắt thông báo">
+        <Tippy
+          content={
+            !isChatMuted(currentChat?._id || "")
+              ? "Tắt thông báo"
+              : "Bật thông báo"
+          }
+        >
           <div
             className="icon-info-chat"
             style={{
-              backgroundColor: "#eeddf5",
+              backgroundColor: isDarkTheme ? "#1a0424" : "#eeddf5",
             }}
+            onClick={handleToggleNotifications}
           >
             <FontAwesomeIcon
-              icon={faBell as IconProp}
-              style={{ color: "#97803d", cursor: "pointer" }}
+              icon={
+                isChatMuted(currentChat?._id || "")
+                  ? (faBellSlash as IconProp)
+                  : (faBell as IconProp)
+              }
+              style={{
+                color: isDarkTheme ? "white" : "#97803d",
+              }}
             />
           </div>
         </Tippy>
@@ -58,66 +96,107 @@ function InfoChat() {
           <div
             className="icon-info-chat"
             style={{
-              backgroundColor: "#eeddf5",
+              backgroundColor: isDarkTheme ? "#1a0424" : "#eeddf5",
             }}
           >
             <FontAwesomeIcon
               icon={faSearch as IconProp}
-              style={{ color: "#97803d", cursor: "pointer" }}
+              style={{
+                color: isDarkTheme ? "white" : "#97803d",
+                cursor: "pointer",
+              }}
             />
           </div>
         </Tippy>
       </div>
       <div className="item-info-chat w-100 mt-3 rounded-5 overflow-hidden">
-        <div style={{ backgroundColor: "#dee4ed" }}>
-          <div style={{ backgroundColor: "#eaf1f5" }}>
+        <div style={{ backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed" }}>
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#eaf1f5",
+            }}
+          >
             <FontAwesomeIcon
               icon={faThumbTack as IconProp}
-              style={{ color: "#888fa0" }}
+              style={{ color: isDarkTheme ? "white" : "#888fa0" }}
             />
           </div>
           Xem tin nhắn đã ghim
         </div>
-        <div style={{ backgroundColor: "#dee4ed" }}>
-          <div style={{ backgroundColor: "#eaf1f5" }}>
-            <FontIcon style={{ fill: "currentColor", color: "#888fa0" }} />
+        <div style={{ backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed" }}>
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#eaf1f5",
+            }}
+          >
+            <FontIcon
+              style={{
+                fill: "currentColor",
+                color: isDarkTheme ? "white" : "#888fa0",
+              }}
+            />
           </div>{" "}
           Chỉnh sửa biệt danh
         </div>
-        <div style={{ backgroundColor: "#dee4ed" }}>
-          <div style={{ backgroundColor: "#eaf1f5" }}>
+        <div style={{ backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed" }}>
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#eaf1f5",
+            }}
+          >
             <FontAwesomeIcon
               icon={faImages as IconProp}
-              style={{ color: "#888fa0" }}
+              style={{ color: isDarkTheme ? "white" : "#888fa0" }}
             />
           </div>{" "}
           File phương tiện
         </div>
-        <div style={{ backgroundColor: "#dee4ed" }}>
-          <div style={{ backgroundColor: "#eaf1f5" }}>
+        <div style={{ backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed" }}>
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#eaf1f5",
+            }}
+          >
             <FontAwesomeIcon
               icon={faFileAlt as IconProp}
-              style={{ color: "#888fa0" }}
+              style={{ color: isDarkTheme ? "white" : "#888fa0" }}
             />
           </div>{" "}
           File
         </div>
       </div>
       <div className="item-info-chat w-100 mt-3 rounded-5 overflow-hidden">
-        <div style={{ backgroundColor: "#f5e0e0" }}>
-          <div style={{ backgroundColor: "#f5eeed" }}>
+        <div
+          style={{ backgroundColor: isDarkTheme ? "#17030378" : "#f5e0e0" }}
+          onClick={handleToggleNotifications}
+        >
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#f5eeed",
+            }}
+          >
             <FontAwesomeIcon
-              icon={faBellSlash as IconProp}
-              style={{ color: "#c2a9aa" }}
+              icon={
+                isChatMuted(currentChat?._id || "")
+                  ? (faBellSlash as IconProp)
+                  : (faBell as IconProp)
+              }
+              style={{ color: isDarkTheme ? "white" : "#c2a9aa" }}
             />
           </div>{" "}
-          Tắt thông báo
+          {!isChatMuted(currentChat?._id || "")
+            ? "Tắt thông báo"
+            : "Bật thông báo"}
         </div>
-        <div style={{ backgroundColor: "#f5e0e0" }}>
-          <div style={{ backgroundColor: "#f5eeed" }}>
+        <div style={{ backgroundColor: isDarkTheme ? "#17030378" : "#f5e0e0" }}>
+          <div
+            style={{
+              backgroundColor: isDarkTheme ? "var(--bg-cpn-dark)" : "#f5eeed",
+            }}
+          >
             <FontAwesomeIcon
               icon={faBan as IconProp}
-              style={{ color: "#c2a9aa" }}
+              style={{ color: isDarkTheme ? "white" : "#c2a9aa" }}
             />
           </div>{" "}
           Chặn
