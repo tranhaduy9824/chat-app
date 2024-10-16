@@ -239,6 +239,44 @@ const createCallMessage = async (
   }
 };
 
+const searchMessages = async (req, res) => {
+  const { chatId } = req.params;
+  const { query, page = 1, limit = 10 } = req.query;
+  const userId = req.userData._id;
+
+  try {
+    const chat = await chatModel.findById(chatId);
+
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    if (!chat.members.includes(userId.toString())) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const messages = await messageModel
+      .find({ chatId, text: { $regex: query, $options: "i" }, type: "text" })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const totalMessages = await messageModel.countDocuments({
+      chatId,
+      text: { $regex: query, $options: "i" },
+      type: "text",
+    });
+
+    return res.status(200).json({
+      messages,
+      hasMore: totalMessages > page * limit,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error.message);
+  }
+};
+
 module.exports = {
   createMessage,
   getMessages,
@@ -247,4 +285,5 @@ module.exports = {
   deleteMessage,
   editMessage,
   createCallMessage,
+  searchMessages,
 };

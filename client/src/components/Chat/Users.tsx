@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext } from "react";
 import { ChatContext } from "../../context/ChatContext";
 import Avatar from "../Avatar";
@@ -8,8 +6,8 @@ import { AuthContext } from "../../context/AuthContext";
 import UserChat from "./UserChat";
 import { MessageContext } from "../../context/MessageContext";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useTheme } from "../../context/ThemeContext";
+import Search from "../Search";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
@@ -35,36 +33,7 @@ function Users() {
             : "var(--bg-cpn-dark)",
         }}
       >
-        <div className="w-100 px-3 mb-3 position-relative">
-          <input
-            type="text"
-            className={`form-control rounded-pill fw-bold  ${
-              isDarkTheme ? "bg-dark text-light" : ""
-            }`}
-            placeholder="Search"
-            style={{
-              backgroundColor: !isDarkTheme
-                ? "var(--bg-cpn-light-gentle)"
-                : "var(--bg-cpn-dark-gentle)",
-              padding: "8px 50px 8px 12px",
-            }}
-          />
-          <div
-            className={`d-flex align-items-center justify-content-center rounded-circle ml-2 position-absolute top-0 h-100  ${
-              isDarkTheme ? "bg-dark text-light" : ""
-            }`}
-            style={{
-              width: "auto",
-              aspectRatio: "1/1",
-              right: "16px",
-              border: "1px solid #dee2e6",
-              backgroundColor: "#e9ecf5",
-              cursor: "pointer",
-            }}
-          >
-            <FontAwesomeIcon icon={faSearch as IconProp} />
-          </div>
-        </div>
+        <Search />
       </div>
       <div
         className="list-friend px-3 d-flex align-items-center gap-3 overflow-x-auto pb-3"

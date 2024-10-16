@@ -22,3 +22,10 @@ export const formatFileSize = (sizeInBytes: number): string => {
     return `${Math.floor(sizeInBytes / (1024 * 1024 * 1024))} GB`;
   }
 };
+
+export const formatLength = (text: string, maxLength: number): string => {
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength - 3) + "...";
+  }
+  return text;
+};

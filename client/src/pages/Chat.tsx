@@ -49,7 +49,9 @@ function Chat() {
         setIsCalling={setIsCalling}
         recipientUser={recipientUser}
       />
-      {showInfoChat && <InfoChat recipientUser={recipientUser} />}
+      {showInfoChat && currentChat && (
+        <InfoChat recipientUser={recipientUser} />
+      )}
       {isCalling && (
         <VideoCall
           socket={socket}

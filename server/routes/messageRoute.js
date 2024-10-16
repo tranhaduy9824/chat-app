@@ -5,7 +5,8 @@ const {
   reactToMessage,
   replyToMessage,
   deleteMessage,
-  editMessage
+  editMessage,
+  searchMessages
 } = require("../controllers/messageController");
 const checkAuth = require("../middleware/check-auth");
 const upload = require("../middleware/multer");
@@ -23,5 +24,6 @@ router.post(
 );
 router.delete("/:messageId", checkAuth, deleteMessage);
 router.patch("/edit/:messageId", checkAuth, editMessage);
+router.get("/search/:chatId", checkAuth, searchMessages);
 
 module.exports = router;

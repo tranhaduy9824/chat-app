@@ -44,6 +44,15 @@ interface MessageContextProps {
   typingUser: User | null;
   handleTyping: () => void;
   handleStopTyping: () => void;
+  searchMessages: (
+    query: string,
+    page: number,
+    limit: number
+  ) => Promise<{
+    messages: any[];
+    hasMore: boolean;
+    error?: string;
+  } | void>;
 }
 
 interface MessageContextProviderProps {

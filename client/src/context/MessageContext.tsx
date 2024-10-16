@@ -439,6 +439,32 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     }
   };
 
+  const searchMessages = useCallback(
+    async (
+      query: string,
+      page: number,
+      limit: number
+    ): Promise<{
+      messages: any[];
+      hasMore: boolean;
+      error?: string;
+    } | void> => {
+      const response = await getRequest(
+        `${baseUrl}/messages/search/${currentChat?._id}?query=${query}&page=${page}&limit=${limit}`,
+        undefined,
+        true
+      );
+
+      if (response.error) {
+        addNotification(response.error, "error");
+        return;
+      }
+
+      return response;
+    },
+    [currentChat, addNotification]
+  );
+
   return (
     <MessageContext.Provider
       value={{
@@ -458,6 +484,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         typingUser,
         handleTyping,
         handleStopTyping,
+        searchMessages,
       }}
     >
       {children}
