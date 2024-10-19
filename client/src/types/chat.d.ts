@@ -19,6 +19,11 @@ interface ChatContextProps {
   setCurrentChat: (chat: Chat | null) => void;
   toggleMuteChat: (chatId: string) => void;
   isChatMuted: (chatId: string) => boolean;
+  pinMessage: (messageId: string) => void;
+  unpinMessage: (messageId: string) => void;
+  getPinnedMessages: () => void;
+  pinnedMessages: Message[];
+  setPinnedMessages: (messages: any) => void;
 }
 
 interface ChatContextProviderProps {

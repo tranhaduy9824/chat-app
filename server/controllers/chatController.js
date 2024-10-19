@@ -141,6 +141,23 @@ const unpinMessage = async (req, res) => {
   }
 };
 
+const getPinnedMessages = async (req, res) => {
+  const chatId = req.params.chatId;
+
+  try {
+    const chat = await chatModel.findById(chatId).populate("pinnedMessages");
+
+    if (!chat) {
+      return res.status(404).json("Chat not found");  
+    }
+
+    return res.status(200).json(chat.pinnedMessages);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error.message);
+  }
+};
+
 const blockUser = async (req, res) => {
   const chatId = req.params.chatId;
   const { userId } = req.body;
@@ -220,6 +237,7 @@ module.exports = {
   removeMemberFromChat,
   pinMessage,
   unpinMessage,
+  getPinnedMessages,
   blockUser,
   unblockUser,
   updateNickname,

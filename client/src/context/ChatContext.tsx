@@ -30,6 +30,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
     const storedMutedChats = localStorage.getItem("mutedChats");
     return storedMutedChats ? JSON.parse(storedMutedChats) : [];
   });
+  const [pinnedMessages, setPinnedMessages] = useState<any[]>([]);
 
   const { setProgress } = useLoading();
   const { addNotification } = useNotification();
@@ -163,6 +164,74 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
     [mutedChats]
   );
 
+  const pinMessage = useCallback(
+    async (messageId: string) => {
+      if (socket) {
+        socket.emit("pinMessage", {
+          messageId,
+          members: currentChat?.members,
+        });
+      }
+  
+      const response = await postRequest(
+        `${baseUrl}/chats/${currentChat?._id}/pinMessage`,
+        { messageId },
+        undefined,
+        true
+      );
+  
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+    },
+    [currentChat, socket, addNotification, setPinnedMessages]
+  );
+  
+  const unpinMessage = useCallback(
+    async (messageId: string) => {
+      if (socket) {
+        socket.emit("unpinMessage", {
+          messageId,
+          members: currentChat?.members,
+        });
+      }
+  
+      const response = await postRequest(
+        `${baseUrl}/chats/${currentChat?._id}/unpinMessage`,
+        { messageId },
+        undefined,
+        true
+      );
+  
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+    },
+    [currentChat, socket, addNotification, setPinnedMessages]
+  );
+  
+  const getPinnedMessages = useCallback(async () => {
+    if (currentChat) {
+      const response = await getRequest(
+        `${baseUrl}/chats/${currentChat._id}/pinnedMessages`,
+        undefined,
+        true
+      );
+  
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+  
+      setPinnedMessages(response);
+    }
+  }, [currentChat, addNotification, setPinnedMessages]);
+
+  useEffect(() => {
+    if (currentChat) {
+      getPinnedMessages();
+    }
+  }, [currentChat, getPinnedMessages]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -175,8 +244,14 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         onlineUsers,
         socket,
         setCurrentChat,
-        toggleMuteChat,
+        toggleMuteChat
+        ,
         isChatMuted,
+        pinMessage,
+        unpinMessage,
+        getPinnedMessages,
+        pinnedMessages,
+        setPinnedMessages
       }}
     >
       {children}

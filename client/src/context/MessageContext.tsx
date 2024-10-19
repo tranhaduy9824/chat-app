@@ -36,8 +36,13 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
 
-  const { currentChat, socket, updateCurrentChat, isChatMuted } =
-    useContext(ChatContext)!;
+  const {
+    currentChat,
+    socket,
+    updateCurrentChat,
+    isChatMuted,
+    setPinnedMessages,
+  } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
   const { setProgress } = useLoading();
 
@@ -85,7 +90,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       }
 
       setMessages((prev) => {
-        if (prev && prev[0]?._id === res._id) {
+        if (prev && prev.some((msg) => msg._id === res._id)) {
           return prev;
         }
         return [res, ...(prev || [])];
@@ -171,6 +176,22 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       }
     });
 
+    socket.on("messagePinned", (data: { messageId: string }) => {
+      setPinnedMessages((prev: any) => {
+        if (prev.some((pinned: any) => (typeof pinned === "string" ? pinned : pinned._id) === data.messageId)) {
+          return prev;
+        }
+        return [...prev, data.messageId];
+      });
+    });
+    
+    socket.on("messageUnpinned", (data: { messageId: string }) => {
+      setPinnedMessages((prev: any) => {
+        return prev.filter((id: any) => (typeof id === "string" ? id : id._id) !== data.messageId);
+      });
+    });
+    
+
     return () => {
       socket.off("getMessage");
       socket.off("messageReaction");
@@ -180,8 +201,10 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("messageEdited");
       socket.off("typing");
       socket.off("stopTyping");
+      socket.off("messagePinned");
+      socket.off("messageUnpinned");
     };
-  }, [socket, currentChat, user, isChatMuted]);
+  }, [socket, currentChat, user, isChatMuted, setPinnedMessages]);
 
   const sendTextMessage = useCallback(
     async (

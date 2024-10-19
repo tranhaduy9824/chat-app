@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { User } from "../../types/auth";
 import LabelMessage from "./LabelMessage";
@@ -9,6 +9,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faFileText } from "@fortawesome/free-regular-svg-icons";
 import { faPhone, faPhoneSlash } from "@fortawesome/free-solid-svg-icons";
 import { formatCallDuration, formatFileSize } from "../../utils/format";
+import { ChatContext } from "../../context/ChatContext";
 
 interface MessageProps {
   msg: Message;
@@ -33,6 +34,21 @@ function Message({
   const messageRef = useRef<HTMLDivElement | null>(null);
 
   const { user } = useContext(AuthContext)!;
+  const { pinnedMessages } = useContext(ChatContext)!;
+
+  useEffect(() => {
+    if (pinnedMessages && msg._id) {
+      const pinnedIds = pinnedMessages.map((pinned) =>
+        typeof pinned === "string" ? pinned : pinned._id
+      );
+      
+      if (pinnedIds.includes(msg._id)) {
+        setPin(true);
+      } else {
+        setPin(false);
+      }
+    }
+  }, [pinnedMessages, msg._id]);
 
   return (
     <div>

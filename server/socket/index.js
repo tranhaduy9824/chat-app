@@ -7,6 +7,8 @@ const {
   handleDeleteMessage,
   handleEditMessage,
   handleTyping,
+  handlePinMessage,
+  handleUnpinMessage,
 } = require("./messages");
 const { handleVideoCall } = require("./call");
 
@@ -24,14 +26,16 @@ const socketHandler = (server) => {
     console.log("New connection", socket.id);
 
     handleUserConnection(io, socket, onlineUsers);
+    handleUserDisconnection(io, socket, onlineUsers);
     handleSendMessage(io, socket, onlineUsers);
     handleReactToMessage(io, socket, onlineUsers);
     handleReplyToMessage(io, socket, onlineUsers);
     handleDeleteMessage(io, socket, onlineUsers);
     handleEditMessage(io, socket, onlineUsers);
     handleVideoCall(io, socket, onlineUsers);
-    handleUserDisconnection(io, socket, onlineUsers);
     handleTyping(io, socket, onlineUsers);
+    handlePinMessage(io, socket, onlineUsers);
+    handleUnpinMessage(io, socket, onlineUsers);
   });
 
   const socketPort = 3000;
