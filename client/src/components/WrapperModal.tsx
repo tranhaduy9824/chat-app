@@ -33,9 +33,7 @@ const WrapperModal: React.FC<WrapperModalProps> = ({
   const handleClose = () => {
     if (outsideClick) {
       setShowModal(false);
-      setTimeout(() => {
-        onClose();
-      }, 500);
+      onClose();
     }
   };
 
@@ -49,7 +47,9 @@ const WrapperModal: React.FC<WrapperModalProps> = ({
       onClick={handleClose}
     >
       <div
-        className={`position-relative p-3 rounded-3 ${className} ${isDarkTheme ? "text-light bg-dark" : "bg-light"}`}
+        className={`position-relative p-3 rounded-3 ${className} ${
+          isDarkTheme ? "text-light bg-dark" : "bg-light"
+        }`}
         style={{
           boxShadow: !isDarkTheme
             ? "var(--bg-primary-gentle) 0px 8px 24px, var(--bg-primary-gentle) 0px 16px 56px, var(--bg-primary-gentle) 0px 24px 80px"

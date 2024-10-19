@@ -437,7 +437,7 @@ function BoxChat({
                   <Avatar user={recipientUser} width={35} height={35} />
                 </div>
                 <div
-                  className="typing-indicator d-flex align-items-center message position-relative border border-secondary bg-white"
+                  className="typing-indicator d-flex align-items-center message position-relative border border-secondary bg-white text-dark"
                   style={{
                     borderRadius: "50px 50px 50px 0",
                     padding: "8px",

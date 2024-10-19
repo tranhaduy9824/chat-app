@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,17 +16,19 @@ import { MessageContext } from "../../context/MessageContext";
 import { AuthContext } from "../../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { formatCallDuration, formatFileSize } from "../../utils/format";
+import { ChatContext } from "../../context/ChatContext";
 
 interface MessageContentProps {
   msg: Message;
-  showEmojiPicker: boolean;
-  setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
-  showMore: boolean;
-  setShowMore: React.Dispatch<React.SetStateAction<boolean>>;
-  pin: boolean;
-  setPin: React.Dispatch<React.SetStateAction<boolean>>;
-  setReplyingTo: React.Dispatch<React.SetStateAction<null | Message>>;
-  setEdit: React.Dispatch<React.SetStateAction<null | Message>>;
+  showEmojiPicker?: boolean;
+  setShowEmojiPicker?: React.Dispatch<React.SetStateAction<boolean>>;
+  showMore?: boolean;
+  setShowMore?: React.Dispatch<React.SetStateAction<boolean>>;
+  pin?: boolean;
+  setPin?: React.Dispatch<React.SetStateAction<boolean>>;
+  setReplyingTo?: React.Dispatch<React.SetStateAction<null | Message>>;
+  setEdit?: React.Dispatch<React.SetStateAction<null | Message>>;
+  typePinMessage?: boolean | undefined;
 }
 
 const MessageContent = ({
@@ -38,15 +41,26 @@ const MessageContent = ({
   setPin,
   setReplyingTo,
   setEdit,
+  typePinMessage,
 }: MessageContentProps) => {
   const moreRef = useRef<HTMLDivElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
   const { reactToMessage, deleteMessage } = useContext(MessageContext)!;
   const { user } = useContext(AuthContext)!;
+  const { pinMessage, unpinMessage } = useContext(ChatContext)!;
 
   const handleEmojiClick = (event: EmojiClickData) => {
     reactToMessage(msg?._id, event.emoji);
-    setShowEmojiPicker(false);
+    setShowEmojiPicker && setShowEmojiPicker(false);
+  };
+
+  const handlePinClick = async () => {
+    if (pin) {
+      await unpinMessage(msg._id);
+    } else {
+      await pinMessage(msg._id);
+    }
+    setPin && setPin(!pin);
   };
 
   const RenderEmoji = () => (
@@ -55,7 +69,7 @@ const MessageContent = ({
         showEmojiPicker ? "selected" : ""
       }`}
       style={{ width: "2rem", height: "2rem" }}
-      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+      onClick={() => setShowEmojiPicker && setShowEmojiPicker(!showEmojiPicker)}
       ref={emojiPickerRef}
     >
       <FontAwesomeIcon icon={faSmile as IconProp} />
@@ -75,8 +89,8 @@ const MessageContent = ({
       className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
       style={{ width: "2rem", height: "2rem" }}
       onClick={() => {
-        setEdit(null);
-        setReplyingTo(msg);
+        setEdit && setEdit(null);
+        setReplyingTo && setReplyingTo(msg);
       }}
     >
       <FontAwesomeIcon icon={faReply as IconProp} />
@@ -86,16 +100,16 @@ const MessageContent = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
-        setShowMore(false);
+        setShowMore && setShowMore(false);
       }
 
       if (
         emojiPickerRef.current &&
         emojiPickerRef.current.contains(event.target as Node)
       ) {
-        setShowEmojiPicker(true);
+        setShowEmojiPicker && setShowEmojiPicker(true);
       } else {
-        setShowEmojiPicker(false);
+        setShowEmojiPicker && setShowEmojiPicker(false);
       }
     };
 
@@ -106,13 +120,13 @@ const MessageContent = ({
   }, [setShowMore, setShowEmojiPicker]);
 
   const handleEditClick = () => {
-    setEdit(msg);
-    setShowMore(false);
+    setEdit && setEdit(msg);
+    setShowMore && setShowMore(false);
   };
 
   return (
     <>
-      {user?._id === msg?.senderId && (
+      {!typePinMessage && user?._id === msg?.senderId && (
         <div
           className={`ml-auto my-auto control-message me-2 d-flex align-items-center gap-1 ${
             showEmojiPicker || showMore ? "selected" : ""
@@ -123,7 +137,7 @@ const MessageContent = ({
               showMore ? "selected" : ""
             }`}
             style={{ width: "2rem", height: "2rem" }}
-            onClick={() => setShowMore(!showMore)}
+            onClick={() => setShowMore && setShowMore(!showMore)}
           >
             <FontAwesomeIcon icon={faEllipsisV as IconProp} />
             {showMore && (
@@ -151,7 +165,7 @@ const MessageContent = ({
                   >
                     Thu hồi
                   </div>
-                  <div className="p-1 w-100" onClick={() => setPin(!pin)}>
+                  <div className="p-1 w-100" onClick={handlePinClick}>
                     {!pin ? "Ghim" : "Bỏ ghim"}
                   </div>
                 </div>
@@ -209,8 +223,8 @@ const MessageContent = ({
             src={msg.mediaUrl}
             alt="media"
             style={{
-              maxWidth: "280px",
-              maxHeight: "300px",
+              maxWidth: typePinMessage ? "130px" : "280px",
+              maxHeight: typePinMessage ? "150px" : "300px",
               width: "auto",
               height: "auto",
               borderRadius: "10px",
@@ -223,8 +237,8 @@ const MessageContent = ({
             src={msg.mediaUrl}
             controls
             style={{
-              maxWidth: "280px",
-              maxHeight: "300px",
+              maxWidth: typePinMessage ? "130px" : "280px",
+              maxHeight: typePinMessage ? "150px" : "300px",
               width: "auto",
               height: "auto",
               borderRadius: "10px",
@@ -318,7 +332,7 @@ const MessageContent = ({
           <PinIcon />
         </span>
       </div>
-      {user?._id !== msg?.senderId && (
+      {!typePinMessage && user?._id !== msg?.senderId && (
         <div
           className={`m-auto control-message ms-2 d-flex align-items-center gap-1 ${
             showEmojiPicker || showMore ? "selected" : ""
@@ -331,7 +345,7 @@ const MessageContent = ({
               showMore ? "selected" : ""
             }`}
             style={{ width: "2rem", height: "2rem" }}
-            onClick={() => setShowMore(!showMore)}
+            onClick={() => setShowMore && setShowMore(!showMore)}
           >
             <FontAwesomeIcon icon={faEllipsisV as IconProp} />
             {showMore && (
@@ -348,7 +362,7 @@ const MessageContent = ({
                   className="d-flex flex-column align-items-start"
                   style={{ minWidth: "max-content" }}
                 >
-                  <div className="p-1" onClick={() => setPin(!pin)}>
+                  <div className="p-1" onClick={handlePinClick}>
                     {!pin ? "Ghim" : "Bỏ ghim"}
                   </div>
                 </div>

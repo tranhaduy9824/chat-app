@@ -136,6 +136,40 @@ const handleTyping = (io, socket, onlineUsers) => {
   });
 };
 
+const handlePinMessage = (io, socket, onlineUsers) => {
+  socket.on("pinMessage", (pinData) => {
+    const { messageId, members } = pinData;
+
+    if (Array.isArray(members)) {
+      members.forEach((userId) => {
+        const user = onlineUsers.find((user) => user.userId === userId);
+        if (user) {
+          io.to(user.socketId).emit("messagePinned", { messageId });
+        }
+      });
+    } else {
+      console.error("Members list is not defined or not an array.");
+    }
+  });
+};
+
+const handleUnpinMessage = (io, socket, onlineUsers) => {
+  socket.on("unpinMessage", (unpinData) => {
+    const { messageId, members } = unpinData;
+
+    if (Array.isArray(members)) {
+      members.forEach((userId) => {
+        const user = onlineUsers.find((user) => user.userId === userId);
+        if (user) {
+          io.to(user.socketId).emit("messageUnpinned", { messageId });
+        }
+      });
+    } else {
+      console.error("Members list is not defined or not an array.");
+    }
+  });
+};
+
 module.exports = {
   handleSendMessage,
   handleReactToMessage,
@@ -143,4 +177,6 @@ module.exports = {
   handleDeleteMessage,
   handleEditMessage,
   handleTyping,
+  handlePinMessage,
+  handleUnpinMessage,
 };
