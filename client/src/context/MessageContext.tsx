@@ -42,6 +42,9 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     updateCurrentChat,
     isChatMuted,
     setPinnedMessages,
+    setUserChats,
+    userChats,
+    setCurrentChat,
   } = useContext(ChatContext)!;
   const { user } = useContext(AuthContext)!;
   const { setProgress } = useLoading();
@@ -66,12 +69,12 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       ]);
       setHasMore(response.hasMore);
     },
-    [currentChat, addNotification]
+    [currentChat?._id, addNotification]
   );
 
   useEffect(() => {
     setMessages([]);
-  }, [currentChat]);
+  }, [currentChat?._id]);
 
   useEffect(() => {
     if (socket === null) return;
@@ -178,19 +181,66 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
 
     socket.on("messagePinned", (data: { messageId: string }) => {
       setPinnedMessages((prev: any) => {
-        if (prev.some((pinned: any) => (typeof pinned === "string" ? pinned : pinned._id) === data.messageId)) {
+        if (
+          prev.some(
+            (pinned: any) =>
+              (typeof pinned === "string" ? pinned : pinned._id) ===
+              data.messageId
+          )
+        ) {
           return prev;
         }
         return [...prev, data.messageId];
       });
     });
-    
+
     socket.on("messageUnpinned", (data: { messageId: string }) => {
       setPinnedMessages((prev: any) => {
-        return prev.filter((id: any) => (typeof id === "string" ? id : id._id) !== data.messageId);
+        return prev.filter(
+          (id: any) => (typeof id === "string" ? id : id._id) !== data.messageId
+        );
       });
     });
-    
+
+    socket.on(
+      "nicknameChanged",
+      (data: { chatId: string; userId: string; newNickname: string }) => {
+        console.log(
+          "Vào rồi",
+          data.userId,
+          data.newNickname,
+          userChats,
+          currentChat
+        );
+        if (currentChat && userChats) {
+          const updatedNicknames = currentChat.nicknames.some(
+            (n) => n.userId === data.userId
+          )
+            ? currentChat.nicknames.map((n) =>
+                n.userId === data.userId
+                  ? { ...n, nickname: data.newNickname }
+                  : n
+              )
+            : [
+                ...currentChat.nicknames,
+                { userId: data.userId, nickname: data.newNickname },
+              ];
+
+          const updatedChats = userChats.map((chat) =>
+            chat._id === currentChat._id
+              ? { ...chat, nicknames: updatedNicknames }
+              : chat
+          );
+
+          setUserChats(updatedChats);
+          setCurrentChat((prevChat: any) =>
+            prevChat?._id === data.chatId
+              ? { ...prevChat, nicknames: updatedNicknames }
+              : prevChat
+          );
+        }
+      }
+    );
 
     return () => {
       socket.off("getMessage");
@@ -203,8 +253,18 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
       socket.off("stopTyping");
       socket.off("messagePinned");
       socket.off("messageUnpinned");
+      socket.off("nicknameChanged");
     };
-  }, [socket, currentChat, user, isChatMuted, setPinnedMessages]);
+  }, [
+    socket,
+    currentChat,
+    user,
+    isChatMuted,
+    setPinnedMessages,
+    userChats,
+    setUserChats,
+    setCurrentChat,
+  ]);
 
   const sendTextMessage = useCallback(
     async (

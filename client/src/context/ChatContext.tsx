@@ -75,7 +75,7 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
     };
 
     getUsers();
-  }, [userChats]);
+  }, [user]);
 
   useEffect(() => {
     const getUserChats = async () => {
@@ -172,21 +172,21 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
           members: currentChat?.members,
         });
       }
-  
+
       const response = await postRequest(
         `${baseUrl}/chats/${currentChat?._id}/pinMessage`,
         { messageId },
         undefined,
         true
       );
-  
+
       if (response.error) {
         return addNotification(response.message, "error");
       }
     },
     [currentChat, socket, addNotification, setPinnedMessages]
   );
-  
+
   const unpinMessage = useCallback(
     async (messageId: string) => {
       if (socket) {
@@ -195,21 +195,21 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
           members: currentChat?.members,
         });
       }
-  
+
       const response = await postRequest(
         `${baseUrl}/chats/${currentChat?._id}/unpinMessage`,
         { messageId },
         undefined,
         true
       );
-  
+
       if (response.error) {
         return addNotification(response.message, "error");
       }
     },
     [currentChat, socket, addNotification, setPinnedMessages]
   );
-  
+
   const getPinnedMessages = useCallback(async () => {
     if (currentChat) {
       const response = await getRequest(
@@ -217,11 +217,11 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         undefined,
         true
       );
-  
+
       if (response.error) {
         return addNotification(response.message, "error");
       }
-  
+
       setPinnedMessages(response);
     }
   }, [currentChat, addNotification, setPinnedMessages]);
@@ -231,6 +231,29 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
       getPinnedMessages();
     }
   }, [currentChat, getPinnedMessages]);
+
+  const updateNickname = useCallback(
+    async (chatId: string, userId: string, nickname: string) => {
+      const response = await postRequest(
+        `${baseUrl}/chats/${chatId}/updateNickname`,
+        { userId, nickname },
+        undefined,
+        true
+      );
+
+      socket.emit("changeNickname", {
+        chatId: currentChat?._id,
+        userId,
+        newNickname: nickname,
+        members: currentChat?.members,
+      });
+
+      if (response.error) {
+        return addNotification(response.message, "error");
+      }
+    },
+    [addNotification, currentChat]
+  );
 
   return (
     <ChatContext.Provider
@@ -244,14 +267,15 @@ export const ChatContextProvider: React.FC<ChatContextProviderProps> = ({
         onlineUsers,
         socket,
         setCurrentChat,
-        toggleMuteChat
-        ,
+        toggleMuteChat,
         isChatMuted,
         pinMessage,
         unpinMessage,
         getPinnedMessages,
         pinnedMessages,
-        setPinnedMessages
+        setPinnedMessages,
+        updateNickname,
+        setUserChats,
       }}
     >
       {children}

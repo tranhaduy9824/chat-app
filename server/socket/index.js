@@ -10,6 +10,7 @@ const {
   handlePinMessage,
   handleUnpinMessage,
 } = require("./messages");
+const { handleChangeNickname } = require("./chat");
 const { handleVideoCall } = require("./call");
 
 const socketHandler = (server) => {
@@ -36,6 +37,7 @@ const socketHandler = (server) => {
     handleTyping(io, socket, onlineUsers);
     handlePinMessage(io, socket, onlineUsers);
     handleUnpinMessage(io, socket, onlineUsers);
+    handleChangeNickname(io, socket, onlineUsers);
   });
 
   const socketPort = 3000;

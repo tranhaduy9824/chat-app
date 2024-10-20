@@ -5,6 +5,7 @@ interface Chat {
   _id: string;
   members: string[];
   notificationsEnabled: Map<string, boolean>;
+  nicknames: any[];
 }
 
 interface ChatContextProps {
@@ -16,7 +17,7 @@ interface ChatContextProps {
   allUsers: User[];
   onlineUsers: User[];
   socket: Socket;
-  setCurrentChat: (chat: Chat | null) => void;
+  setCurrentChat: any;
   toggleMuteChat: (chatId: string) => void;
   isChatMuted: (chatId: string) => boolean;
   pinMessage: (messageId: string) => void;
@@ -24,6 +25,8 @@ interface ChatContextProps {
   getPinnedMessages: () => void;
   pinnedMessages: Message[];
   setPinnedMessages: (messages: any) => void;
+  updateNickname: (chatId: string, userId: string, nickname: string) => void;
+  setUserChats: (chats: Chat[]) => void;
 }
 
 interface ChatContextProviderProps {
