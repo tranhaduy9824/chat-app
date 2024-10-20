@@ -9,6 +9,9 @@ import moment from "moment";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
 import { MessageContext } from "../../context/MessageContext.js";
 import { useTheme } from "../../context/ThemeContext.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faBellSlash } from "@fortawesome/free-regular-svg-icons";
 
 interface UserChatProps {
   chat: Chat;
@@ -28,7 +31,7 @@ const UserChat: React.FC<UserChatProps> = ({
   nextChat,
 }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
-  const { onlineUsers } = useContext(ChatContext)!;
+  const { onlineUsers, isChatMuted } = useContext(ChatContext)!;
   const { notifications, markThisUserNotificationsAsRead } =
     useContext(MessageContext)!;
   const { isDarkTheme } = useTheme();
@@ -105,7 +108,10 @@ const UserChat: React.FC<UserChatProps> = ({
         ></div>
       </div>
       <div className="flex-grow-1 pe-5">
-        <span className="fw-bold">{recipientUser?.fullname}</span>
+        <span className="fw-bold">
+          {chat?.nicknames?.find((n) => n.userId === recipientUser?._id)
+            ?.nickname || recipientUser?.fullname}
+        </span>
         <div>
           {latestMessage?.type && (
             <>
@@ -142,6 +148,21 @@ const UserChat: React.FC<UserChatProps> = ({
             backgroundColor: "#2e89ff",
           }}
         ></div>
+      )}
+      {isChatMuted(chat?._id || "") && (
+        <span
+          className="position-absolute rounded-circle"
+          style={{
+            top: "50%",
+            right: thisUserNotification?.length > 0 ? "60px" : "36px",
+            transform: "translateY(-50%)",
+          }}
+        >
+          <FontAwesomeIcon
+            style={{ fontSize: "18px" }}
+            icon={faBellSlash as IconProp}
+          />
+        </span>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseUrl, getRequest } from "../utils/services";
-import { User } from "../types/auth";
 
-const fetchUser = async (userId: string): Promise<User | null> => {
+const fetchUser = async (userId: string): Promise<any | null> => {
   try {
     const response = await getRequest(
       `${baseUrl}/users/find/${userId}`,

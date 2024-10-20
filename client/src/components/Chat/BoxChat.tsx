@@ -171,13 +171,14 @@ function BoxChat({
     setEdit(null);
     setReplyingTo(null);
     setPage(1);
-  }, [currentChat]);
+  }, [currentChat?._id]);
 
   useEffect(() => {
     if (currentChat) {
+      console.log("Bị Dính");
       getMessages(page, 10);
     }
-  }, [currentChat, page]);
+  }, [currentChat?._id, page]);
 
   const loadMoreMessages = () => {
     if (hasMore) {
@@ -190,7 +191,7 @@ function BoxChat({
     if (chatMessagesElement) {
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = chatMessagesElement;
-        if (clientHeight - scrollTop >= scrollHeight - 1) {
+        if (Math.ceil(clientHeight - scrollTop) >= scrollHeight - 1) {
           loadMoreMessages();
         }
       };
@@ -200,7 +201,7 @@ function BoxChat({
         chatMessagesElement.removeEventListener("scroll", handleScroll);
       };
     }
-  }, [hasMore, loadMoreMessages, currentChat]);
+  }, [hasMore, loadMoreMessages, currentChat?._id]);
 
   useEffect(() => {
     if (inputMessageRef.current) {
@@ -385,7 +386,11 @@ function BoxChat({
                 }}
               ></div>
               <div>
-                <p className="fw-bold m-0">{recipientUser?.fullname}</p>
+                <p className="fw-bold m-0">
+                  {currentChat?.nicknames?.find(
+                    (n) => n.userId === recipientUser?._id
+                  )?.nickname || recipientUser?.fullname}
+                </p>
                 <span className="message-footer fa-sm">
                   {onlineUsers?.some(
                     (user) => user?.userId === recipientUser?._id
@@ -516,7 +521,9 @@ function BoxChat({
                     {edit ? "Chỉnh sửa tin nhắn" : "Đang trả lời"}{" "}
                     {!edit &&
                       (replyingTo?.senderId !== user?._id
-                        ? recipientUser?.fullname
+                        ? currentChat?.nicknames?.find(
+                            (n) => n.userId === recipientUser?._id
+                          )?.nickname || recipientUser?.fullname
                         : "Chính mình")}
                   </div>
                   <div className="small">

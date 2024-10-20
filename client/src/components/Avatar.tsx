@@ -6,9 +6,16 @@ interface AvatarProps {
   width?: number;
   height?: number;
   style?: React.CSSProperties;
+  className?: string;
 }
 
-function Avatar({ user, width = 50, height = 50, style }: AvatarProps) {
+function Avatar({
+  user,
+  width = 50,
+  height = 50,
+  style,
+  className,
+}: AvatarProps) {
   return (
     <img
       src={
@@ -17,7 +24,7 @@ function Avatar({ user, width = 50, height = 50, style }: AvatarProps) {
           : avatarDefault
       }
       alt={user?.fullname}
-      className="rounded-circle mr-3"
+      className={`rounded-circle mr-3 ${className}`}
       style={{ border: "1px solid var(--bg-primary-gentle)", ...style }}
       width={width}
       height={height}

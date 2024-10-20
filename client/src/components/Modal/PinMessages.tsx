@@ -34,7 +34,7 @@ export const PinMessages = ({
         <p className="text-center fw-bold ">Tin nhắn đã ghim</p>
         {pinnedMessages.length > 0 ? (
           <div
-            className="d-flex flex-column gap-3 overflow-y-auto overflow-x-hidden"
+            className="d-flex flex-column gap-3 overflow-y-auto overflow-x-hidden px-2"
             style={{ height: "calc(100% - 40px)" }}
           >
             {[...pinnedMessages].reverse().map((message) => (

@@ -21,10 +21,12 @@ import { ChatContext } from "../../context/ChatContext";
 import { useTheme } from "../../context/ThemeContext";
 import SearchMessage from "./SearchMessage";
 import { PinMessages } from "../Modal/PinMessages";
+import { ChangeNickname } from "../Modal/ChangeNickname";
 
 function InfoChat({ recipientUser }: { recipientUser: User | null }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isPinOpen, setIsPinOpen] = useState(false);
+  const [isNicknameOpen, setIsNicknameOpen] = useState(false);
 
   const { onlineUsers, currentChat, toggleMuteChat, isChatMuted } =
     useContext(ChatContext)!;
@@ -148,6 +150,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
                 style={{
                   backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed",
                 }}
+                onClick={() => setIsNicknameOpen(true)}
               >
                 <div
                   style={{
@@ -254,7 +257,15 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
           </>
         )}
       </div>
-      <PinMessages show={isPinOpen} onClose={() => setIsPinOpen(false)} recipientUser={recipientUser} />
+      <PinMessages
+        show={isPinOpen}
+        onClose={() => setIsPinOpen(false)}
+        recipientUser={recipientUser}
+      />
+      <ChangeNickname
+        show={isNicknameOpen}
+        onClose={() => setIsNicknameOpen(false)}
+      />
     </>
   );
 }

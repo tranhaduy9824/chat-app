@@ -6,6 +6,7 @@ const {
   pinMessage,
   unpinMessage,
   getPinnedMessages,
+  updateNickname
 } = require("../controllers/chatController");
 const checkAuth = require("../middleware/check-auth");
 
@@ -17,5 +18,6 @@ router.get("/find/:firstId/:secondId", checkAuth, findChat);
 router.post("/:chatId/pinMessage", checkAuth, pinMessage);
 router.post("/:chatId/unpinMessage", checkAuth, unpinMessage);
 router.get("/:chatId/pinnedMessages", checkAuth, getPinnedMessages);
+router.post("/:chatId/updateNickname", checkAuth, updateNickname);
 
 module.exports = router;
