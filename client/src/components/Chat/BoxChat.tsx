@@ -175,7 +175,6 @@ function BoxChat({
 
   useEffect(() => {
     if (currentChat) {
-      console.log("Bị Dính");
       getMessages(page, 10);
     }
   }, [currentChat?._id, page]);

@@ -526,23 +526,24 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
     async (
       query: string,
       page: number,
-      limit: number
+      limit: number,
+      type: "text" | "media" | "file" = "text"
     ): Promise<{
       messages: any[];
       hasMore: boolean;
       error?: string;
     } | void> => {
       const response = await getRequest(
-        `${baseUrl}/messages/search/${currentChat?._id}?query=${query}&page=${page}&limit=${limit}`,
+        `${baseUrl}/messages/search/${currentChat?._id}?query=${query}&page=${page}&limit=${limit}&type=${type}`,
         undefined,
         true
       );
-
+  
       if (response.error) {
         addNotification(response.error, "error");
         return;
       }
-
+  
       return response;
     },
     [currentChat, addNotification]

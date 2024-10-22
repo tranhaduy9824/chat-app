@@ -241,7 +241,7 @@ const createCallMessage = async (
 
 const searchMessages = async (req, res) => {
   const { chatId } = req.params;
-  const { query, page = 1, limit = 10 } = req.query;
+  const { query, page = 1, limit = 10, type = "text" } = req.query;
   const userId = req.userData._id;
 
   try {
@@ -255,17 +255,26 @@ const searchMessages = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
+    let searchCriteria = {
+      chatId,
+      text: { $regex: query, $options: "i" },
+    };
+
+    if (type === "media") {
+      searchCriteria.type = { $in: ["image", "video"] };
+    } else if (type === "file") {
+      searchCriteria.type = "file";
+    } else {
+      searchCriteria.type = "text";
+    }
+
     const messages = await messageModel
-      .find({ chatId, text: { $regex: query, $options: "i" }, type: "text" })
+      .find(searchCriteria)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
 
-    const totalMessages = await messageModel.countDocuments({
-      chatId,
-      text: { $regex: query, $options: "i" },
-      type: "text",
-    });
+    const totalMessages = await messageModel.countDocuments(searchCriteria);
 
     return res.status(200).json({
       messages,

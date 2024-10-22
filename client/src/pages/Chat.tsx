@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import BoxChat from "../components/Chat/BoxChat";
 import InfoChat from "../components/Chat/InfoChat";
 import { ChatContext } from "../context/ChatContext";
@@ -29,13 +29,30 @@ function Chat() {
     };
   }, [currentChat, socket]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const root = document.getElementById("root");
-      if (root) {
+  useLayoutEffect(() => {
+    const root = document.getElementById("root");
+
+    const removeBackgroundImage = () => {
+      if (root && root.style.backgroundImage) {
         root.style.removeProperty("background-image");
+        console.log("Background image removed");
       }
-    }, 1000);
+    };
+
+    removeBackgroundImage();
+
+    const observer = new MutationObserver(removeBackgroundImage);
+
+    if (root) {
+      observer.observe(root, {
+        attributes: true,
+        attributeFilter: ["style"],
+      });
+    }
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   return (

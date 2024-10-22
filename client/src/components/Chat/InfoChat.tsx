@@ -22,11 +22,13 @@ import { useTheme } from "../../context/ThemeContext";
 import SearchMessage from "./SearchMessage";
 import { PinMessages } from "../Modal/PinMessages";
 import { ChangeNickname } from "../Modal/ChangeNickname";
+import { ListFiles } from "./ListFiles";
 
 function InfoChat({ recipientUser }: { recipientUser: User | null }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isPinOpen, setIsPinOpen] = useState(false);
   const [isNicknameOpen, setIsNicknameOpen] = useState(false);
+  const [listFiles, setListFiles] = useState("");
 
   const { onlineUsers, currentChat, toggleMuteChat, isChatMuted } =
     useContext(ChatContext)!;
@@ -46,6 +48,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
         }`}
         style={{
           minWidth: "350px",
+          maxWidth: "350px",
           borderRadius: "var(--border-radius)",
           backgroundColor: !isDarkTheme
             ? "var(--bg-cpn-light-gentle)"
@@ -55,7 +58,9 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
             : "2px solid var(--bg-cpn-dark)",
         }}
       >
-        {isSearchOpen ? (
+        {listFiles ? (
+          <ListFiles listFiles={listFiles} onClose={() => setListFiles("")} setListFiles={setListFiles} />
+        ) : isSearchOpen ? (
           <SearchMessage onClose={() => setIsSearchOpen(false)} />
         ) : (
           <>
@@ -172,6 +177,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
                 style={{
                   backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed",
                 }}
+                onClick={() => setListFiles("media")}
               >
                 <div
                   style={{
@@ -191,6 +197,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
                 style={{
                   backgroundColor: isDarkTheme ? "#00000075" : "#dee4ed",
                 }}
+                onClick={() => setListFiles("file")}
               >
                 <div
                   style={{
