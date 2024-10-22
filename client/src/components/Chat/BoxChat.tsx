@@ -55,7 +55,7 @@ function BoxChat({
     "translate3d(0, 0, 0)"
   );
 
-  const { user } = useContext(AuthContext)!;
+  const { user, unblockUser } = useContext(AuthContext)!;
   const { currentChat, onlineUsers, socket } = useContext(ChatContext)!;
   const {
     messages,
@@ -72,6 +72,9 @@ function BoxChat({
   const isMobile = useIsMobile();
   const { isDarkTheme } = useTheme();
 
+  const isBlocked = recipientUser?.blockedUsers?.includes(user?._id || "");
+  const hasBlocked = user?.blockedUsers?.includes(recipientUser?._id || "");
+
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
       chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
@@ -79,7 +82,7 @@ function BoxChat({
   };
 
   useEffect(() => {
-    if (attachedFile) {
+    if (attachedFile && !(isBlocked || hasBlocked)) {
       const sendFile = async () => {
         scrollToBottom();
         if (replyingTo) {
@@ -107,7 +110,7 @@ function BoxChat({
   }, [attachedFile]);
 
   const handleSendMessage = () => {
-    if (message.trim() || attachedFile) {
+    if ((message.trim() || attachedFile) && !(isBlocked || hasBlocked)) {
       if (edit) {
         editMessage(edit._id, message);
       } else if (replyingTo) {
@@ -239,7 +242,7 @@ function BoxChat({
 
   const handleStartCall = () => {
     try {
-      if (currentChat) {
+      if (currentChat && !(isBlocked || hasBlocked)) {
         setIsCalling(true);
         socket.emit("startCall", {
           chatId: currentChat?._id,
@@ -553,124 +556,148 @@ function BoxChat({
             </div>
           )}
           <div className="d-flex align-items-center pt-2">
-            <div className="d-flex align-items-center gap-2">
-              <Tippy content="Chụp ảnh">
-                <span
-                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                  style={{ width: "2.1rem", height: "2.1rem" }}
-                  onClick={() => setShowCamera(true)}
-                >
-                  <FontAwesomeIcon
-                    icon={faCamera as IconProp}
-                    style={{ fontSize: "20px" }}
-                  />
-                </span>
-              </Tippy>
-              <Tippy content="Đính kèm file">
-                <label
-                  htmlFor="file-upload"
-                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                  style={{
-                    width: "2.1rem",
-                    height: "2.1rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faImages as IconProp}
-                    style={{ fontSize: "20px" }}
-                  />
-                </label>
-              </Tippy>
-              <input
-                id="file-upload"
-                type="file"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-              />
-              <Tippy content="Chọn file gif">
-                <span
-                  className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
-                  style={{ width: "2.1rem", height: "2.1rem" }}
-                >
-                  <FontAwesomeIcon
-                    icon={faStickyNote as IconProp}
-                    style={{ fontSize: "20px" }}
-                  />
-                </span>
-              </Tippy>
-            </div>
-            <div className="position-relative flex-grow-1 mx-3">
-              <input
-                type="text"
-                className="form-control rounded-pill me-2"
-                style={{ paddingRight: "38px" }}
-                placeholder="Enter message..."
-                value={edit ? edit.text : message}
-                ref={inputMessageRef}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  if (edit) {
-                    setEdit((prevEdit) =>
-                      prevEdit ? { ...prevEdit, text: newValue } : null
-                    );
-                  }
-                  setMessage(newValue);
-                }}
-                onFocus={() => setShowEmojiPicker(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleStopTyping();
-                    handleSendMessage();
-                  } else {
-                    handleTyping();
-                  }
-                }}
-                onBlur={handleStopTyping}
-              />
-              <Tippy content="Chọn biểu tượng cảm xúc">
-                <span
-                  className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
-                    showEmojiPicker && "selected"
-                  } ${isDarkTheme ? "text-dark" : ""}`}
-                  style={{
-                    width: "2.1rem",
-                    height: "2.1rem",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  <FontAwesomeIcon
-                    icon={faSmile as IconProp}
-                    style={{ fontSize: "20px" }}
-                  />
-                </span>
-              </Tippy>
-              {showEmojiPicker && (
+            {hasBlocked ? (
+              <div className="w-100 text-center fw-bold">
+                <span>Bạn đã chặn {recipientUser?.fullname}</span>
                 <div
-                  className="position-absolute bottom-100 end-0 mb-2"
-                  style={{ zIndex: 1000 }}
-                  ref={emojiPickerRef}
+                  className=" mt-2 p-2 m-auto rounded-2 icon-hover text-danger"
+                  style={{
+                    backgroundColor: isDarkTheme
+                      ? "var(--bg-cpn-dark)"
+                      : "var(--bg-cpn-light)",
+                    width: "max-content",
+                  }}
+                  onClick={() => unblockUser(recipientUser?._id || "")}
                 >
-                  <Picker
-                    onEmojiClick={(emojiObject) =>
-                      handleEmojiClick(emojiObject)
-                    }
-                  />
+                  Mở chặn
                 </div>
-              )}
-            </div>
-            <button
-              className="btn btn-primary rounded-pill"
-              style={{ height: "100%", width: "auto", aspectRatio: "1/1" }}
-              onClick={handleSendMessage}
-            >
-              {!edit ? (
-                <FontAwesomeIcon icon={faPaperPlane as IconProp} />
-              ) : (
-                <FontAwesomeIcon icon={faCheck as IconProp} />
-              )}
-            </button>
+              </div>
+            ) : isBlocked ? (
+              <div className="w-100 text-center fw-bold">
+                Bạn đã bị {recipientUser?.fullname} chặn
+              </div>
+            ) : (
+              <>
+                <div className="d-flex align-items-center gap-2">
+                  <Tippy content="Chụp ảnh">
+                    <span
+                      className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                      style={{ width: "2.1rem", height: "2.1rem" }}
+                      onClick={() => setShowCamera(true)}
+                    >
+                      <FontAwesomeIcon
+                        icon={faCamera as IconProp}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </span>
+                  </Tippy>
+                  <Tippy content="Đính kèm file">
+                    <label
+                      htmlFor="file-upload"
+                      className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                      style={{
+                        width: "2.1rem",
+                        height: "2.1rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={faImages as IconProp}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </label>
+                  </Tippy>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  <Tippy content="Chọn file gif">
+                    <span
+                      className="icon-hover d-flex align-items-center justify-content-center rounded-circle"
+                      style={{ width: "2.1rem", height: "2.1rem" }}
+                    >
+                      <FontAwesomeIcon
+                        icon={faStickyNote as IconProp}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </span>
+                  </Tippy>
+                </div>
+                <div className="position-relative flex-grow-1 mx-3">
+                  <input
+                    type="text"
+                    className="form-control rounded-pill me-2"
+                    style={{ paddingRight: "38px" }}
+                    placeholder="Enter message..."
+                    value={edit ? edit.text : message}
+                    ref={inputMessageRef}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      if (edit) {
+                        setEdit((prevEdit) =>
+                          prevEdit ? { ...prevEdit, text: newValue } : null
+                        );
+                      }
+                      setMessage(newValue);
+                    }}
+                    onFocus={() => setShowEmojiPicker(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleStopTyping();
+                        handleSendMessage();
+                      } else {
+                        handleTyping();
+                      }
+                    }}
+                    onBlur={handleStopTyping}
+                  />
+                  <Tippy content="Chọn biểu tượng cảm xúc">
+                    <span
+                      className={`position-absolute top-0 end-0 icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                        showEmojiPicker && "selected"
+                      } ${isDarkTheme ? "text-dark" : ""}`}
+                      style={{
+                        width: "2.1rem",
+                        height: "2.1rem",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <FontAwesomeIcon
+                        icon={faSmile as IconProp}
+                        style={{ fontSize: "20px" }}
+                      />
+                    </span>
+                  </Tippy>
+                  {showEmojiPicker && (
+                    <div
+                      className="position-absolute bottom-100 end-0 mb-2"
+                      style={{ zIndex: 1000 }}
+                      ref={emojiPickerRef}
+                    >
+                      <Picker
+                        onEmojiClick={(emojiObject) =>
+                          handleEmojiClick(emojiObject)
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="btn btn-primary rounded-pill"
+                  style={{ height: "100%", width: "auto", aspectRatio: "1/1" }}
+                  onClick={handleSendMessage}
+                >
+                  {!edit ? (
+                    <FontAwesomeIcon icon={faPaperPlane as IconProp} />
+                  ) : (
+                    <FontAwesomeIcon icon={faCheck as IconProp} />
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

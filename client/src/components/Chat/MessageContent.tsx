@@ -17,6 +17,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { formatCallDuration, formatFileSize } from "../../utils/format";
 import { ChatContext } from "../../context/ChatContext";
+import { User } from "../../types/auth";
 
 interface MessageContentProps {
   msg: Message;
@@ -29,6 +30,7 @@ interface MessageContentProps {
   setReplyingTo?: React.Dispatch<React.SetStateAction<null | Message>>;
   setEdit?: React.Dispatch<React.SetStateAction<null | Message>>;
   typePinMessage?: boolean | undefined;
+  recipientUser?: User | null;
 }
 
 const MessageContent = ({
@@ -42,12 +44,17 @@ const MessageContent = ({
   setReplyingTo,
   setEdit,
   typePinMessage,
+  recipientUser,
 }: MessageContentProps) => {
   const moreRef = useRef<HTMLDivElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+
   const { reactToMessage, deleteMessage } = useContext(MessageContext)!;
   const { user } = useContext(AuthContext)!;
   const { pinMessage, unpinMessage } = useContext(ChatContext)!;
+
+  const isBlocked = recipientUser?.blockedUsers?.includes(user?._id || "");
+  const hasBlocked = user?.blockedUsers?.includes(recipientUser?._id || "");
 
   const handleEmojiClick = (event: EmojiClickData) => {
     reactToMessage(msg?._id, event.emoji);
@@ -126,56 +133,60 @@ const MessageContent = ({
 
   return (
     <>
-      {!typePinMessage && user?._id === msg?.senderId && (
-        <div
-          className={`ml-auto my-auto control-message me-2 d-flex align-items-center gap-1 ${
-            showEmojiPicker || showMore ? "selected" : ""
-          }`}
-        >
-          <span
-            className={`position-relative icon-hover d-flex align-items-center justify-content-center rounded-circle ${
-              showMore ? "selected" : ""
+      {!typePinMessage &&
+        user?._id === msg?.senderId &&
+        (isBlocked || hasBlocked ? (
+          <></>
+        ) : (
+          <div
+            className={`ml-auto my-auto control-message me-2 d-flex align-items-center gap-1 ${
+              showEmojiPicker || showMore ? "selected" : ""
             }`}
-            style={{ width: "2rem", height: "2rem" }}
-            onClick={() => setShowMore && setShowMore(!showMore)}
           >
-            <FontAwesomeIcon icon={faEllipsisV as IconProp} />
-            {showMore && (
-              <div
-                className="position-absolute start-50 bottom-100 border rounded p-2"
-                style={{
-                  zIndex: 1000,
-                  transform: "translate(-50%, 0)",
-                  backgroundColor: "#ffffff90",
-                }}
-                ref={moreRef}
-              >
+            <span
+              className={`position-relative icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                showMore ? "selected" : ""
+              }`}
+              style={{ width: "2rem", height: "2rem" }}
+              onClick={() => setShowMore && setShowMore(!showMore)}
+            >
+              <FontAwesomeIcon icon={faEllipsisV as IconProp} />
+              {showMore && (
                 <div
-                  className="d-flex flex-column align-items-start"
-                  style={{ minWidth: "max-content" }}
+                  className="position-absolute start-50 bottom-100 border rounded p-2"
+                  style={{
+                    zIndex: 1000,
+                    transform: "translate(-50%, 0)",
+                    backgroundColor: "#ffffff90",
+                  }}
+                  ref={moreRef}
                 >
-                  {msg.type === "text" && (
-                    <div className="p-1 w-100" onClick={handleEditClick}>
-                      Chỉnh sửa
-                    </div>
-                  )}
                   <div
-                    className="p-1 w-100"
-                    onClick={() => deleteMessage(msg?._id)}
+                    className="d-flex flex-column align-items-start"
+                    style={{ minWidth: "max-content" }}
                   >
-                    Thu hồi
-                  </div>
-                  <div className="p-1 w-100" onClick={handlePinClick}>
-                    {!pin ? "Ghim" : "Bỏ ghim"}
+                    {msg.type === "text" && (
+                      <div className="p-1 w-100" onClick={handleEditClick}>
+                        Chỉnh sửa
+                      </div>
+                    )}
+                    <div
+                      className="p-1 w-100"
+                      onClick={() => deleteMessage(msg?._id)}
+                    >
+                      Thu hồi
+                    </div>
+                    <div className="p-1 w-100" onClick={handlePinClick}>
+                      {!pin ? "Ghim" : "Bỏ ghim"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </span>
-          <RenderReply />
-          <RenderEmoji />
-        </div>
-      )}
+              )}
+            </span>
+            <RenderReply />
+            <RenderEmoji />
+          </div>
+        ))}
       <div
         className={`d-flex align-items-center message position-relative ${
           user?._id !== msg?.senderId &&
@@ -332,45 +343,49 @@ const MessageContent = ({
           <PinIcon />
         </span>
       </div>
-      {!typePinMessage && user?._id !== msg?.senderId && (
-        <div
-          className={`m-auto control-message ms-2 d-flex align-items-center gap-1 ${
-            showEmojiPicker || showMore ? "selected" : ""
-          }`}
-        >
-          <RenderEmoji />
-          <RenderReply />
-          <span
-            className={`position-relative icon-hover d-flex align-items-center justify-content-center rounded-circle ${
-              showMore ? "selected" : ""
+      {!typePinMessage &&
+        user?._id !== msg?.senderId &&
+        (isBlocked || hasBlocked ? (
+          <></>
+        ) : (
+          <div
+            className={`m-auto control-message ms-2 d-flex align-items-center gap-1 ${
+              showEmojiPicker || showMore ? "selected" : ""
             }`}
-            style={{ width: "2rem", height: "2rem" }}
-            onClick={() => setShowMore && setShowMore(!showMore)}
           >
-            <FontAwesomeIcon icon={faEllipsisV as IconProp} />
-            {showMore && (
-              <div
-                className="position-absolute start-50 bottom-100 border rounded-4 p-2"
-                style={{
-                  zIndex: 1000,
-                  transform: "translate(-50%, 0)",
-                  backgroundColor: "#ffffff90",
-                }}
-                ref={moreRef}
-              >
+            <RenderEmoji />
+            <RenderReply />
+            <span
+              className={`position-relative icon-hover d-flex align-items-center justify-content-center rounded-circle ${
+                showMore ? "selected" : ""
+              }`}
+              style={{ width: "2rem", height: "2rem" }}
+              onClick={() => setShowMore && setShowMore(!showMore)}
+            >
+              <FontAwesomeIcon icon={faEllipsisV as IconProp} />
+              {showMore && (
                 <div
-                  className="d-flex flex-column align-items-start"
-                  style={{ minWidth: "max-content" }}
+                  className="position-absolute start-50 bottom-100 border rounded-4 p-2"
+                  style={{
+                    zIndex: 1000,
+                    transform: "translate(-50%, 0)",
+                    backgroundColor: "#ffffff90",
+                  }}
+                  ref={moreRef}
                 >
-                  <div className="p-1" onClick={handlePinClick}>
-                    {!pin ? "Ghim" : "Bỏ ghim"}
+                  <div
+                    className="d-flex flex-column align-items-start"
+                    style={{ minWidth: "max-content" }}
+                  >
+                    <div className="p-1" onClick={handlePinClick}>
+                      {!pin ? "Ghim" : "Bỏ ghim"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </span>
-        </div>
-      )}
+              )}
+            </span>
+          </div>
+        ))}
     </>
   );
 };

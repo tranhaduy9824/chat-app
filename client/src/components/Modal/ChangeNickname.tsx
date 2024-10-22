@@ -14,9 +14,14 @@ import { faEdit } from "@fortawesome/free-regular-svg-icons";
 interface ChangeNicknameProps {
   show: boolean;
   onClose: () => void;
+  block?: boolean;
 }
 
-export const ChangeNickname = ({ show, onClose }: ChangeNicknameProps) => {
+export const ChangeNickname = ({
+  show,
+  onClose,
+  block,
+}: ChangeNicknameProps) => {
   const [nicknames, setNicknames] = useState<any[]>([]);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [originalNickname, setOriginalNickname] = useState<string | null>(null);
@@ -81,10 +86,14 @@ export const ChangeNickname = ({ show, onClose }: ChangeNicknameProps) => {
   };
 
   const handleEditClick = (userId: string) => {
-    setEditingUserId(userId);
-    const originalNickname = nicknames.find((n) => n._id === userId)?.nickname;
-    setOriginalNickname(originalNickname || null);
-    inputRef.current?.focus();
+    if (!block) {
+      setEditingUserId(userId);
+      const originalNickname = nicknames.find(
+        (n) => n._id === userId
+      )?.nickname;
+      setOriginalNickname(originalNickname || null);
+      inputRef.current?.focus();
+    }
   };
 
   const resetNicknameIfEmpty = (userId: string) => {

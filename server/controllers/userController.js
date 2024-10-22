@@ -66,6 +66,7 @@ const loginUser = async (req, res) => {
       fullname: user.fullname,
       email,
       avatar: user.avatar,
+      blockedUsers: user.blockedUsers,
       token,
     });
   } catch (error) {
@@ -116,6 +117,7 @@ const updateAvatar = async (req, res) => {
       fullname: user.fullname,
       email: user.email,
       avatar: user.avatar,
+      blockedUsers: user.blockedUsers,
     });
   } catch (error) {
     console.log(error);
@@ -178,6 +180,48 @@ const updateUser = async (req, res) => {
   }
 };
 
+const blockUser = async (req, res) => {
+  const userId = req.userData._id;
+  const { blockUserId } = req.body;
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json("User not found");
+
+    if (user.blockedUsers.includes(blockUserId)) {
+      return res.status(400).json("User is already blocked");
+    }
+
+    user.blockedUsers.push(blockUserId);
+    await user.save();
+
+    return res.status(200).json("User blocked successfully");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
+const unblockUser = async (req, res) => {
+  const userId = req.userData._id;
+  const { unblockUserId } = req.body;
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json("User not found");
+
+    user.blockedUsers = user.blockedUsers.filter(
+      (id) => id.toString() !== unblockUserId
+    );
+    await user.save();
+
+    return res.status(200).json("User unblocked successfully");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -185,4 +229,6 @@ module.exports = {
   getUsers,
   updateAvatar,
   updateUser,
+  blockUser,
+  unblockUser,
 };

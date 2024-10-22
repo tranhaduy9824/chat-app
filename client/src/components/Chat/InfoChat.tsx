@@ -23,6 +23,7 @@ import SearchMessage from "./SearchMessage";
 import { PinMessages } from "../Modal/PinMessages";
 import { ChangeNickname } from "../Modal/ChangeNickname";
 import { ListFiles } from "./ListFiles";
+import { AuthContext } from "../../context/AuthContext";
 
 function InfoChat({ recipientUser }: { recipientUser: User | null }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -33,10 +34,26 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
   const { onlineUsers, currentChat, toggleMuteChat, isChatMuted } =
     useContext(ChatContext)!;
   const { isDarkTheme } = useTheme();
+  const { user, blockUser, unblockUser } = useContext(AuthContext)!;
+
+  const isBlocked = recipientUser?.blockedUsers?.includes(user?._id || "");
+  const hasBlocked = user?.blockedUsers?.includes(recipientUser?._id || "");
 
   const handleToggleNotifications = () => {
-    if (currentChat) {
+    if (currentChat && !(isBlocked || hasBlocked)) {
       toggleMuteChat(currentChat._id);
+    }
+  };
+
+  const handleBlockUser = () => {
+    if (recipientUser && !isBlocked) {
+      blockUser(recipientUser._id);
+    }
+  };
+
+  const handleUnblockUser = () => {
+    if (recipientUser && !isBlocked) {
+      unblockUser(recipientUser._id);
     }
   };
 
@@ -59,7 +76,11 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
         }}
       >
         {listFiles ? (
-          <ListFiles listFiles={listFiles} onClose={() => setListFiles("")} setListFiles={setListFiles} />
+          <ListFiles
+            listFiles={listFiles}
+            onClose={() => setListFiles("")}
+            setListFiles={setListFiles}
+          />
         ) : isSearchOpen ? (
           <SearchMessage onClose={() => setIsSearchOpen(false)} />
         ) : (
@@ -245,6 +266,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
                 style={{
                   backgroundColor: isDarkTheme ? "#17030378" : "#f5e0e0",
                 }}
+                onClick={hasBlocked ? handleUnblockUser : handleBlockUser}
               >
                 <div
                   style={{
@@ -258,7 +280,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
                     style={{ color: isDarkTheme ? "white" : "#c2a9aa" }}
                   />
                 </div>{" "}
-                Chặn
+                {hasBlocked ? "Mở chặn" : "Chặn"}
               </div>
             </div>
           </>
@@ -272,6 +294,7 @@ function InfoChat({ recipientUser }: { recipientUser: User | null }) {
       <ChangeNickname
         show={isNicknameOpen}
         onClose={() => setIsNicknameOpen(false)}
+        block={isBlocked || hasBlocked}
       />
     </>
   );

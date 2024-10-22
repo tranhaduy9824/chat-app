@@ -10,6 +10,7 @@ import { faFileText } from "@fortawesome/free-regular-svg-icons";
 import { faPhone, faPhoneSlash } from "@fortawesome/free-solid-svg-icons";
 import { formatCallDuration, formatFileSize } from "../../utils/format";
 import { ChatContext } from "../../context/ChatContext";
+import { useTheme } from "../../context/ThemeContext";
 
 interface MessageProps {
   msg: Message;
@@ -35,13 +36,14 @@ function Message({
 
   const { user } = useContext(AuthContext)!;
   const { pinnedMessages } = useContext(ChatContext)!;
+  const { isDarkTheme } = useTheme();
 
   useEffect(() => {
     if (pinnedMessages && msg._id) {
       const pinnedIds = pinnedMessages.map((pinned) =>
         typeof pinned === "string" ? pinned : pinned._id
       );
-      
+
       if (pinnedIds.includes(msg._id)) {
         setPin(true);
       } else {
@@ -72,7 +74,9 @@ function Message({
               msg.replyTo.type === "text" ||
               msg.replyTo.type === "file" ||
               msg.replyTo.type === "call"
-                ? "#dce2f0"
+                ? isDarkTheme
+                  ? "#00000075"
+                  : "#dce2f0"
                 : "",
             padding:
               msg.replyTo.mediaUrl && msg.replyTo.type !== "file"
@@ -194,6 +198,7 @@ function Message({
             setPin={setPin}
             setReplyingTo={setReplyingTo}
             setEdit={setEdit}
+            recipientUser={recipientUser}
           />
         )}
       </div>

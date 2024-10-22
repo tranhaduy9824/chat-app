@@ -158,49 +158,6 @@ const getPinnedMessages = async (req, res) => {
   }
 };
 
-const blockUser = async (req, res) => {
-  const chatId = req.params.chatId;
-  const { userId } = req.body;
-
-  try {
-    const chat = await chatModel.findById(chatId);
-
-    if (!chat) return res.status(404).json("Chat not found");
-
-    if (chat.blockedUsers.includes(userId))
-      return res.status(400).json("User already blocked");
-
-    chat.blockedUsers.push(userId);
-    await chat.save();
-
-    return res.status(200).json(chat);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error.message);
-  }
-};
-
-const unblockUser = async (req, res) => {
-  const chatId = req.params.chatId;
-  const { userId } = req.body;
-
-  try {
-    const chat = await chatModel.findById(chatId);
-
-    if (!chat) return res.status(404).json("Chat not found");
-
-    chat.blockedUsers = chat.blockedUsers.filter(
-      (id) => id.toString() !== userId
-    );
-    await chat.save();
-
-    return res.status(200).json(chat);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error.message);
-  }
-};
-
 const updateNickname = async (req, res) => {
   const chatId = req.params.chatId;
   const { userId, nickname } = req.body;
@@ -238,7 +195,5 @@ module.exports = {
   pinMessage,
   unpinMessage,
   getPinnedMessages,
-  blockUser,
-  unblockUser,
   updateNickname,
 };
