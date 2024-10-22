@@ -190,6 +190,56 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     [addNotification, setProgress, user]
   );
 
+  const blockUser = useCallback(
+    async (blockUserId: string) => {
+      const response = await patchRequest(
+        `${baseUrl}/users/block`,
+        { blockUserId },
+        undefined,
+        true
+      );
+  
+      if (!response.error) {
+        const updatedBlockedUsers = [...(user?.blockedUsers || []), blockUserId];
+        localStorage.setItem(
+          "User",
+          JSON.stringify({ ...user, blockedUsers: updatedBlockedUsers })
+        );
+        setUser({ ...user, blockedUsers: updatedBlockedUsers });
+        addNotification("User blocked successfully", "success");
+      } else {
+        addNotification(response.message, "error");
+      }
+    },
+    [user, addNotification]
+  );
+  
+  const unblockUser = useCallback(
+    async (unblockUserId: string) => {
+      const response = await patchRequest(
+        `${baseUrl}/users/unblock`,
+        { unblockUserId },
+        undefined,
+        true
+      );
+  
+      if (!response.error) {
+        const updatedBlockedUsers = (user?.blockedUsers || []).filter(
+          (id: any) => id !== unblockUserId
+        );
+        localStorage.setItem(
+          "User",
+          JSON.stringify({ ...user, blockedUsers: updatedBlockedUsers })
+        );
+        setUser({ ...user, blockedUsers: updatedBlockedUsers });
+        addNotification("User unblocked successfully", "success");
+      } else {
+        addNotification(response.message, "error");
+      }
+    },
+    [user, addNotification]
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -207,6 +257,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         updateUser,
         socket,
         setSocket,
+        blockUser,
+        unblockUser,
       }}
     >
       {children}

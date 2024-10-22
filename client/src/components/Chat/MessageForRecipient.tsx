@@ -52,6 +52,7 @@ const MessageForRecipient = ({
       setPin={setPin}
       setReplyingTo={setReplyingTo}
       setEdit={setEdit}
+      recipientUser={recipientUser}
     />
   </>
 );

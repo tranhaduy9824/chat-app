@@ -14,6 +14,7 @@ interface MessageForSenderProps {
   setPin: React.Dispatch<React.SetStateAction<boolean>>;
   setReplyingTo: React.Dispatch<React.SetStateAction<null | Message>>;
   setEdit: React.Dispatch<React.SetStateAction<null | Message>>;
+  recipientUser: User | null;
 }
 
 const MessageForSender = ({
@@ -28,6 +29,7 @@ const MessageForSender = ({
   setPin,
   setReplyingTo,
   setEdit,
+  recipientUser
 }: MessageForSenderProps) => (
   <>
     <MessageContent
@@ -40,6 +42,7 @@ const MessageForSender = ({
       setPin={setPin}
       setReplyingTo={setReplyingTo}
       setEdit={setEdit}
+      recipientUser={recipientUser}
     />
     <div
       className="d-flex align-items-end ms-2 mt-auto"

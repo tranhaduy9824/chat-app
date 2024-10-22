@@ -4,6 +4,7 @@ export interface User {
   email: string;
   avatar: string;
   token: string;
+  blockedUsers: string[];
 }
 
 export interface RegisterInfo {
@@ -35,4 +36,6 @@ export interface AuthContextType {
   ) => Promise<void>;
   socket: Socket;
   setSocket: React.Dispatch<React.SetStateAction<Socket>>;
+  blockUser: (id: string) => Promise<void>;
+  unblockUser: (id: string) => Promise<void>;
 }

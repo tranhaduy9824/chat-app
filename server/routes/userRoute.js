@@ -9,6 +9,8 @@ const {
   getUsers,
   updateAvatar,
   updateUser,
+  blockUser,
+  unblockUser,
 } = require("../controllers/userController");
 const checkAuth = require("../middleware/check-auth");
 
@@ -50,5 +52,7 @@ router.get("/find/:userId", findUser);
 router.get("/", getUsers);
 router.patch("/avatar", checkAuth, upload.single("avatar"), updateAvatar);
 router.patch("/", checkAuth, updateUser);
+router.patch("/block", checkAuth, blockUser);
+router.patch("/unblock", checkAuth, unblockUser);
 
 module.exports = router;

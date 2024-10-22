@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatFileSize } from "../../utils/format";
 import { faFileText } from "@fortawesome/free-regular-svg-icons";
 import { useTheme } from "../../context/ThemeContext";
+import { ChatContext } from "../../context/ChatContext";
 
 interface ListFilesProps {
   listFiles: string;
@@ -27,11 +28,11 @@ export const ListFiles = ({
 
   const { isDarkTheme } = useTheme();
   const { searchMessages } = useContext(MessageContext)!;
+  const { currentChat } = useContext(ChatContext)!;
 
   useEffect(() => {
     const fetchFiles = async () => {
       const response = await searchMessages("", page, 20, listFiles as any);
-      console.log("Search Results:", response, page);
       if (response) {
         setFiles((prevFiles) => {
           const newFiles = response.messages.filter(
@@ -44,11 +45,7 @@ export const ListFiles = ({
     };
 
     fetchFiles();
-
-    return () => {
-      setFiles([]);
-    };
-  }, [listFiles, page, searchMessages]);
+  }, [listFiles, page, searchMessages, currentChat]);
 
   useEffect(() => {
     if (observer.current) observer.current.disconnect();
@@ -61,6 +58,13 @@ export const ListFiles = ({
       observer.current.observe(lastFileElementRef.current);
     }
   }, [files, hasMore]);
+
+  useEffect(() => {
+    return () => {
+      setFiles([]);
+      setPage(1);
+    };
+  }, [currentChat]);
 
   return (
     <div className="d-flex flex-column w-100 h-100">
