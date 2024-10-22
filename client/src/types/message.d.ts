@@ -47,7 +47,8 @@ interface MessageContextProps {
   searchMessages: (
     query: string,
     page: number,
-    limit: number
+    limit: number,
+    type: "text" | "media" | "file" = "text"
   ) => Promise<{
     messages: any[];
     hasMore: boolean;

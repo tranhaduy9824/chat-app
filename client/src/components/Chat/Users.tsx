@@ -43,46 +43,48 @@ function Users() {
             : "var(--bg-cpn-dark)",
         }}
       >
-        {allUsers
-          .filter((u) => u._id !== user?._id)
-          .map((u) => {
-            const unReadNotifications = unReadNotificationsFunc(notifications);
-            const thisUserNotification = unReadNotifications?.filter(
-              (n: any) => n.senderId === u?._id
-            );
-            return (
-              <div
-                key={u._id}
-                className="d-flex flex-column align-items-center position-relative"
-                onClick={() => {
-                  if (user) {
-                    createChat(user._id, u._id);
-                  }
-                  if (thisUserNotification?.length !== 0) {
-                    markThisUserNotificationsAsRead(
-                      thisUserNotification,
-                      notifications
-                    );
-                  }
-                }}
-              >
-                <Avatar user={u} />
-                <p className="fw-bold m-0">{u.fullname.split(" ").pop()}</p>
+        <div className="list-friend d-flex align-items-center gap-3 overflow-x-auto">
+          {allUsers
+            .filter((u) => u._id !== user?._id)
+            .map((u) => {
+              const unReadNotifications = unReadNotificationsFunc(notifications);
+              const thisUserNotification = unReadNotifications?.filter(
+                (n: any) => n.senderId === u?._id
+              );
+              return (
                 <div
-                  className={`position-absolute end-0 rounded-circle ${
-                    !onlineUsers?.some((user) => user?.userId === u?._id) &&
-                    "d-none"
-                  }`}
-                  style={{
-                    width: "15px",
-                    height: "15px",
-                    top: "35px",
-                    backgroundColor: "#31a24c",
+                  key={u._id}
+                  className="d-flex flex-column align-items-center position-relative"
+                  onClick={() => {
+                    if (user) {
+                      createChat(user._id, u._id);
+                    }
+                    if (thisUserNotification?.length !== 0) {
+                      markThisUserNotificationsAsRead(
+                        thisUserNotification,
+                        notifications
+                      );
+                    }
                   }}
-                ></div>
-              </div>
-            );
-          })}
+                >
+                  <Avatar user={u} />
+                  <p className="fw-bold m-0">{u.fullname.split(" ").pop()}</p>
+                  <div
+                    className={`position-absolute end-0 rounded-circle ${
+                      !onlineUsers?.some((user) => user?.userId === u?._id) &&
+                      "d-none"
+                    }`}
+                    style={{
+                      width: "15px",
+                      height: "15px",
+                      top: "35px",
+                      backgroundColor: "#31a24c",
+                    }}
+                  ></div>
+                </div>
+              );
+            })}
+        </div>
       </div>
       <div
         className="d-flex flex-column overflow-y-auto"

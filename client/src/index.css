@@ -593,6 +593,53 @@ input.bg-dark::placeholder {
   }
 }
 
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  overflow-y: auto;
+}
+
+.file-item {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+}
+
+.file-item-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.file-item img,
+.file-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.file-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 @media (max-width: 1023px) {
   .users-container {
     min-width: 350px;
