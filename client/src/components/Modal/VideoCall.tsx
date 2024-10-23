@@ -460,7 +460,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
         chatId,
         userId: user?._id,
         members,
-        showNotificateReject
+        showNotificateReject,
       });
     }
 
@@ -635,6 +635,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                     token: "",
                     avatar: callerInfo?.callerAvatar || "",
                     fullname: callerInfo?.callerName || "",
+                    blockedUsers: [],
                   }}
                   width={80}
                   height={80}
