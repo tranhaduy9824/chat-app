@@ -27,7 +27,7 @@ export const ListFiles = ({
   const lastFileElementRef = useRef<any | null>(null);
 
   const { isDarkTheme } = useTheme();
-  const { searchMessages } = useContext(MessageContext)!;
+  const { searchMessages, setMediaDetail } = useContext(MessageContext)!;
   const { currentChat } = useContext(ChatContext)!;
 
   useEffect(() => {
@@ -124,7 +124,13 @@ export const ListFiles = ({
             >
               <div className="file-item-content">
                 {file.type === "image" ? (
-                  <img src={file.mediaUrl} alt={file.text} />
+                  <img
+                    src={file.mediaUrl}
+                    alt={file.text}
+                    onClick={() =>
+                      setMediaDetail && setMediaDetail(file.mediaUrl)
+                    }
+                  />
                 ) : file.type === "video" ? (
                   <video controls>
                     <source src={file.mediaUrl} type="video/mp4" />
