@@ -5,6 +5,7 @@ import { ChatContext } from "../context/ChatContext";
 import VideoCall from "../components/Modal/VideoCall";
 import { AuthContext } from "../context/AuthContext";
 import { useFetchRecipientUser } from "../hooks/useFetchRecipientUser";
+import { DetailMedia } from "../components/Modal/DetailMedia";
 
 function Chat() {
   const [showInfoChat, setShowInfoChat] = useState<boolean>(false);
@@ -81,6 +82,7 @@ function Chat() {
           recipientUser={recipientUser}
         />
       )}
+      <DetailMedia />
     </div>
   );
 }

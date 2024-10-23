@@ -35,6 +35,7 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [mediaDetail, setMediaDetail] = useState<string | null>(null);
 
   const {
     currentChat,
@@ -538,12 +539,12 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         undefined,
         true
       );
-  
+
       if (response.error) {
         addNotification(response.error, "error");
         return;
       }
-  
+
       return response;
     },
     [currentChat, addNotification]
@@ -569,6 +570,8 @@ export const MessageContextProvider: React.FC<MessageContextProviderProps> = ({
         handleTyping,
         handleStopTyping,
         searchMessages,
+        mediaDetail,
+        setMediaDetail,
       }}
     >
       {children}

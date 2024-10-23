@@ -49,7 +49,8 @@ const MessageContent = ({
   const moreRef = useRef<HTMLDivElement | null>(null);
   const emojiPickerRef = useRef<HTMLDivElement | null>(null);
 
-  const { reactToMessage, deleteMessage } = useContext(MessageContext)!;
+  const { reactToMessage, deleteMessage, setMediaDetail } =
+    useContext(MessageContext)!;
   const { user } = useContext(AuthContext)!;
   const { pinMessage, unpinMessage } = useContext(ChatContext)!;
 
@@ -241,6 +242,7 @@ const MessageContent = ({
               borderRadius: "10px",
             }}
             className="message-media"
+            onClick={() => setMediaDetail && setMediaDetail(msg.mediaUrl)}
           />
         )}
         {msg.type === "video" && (

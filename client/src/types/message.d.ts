@@ -54,6 +54,8 @@ interface MessageContextProps {
     hasMore: boolean;
     error?: string;
   } | void>;
+  mediaDetail: any;
+  setMediaDetail: any;
 }
 
 interface MessageContextProviderProps {
