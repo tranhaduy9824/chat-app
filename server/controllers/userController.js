@@ -222,6 +222,21 @@ const unblockUser = async (req, res) => {
   }
 };
 
+const searchUsers = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const users = await userModel.find({
+      fullname: { $regex: query, $options: "i" },
+    });
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -231,4 +246,5 @@ module.exports = {
   updateUser,
   blockUser,
   unblockUser,
+  searchUsers
 };
