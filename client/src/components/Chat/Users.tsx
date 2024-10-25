@@ -7,7 +7,7 @@ import UserChat from "./UserChat";
 import { MessageContext } from "../../context/MessageContext";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
 import { useTheme } from "../../context/ThemeContext";
-import Search from "../Search";
+import SearchUser from "./SearchUser";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
@@ -33,7 +33,7 @@ function Users() {
             : "var(--bg-cpn-dark)",
         }}
       >
-        <Search />
+        <SearchUser />
       </div>
       <div
         className="list-friend px-3 d-flex align-items-center gap-3 overflow-x-auto pb-3"

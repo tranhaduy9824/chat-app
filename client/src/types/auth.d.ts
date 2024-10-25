@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface User {
   _id: string;
   fullname: string;
@@ -38,4 +39,5 @@ export interface AuthContextType {
   setSocket: React.Dispatch<React.SetStateAction<Socket>>;
   blockUser: (id: string) => Promise<void>;
   unblockUser: (id: string) => Promise<void>;
+  searchUsers: any;
 }

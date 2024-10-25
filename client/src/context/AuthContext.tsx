@@ -6,7 +6,12 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { baseUrl, patchRequest, postRequest } from "../utils/services";
+import {
+  baseUrl,
+  getRequest,
+  patchRequest,
+  postRequest,
+} from "../utils/services";
 import { AuthContextType, User, RegisterInfo, LoginInfo } from "../types/auth";
 import { useLoading } from "./LoadingContext";
 import { useNavigate } from "react-router-dom";
@@ -198,9 +203,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         undefined,
         true
       );
-  
+
       if (!response.error) {
-        const updatedBlockedUsers = [...(user?.blockedUsers || []), blockUserId];
+        const updatedBlockedUsers = [
+          ...(user?.blockedUsers || []),
+          blockUserId,
+        ];
         localStorage.setItem(
           "User",
           JSON.stringify({ ...user, blockedUsers: updatedBlockedUsers })
@@ -213,7 +221,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     },
     [user, addNotification]
   );
-  
+
   const unblockUser = useCallback(
     async (unblockUserId: string) => {
       const response = await patchRequest(
@@ -222,7 +230,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         undefined,
         true
       );
-  
+
       if (!response.error) {
         const updatedBlockedUsers = (user?.blockedUsers || []).filter(
           (id: any) => id !== unblockUserId
@@ -238,6 +246,24 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       }
     },
     [user, addNotification]
+  );
+
+  const searchUsers = useCallback(
+    async (query: string, page: number, limit: number) => {
+      const response = await getRequest(
+        `${baseUrl}/users/search?query=${query}&page=${page}&limit=${limit}`,
+        undefined,
+        true
+      );
+
+      if (!response.error) {
+        return response;
+      } else {
+        addNotification(response.message, "error");
+        return null;
+      }
+    },
+    [addNotification]
   );
 
   return (
@@ -259,6 +285,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         setSocket,
         blockUser,
         unblockUser,
+        searchUsers,
       }}
     >
       {children}
