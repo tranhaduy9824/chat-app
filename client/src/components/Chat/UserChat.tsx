@@ -4,7 +4,6 @@ import { useFetchRecipientUser } from "../../hooks/useFetchRecipientUser.js";
 import { User } from "../../types/auth.js";
 import Avatar from "../Avatar.js";
 import { ChatContext } from "../../context/ChatContext.js";
-import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage.js";
 import moment from "moment";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc.js";
 import { MessageContext } from "../../context/MessageContext.js";
@@ -20,6 +19,7 @@ interface UserChatProps {
   updateCurrentChat: (chat: Chat) => void;
   previousChat?: Chat | boolean;
   nextChat?: Chat | boolean;
+  latestMessage: Message | null | undefined;
 }
 
 const UserChat: React.FC<UserChatProps> = ({
@@ -29,14 +29,13 @@ const UserChat: React.FC<UserChatProps> = ({
   updateCurrentChat,
   previousChat,
   nextChat,
+  latestMessage,
 }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const { onlineUsers, isChatMuted } = useContext(ChatContext)!;
   const { notifications, markThisUserNotificationsAsRead } =
     useContext(MessageContext)!;
   const { isDarkTheme } = useTheme();
-
-  const { latestMessage } = useFetchLatestMessage(chat);
 
   const unReadNotifications = unReadNotificationsFunc(notifications);
   const thisUserNotification = unReadNotifications?.filter(

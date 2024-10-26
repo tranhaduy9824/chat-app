@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ChatContext } from "../../context/ChatContext";
 import Avatar from "../Avatar";
 import { AuthContext } from "../../context/AuthContext";
@@ -8,6 +9,7 @@ import { MessageContext } from "../../context/MessageContext";
 import { unReadNotificationsFunc } from "../../utils/unReadNotificationsFunc";
 import { useTheme } from "../../context/ThemeContext";
 import SearchUser from "./SearchUser";
+import { useFetchLatestMessages } from "../../hooks/useFetchLatestMessages";
 
 function Users() {
   const { user } = useContext(AuthContext)!;
@@ -22,6 +24,34 @@ function Users() {
   const { notifications, markThisUserNotificationsAsRead } =
     useContext(MessageContext)!;
   const { isDarkTheme } = useTheme();
+
+  const [sortedChats, setSortedChats] = useState(userChats);
+
+  const { latestMessages } = useFetchLatestMessages(userChats);
+
+  useEffect(() => {
+    const sorted = userChats
+      ? [...userChats].sort((a, b) => {
+          const latestMessageA = latestMessages.find(
+            (msg) => msg.chatId === a._id
+          )?.latestMessage;
+          const latestMessageB = latestMessages.find(
+            (msg) => msg.chatId === b._id
+          )?.latestMessage;
+          return (
+            new Date(latestMessageB?.createdAt ?? 0).getTime() -
+            new Date(latestMessageA?.createdAt ?? 0).getTime()
+          );
+        })
+      : [];
+    setSortedChats(sorted);
+  }, [userChats, latestMessages]);
+
+  const sortedUsers = [...allUsers].sort((a, b) => {
+    const isAOnline = onlineUsers?.some((user) => user?.userId === a._id);
+    const isBOnline = onlineUsers?.some((user) => user?.userId === b._id);
+    return Number(isBOnline) - Number(isAOnline);
+  });
 
   return (
     <div className="shadow-sm users-container">
@@ -44,10 +74,11 @@ function Users() {
         }}
       >
         <div className="list-friend d-flex align-items-center gap-3 overflow-x-auto">
-          {allUsers
+          {sortedUsers
             .filter((u) => u._id !== user?._id)
             .map((u) => {
-              const unReadNotifications = unReadNotificationsFunc(notifications);
+              const unReadNotifications =
+                unReadNotificationsFunc(notifications);
               const thisUserNotification = unReadNotifications?.filter(
                 (n: any) => n.senderId === u?._id
               );
@@ -90,13 +121,17 @@ function Users() {
         className="d-flex flex-column overflow-y-auto"
         style={{ height: "max-content", maxHeight: "400px" }}
       >
-        {userChats?.map((chat, index) => {
+        {sortedChats?.map((chat, index) => {
           const isSelected = chat._id === currentChat?._id;
           const previousChat =
-            index > 0 && userChats[index - 1]._id === currentChat?._id;
+            index > 0 && sortedChats[index - 1]._id === currentChat?._id;
           const nextChat =
-            index < userChats.length - 1 &&
-            userChats[index + 1]._id === currentChat?._id;
+            index < sortedChats.length - 1 &&
+            sortedChats[index + 1]._id === currentChat?._id;
+
+          const latestMessage = latestMessages.find(
+            (msg) => msg.chatId === chat._id
+          )?.latestMessage;
 
           return (
             <UserChat
@@ -107,6 +142,7 @@ function Users() {
               updateCurrentChat={updateCurrentChat}
               previousChat={previousChat}
               nextChat={nextChat}
+              latestMessage={latestMessage}
             />
           );
         })}
