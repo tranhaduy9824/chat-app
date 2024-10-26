@@ -27,7 +27,7 @@ function Users() {
 
   const [sortedChats, setSortedChats] = useState(userChats);
 
-  const { latestMessages } = useFetchLatestMessages(userChats);
+  const { latestMessages } = useFetchLatestMessages(userChats ?? []);
 
   useEffect(() => {
     const sorted = userChats
