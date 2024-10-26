@@ -47,7 +47,7 @@ const Search: React.FC<SearchProps> = ({
           backgroundColor: !isDarkTheme
             ? "var(--bg-cpn-light-gentle)"
             : "var(--bg-cpn-dark-gentle)",
-          padding: "8px 50px 8px 12px",
+          padding: handleDelete ? "8px 85px 8px 12px" : "8px 50px 8px 12px",
           border: `1px solid ${isDarkTheme ? "#dee2e6" : "#b0b3b8"}`,
         }}
       />

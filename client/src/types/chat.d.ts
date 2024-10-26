@@ -9,7 +9,7 @@ interface Chat {
 }
 
 interface ChatContextProps {
-  userChats: Chat[] | null;
+  userChats: Chat[] | [];
   potentialChats: User[];
   createChat: (firstId: string, secondId: string) => Promise<void>;
   currentChat: Chat | null;
